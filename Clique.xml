@@ -1,0 +1,43 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+      <CheckButton name="CliqueIconTemplate" virtual="true">
+                <Size>
+                        <AbsDimension x="36" y="36"/>
+                </Size>
+                <Layers>
+                        <Layer level="BACKGROUND">
+                                <Texture file="Interface\Buttons\UI-EmptySlot-Disabled">
+                                        <Size>
+                                                <AbsDimension x="64" y="64"/>
+                                        </Size>
+                                        <Anchors>
+                                                <Anchor point="CENTER">
+                                                        <Offset>
+                                                                <AbsDimension x="0" y="-1"/>
+                                                        </Offset>
+                                                </Anchor>
+                                        </Anchors>
+                                </Texture>
+                        </Layer>
+                </Layers>
+                <NormalTexture name="$parentIcon">
+                        <Size>
+                                <AbsDimension x="36" y="36"/>
+                        </Size>
+                        <Anchors>
+                                <Anchor point="CENTER">
+                                        <Offset>
+                                                <AbsDimension x="0" y="-1"/>
+                                        </Offset>
+                                </Anchor>
+                        </Anchors>
+                </NormalTexture>
+                <HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
+                <CheckedTexture alphaMode="ADD" file="Interface\Buttons\CheckButtonHilight"/>
+        <Scripts>
+            <OnClick>
+                Clique:SetSpellIcon()
+            </OnClick>
+        </Scripts>
+        </CheckButton>
+</Ui>
