@@ -319,8 +319,9 @@ function Clique:CreateOptionsFrame()
 	-- Profile Dropdown Frame
 	CreateFrame("Frame", "CliqueDropDownProfile", CliqueFrame, "UIDropDownMenuTemplate")
 	CliqueDropDownProfile:SetID(1)
-	CliqueDropDownProfile:SetPoint("RIGHT", CliqueDropDown, "LEFT", -210, 0)
+	CliqueDropDownProfile:SetPoint("TOPLEFT", CliqueFrame, "TOPLEFT", -10, -25)
 	CliqueDropDownProfile:SetScript("OnShow", function() Clique:DropDownProfile_OnShow() end)
+	UIDropDownMenu_SetWidth(150, CliqueDropDownProfile)
 
 	-- Button Creations
     local buttonFunc = function() Clique:ButtonOnClick() end
@@ -997,12 +998,7 @@ function Clique:DropDownProfile_Initialize()
 
     for k,v in ipairs(work) do
         info = {}
-        info.text = string.sub(v, 1, 15)
-
-		if #v > 15 then 
-			info.text = info.text.."..."
-		end
-
+        info.text = v
 		info.value = v
         info.func = click_func
         UIDropDownMenu_AddButton(info)
