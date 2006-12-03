@@ -1010,11 +1010,21 @@ function Clique:DropDownProfile_Initialize()
 		func = click_func
 	}
 	UIDropDownMenu_AddButton(info)
+
+	info = {
+		text = "Delete Profile",
+		value = -2,
+		func = click_func
+	}
+	UIDropDownMenu_AddButton(info)
 end
 
 function Clique:DropDownProfile_OnClick()
 	if this.value == -1 then
 		StaticPopup_Show("CLIQUE_NEW_PROFILE")
+		return
+	elseif this.value == -2 then
+		StaticPopup_Show("CLIQUE_DELETE_PROFILE")
 		return
 	end
 
@@ -1263,6 +1273,53 @@ StaticPopupDialogs["CLIQUE_NEW_PROFILE"] = {
 		local editBox = getglobal(this:GetParent():GetName().."EditBox");
 		local txt = editBox:GetText()
 		if #txt > 0 then
+			getglobal(this:GetParent():GetName().."Button1"):Enable();
+		else
+			getglobal(this:GetParent():GetName().."Button1"):Disable();
+		end
+	end,
+	EditBoxOnEscapePressed = function()
+		this:GetParent():Hide();
+		ClearCursor();
+	end
+}
+
+StaticPopupDialogs["CLIQUE_DELETE_PROFILE"] = {
+	text = TEXT("Enter the name of a profile you'd like to delete"),
+	button1 = TEXT(OKAY),
+	button2 = TEXT(CANCEL),
+	OnAccept = function()
+		Clique:DeleteProfile(getglobal(this:GetName().."EditBox"):GetText())
+		Clique:DropDownProfile_OnShow()
+	end,
+	timeout = 0,
+	whileDead = 1,
+	exclusive = 1,
+	showAlert = 1,
+	hideOnEscape = 1,
+	hasEditBox = 1,
+	maxLetters = 32,
+	OnShow = function()
+		getglobal(this:GetName().."Button1"):Disable();
+		getglobal(this:GetName().."EditBox"):SetFocus();
+	end,
+	OnHide = function()
+		if ( ChatFrameEditBox:IsVisible() ) then
+			ChatFrameEditBox:SetFocus();
+		end
+		getglobal(this:GetName().."EditBox"):SetText("");
+	end,
+	EditBoxOnEnterPressed = function()
+		if ( getglobal(this:GetParent():GetName().."Button1"):IsEnabled() == 1 ) then
+			Clique:DeleteProfile(this:GetText())
+			Clique:DropDownProfile_OnShow()
+			this:GetParent():Hide();
+		end
+	end,
+	EditBoxOnTextChanged = function ()
+		local editBox = getglobal(this:GetParent():GetName().."EditBox");
+		local txt = editBox:GetText()
+		if Clique.db.profiles[txt] then
 			getglobal(this:GetParent():GetName().."Button1"):Enable();
 		else
 			getglobal(this:GetParent():GetName().."Button1"):Disable();

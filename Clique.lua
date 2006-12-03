@@ -37,7 +37,7 @@ function Clique:Enable()
 			[L.CLICKSET_OOC] = {},
 		}
 	}
-
+	
 	self.db = self:InitializeDB("CliqueDB", self.defaults)
 	self.profile = self.db.profile
 
@@ -59,6 +59,33 @@ function Clique:Enable()
     Clique:OptionsOnLoad()
     Clique:EnableFrames()
 
+	-- Define a state header for forms
+	self.stateheader = CreateFrame("Frame", "CliqueStateHeader", UIParent, "SecureStateDriverTemplate")
+	self.stateheader:SetAttribute("statemap-stance-0", "s0")
+	self.stateheader:SetAttribute("statemap-stance-1", "s1")
+	self.stateheader:SetAttribute("statemap-stance-2", "s2")
+	self.stateheader:SetAttribute("statemap-stance-3", "s3")
+	self.stateheader:SetAttribute("statemap-stance-4", "s4")
+	self.stateheader:SetAttribute("statemap-stance-5", "s5")
+
+	--PlayerFrame:SetAttribute("shift-statebutton1", "s0:s0;s1:s1;s2:s2;s3:s3;s4:s4;s5:s5")
+--[[
+	PlayerFrame:SetAttribute("shift-unit-s1", "player")
+	PlayerFrame:SetAttribute("shift-type-s1", "spell")
+	PlayerFrame:SetAttribute("shift-spell-s1", "Enrage")
+
+	PlayerFrame:SetAttribute("shift-unit1", "player")
+	PlayerFrame:SetAttribute("shift-type1", "spell")
+	PlayerFrame:SetAttribute("shift-spell1", "Rejuvenation")
+
+	PlayerFrame:SetAttribute("alt-type1", "spell")
+	PlayerFrame:SetAttribute("alt-spell1", "Attack")
+--]]
+
+	-- Register for LEARNED_SPELL_IN_TAB
+	self:RegisterEvent("LEARNED_SPELL_IN_TAB")
+	self:LEARNED_SPELL_IN_TAB()
+
 	-- Run the OOC script if we need to
 	Clique:CombatUnlock()
 
@@ -70,6 +97,36 @@ function Clique:Enable()
 	end
 		 
     hooksecurefunc("CreateFrame", raidFunc)
+end
+
+function Clique:LEARNED_SPELL_IN_TAB()
+	local forms = {
+		[L.DIRE_BEAR_FORM] = L.CLICKSET_BEARFORM,
+		[L.BEAR_FORM] = L.CLICKSET_BEARFORM,
+		[L.AQUATIC_FORM] = L.CLICKSET_AQUATICFORM,
+		[L.CAT_FORM] = L.CLICKSET_CATFORM,
+		[L.TRAVEL_FORM] = L.CLICKSET_TRAVELFORM,
+		[L.MOONKIN_FORM] = L.CLICKSET_MOONKINFORM,
+		[L.TREEOFLIFE] = L.CLICKSET_TREEOFLIFE,
+		[L.STEALTH] = L.CLICKSET_STEALTHED,
+		[L.BATTLESTANCE] = L.CLICKSET_BATTLESTANCE,
+		[L.DEFENSIVESTANCE] = L.CLICKSET_DEFENSIVESTANCE,
+		[L.BERSERKERSTANCE] = L.CLICKSET_BERSERKERSTANCE,
+		[L.SHADOWFORM] = L.CLICKSET_SHADOWFORM,
+	}
+	self.forms = forms
+	local profile = self.defaults.profile
+
+	local offset,num = select(3, GetSpellTabInfo(GetNumSpellTabs()))
+	local num = num + offset
+
+	for i=1,num do
+		local name = GetSpellName(i, BOOKTYPE_SPELL)
+		if forms[name] then
+			profile[name] = profile[name] or {}
+			self.profile[name] = self.profile[name] or {}
+		end
+	end
 end
 
 function Clique:EnableFrames()
@@ -210,7 +267,6 @@ function Clique:RegisterFrame(frame)
 end
 
 function Clique:ProfileChanged(new)
-
 	for name,set in pairs(self.profile) do
 	    for modifier,entry in pairs(set) do
 			self:DeleteAction(entry)
@@ -224,8 +280,6 @@ function Clique:ProfileChanged(new)
 	-- refresh the dropdown if its active
 	CliqueDropDownProfile:Hide()
 	CliqueDropDownProfile:Show()
-
-	self:Print("Profile changed to '%s'", new)
 
     for frame in pairs(ClickCastFrames) do
 		self:RegisterFrame(frame)
