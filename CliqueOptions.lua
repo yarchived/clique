@@ -1475,7 +1475,10 @@ StaticPopupDialogs["CLIQUE_NEW_PROFILE"] = {
 	button1 = TEXT(OKAY),
 	button2 = TEXT(CANCEL),
 	OnAccept = function()
-		Clique:SetProfile(getglobal(this:GetName().."EditBox"):GetText())
+		local name = this:GetName().."EditBox"
+		local button = getglobal(name)
+		local text = button:GetText()
+		Clique:SetProfile(text)
 	end,
 	timeout = 0,
 	whileDead = 1,

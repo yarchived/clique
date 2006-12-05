@@ -223,7 +223,7 @@ end
 
 function Clique:CombatUnlock()
 	self:Debug(1, "Setting any out of combat clicks")
-    for frame in pairs(self.cc.frames) do
+    for frame in pairs(self.ccframes) do
 		for k,v in pairs(self.clicksets[L.CLICKSET_OOC]) do
 			self:SetAttribute(v,frame)
 		end
