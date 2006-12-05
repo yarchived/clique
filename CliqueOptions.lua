@@ -1034,11 +1034,11 @@ function Clique:FillListEntry(frame, idx)
 	elseif entry.type == "stop" then
 		frame.name:SetText("Stop Casting")
 	elseif entry.type == "target" then
-		frame.name:SetText("Target Unit: %s" .. entry.arg2 and entry.arg2 or "")
+		frame.name:SetText(string.format("Target Unit: %s", entry.arg1 and entry.arg1 or ""))
 	elseif entry.type == "focus" then
-		frame.name:SetText("Set Focus Unit: %s" .. entry.arg2 and entry.arg2 or "")
+		frame.name:SetText(string.format("Set Focus Unit: %s", entry.arg1 and entry.arg1 or ""))
 	elseif entry.type == "assist" then
-		frame.name:SetText("Assist Unit: %s" .. entry.arg2 and entry.arg2 or "")
+		frame.name:SetText(string.format("Assist Unit: %s", entry.arg1 and entry.arg1 or ""))
 	elseif entry.type == "item" then
 		if entry.arg1 then
 			frame.name:SetText(string.format("Item: %d,%d", entry.arg1, entry.arg2))
