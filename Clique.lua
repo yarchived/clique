@@ -18,12 +18,6 @@ eventFrame:SetScript("OnUpdate", function()
 	end
 end)
 eventFrame:Hide()
-
-if not InCombatLockdown then
-    function InCombatLockdown()
-	return UnitAffectingCombat("player")
-    end
-end
    
 function Clique:Enable()
 	-- Grab the localisation header
@@ -31,28 +25,40 @@ function Clique:Enable()
 
 	self.defaults = {
 		profile = {
-			[L.CLICKSET_DEFAULT] = {},
-			[L.CLICKSET_HARMFUL] = {},
-			[L.CLICKSET_HELPFUL] = {},
-			[L.CLICKSET_OOC] = {},
+			clicksets = {
+				[L.CLICKSET_DEFAULT] = {},
+				[L.CLICKSET_HARMFUL] = {},
+				[L.CLICKSET_HELPFUL] = {},
+				[L.CLICKSET_OOC] = {},
+			},
+			blacklist = {
+			},
 		}
 	}
 	
 	self.db = self:InitializeDB("CliqueDB", self.defaults)
 	self.profile = self.db.profile
+	self.clicksets = self.profile.clicksets
 
-    self.editSet = self.profile[L.CLICKSET_DEFAULT]
+    self.editSet = self.clicksets[L.CLICKSET_DEFAULT]
+
+	ClickCastFrames = ClickCastFrames or {}
+	self.ccframes = ClickCastFrames
 
     local newindex = function(t,k,v)
-		Clique:RegisterFrame(k)
-		rawset(t,k,v)
+		if v == nil then
+			Clique:UnregisterFrame(k)
+			rawset(self.ccframes, k, nil)
+		else
+			Clique:RegisterFrame(k)
+			rawset(self.ccframes, k, v)
+		end
     end
     
-	ClickCastFrames = ClickCastFrames or {}
-    setmetatable(ClickCastFrames, {__newindex=newindex})
+	ClickCastFrames = setmetatable({}, {__newindex=newindex})
     
     -- Register all frames that snuck in before we did =)
-    for frame in pairs(ClickCastFrames) do
+    for frame in pairs(self.ccframes) do
 		self:RegisterFrame(frame)
     end
 
@@ -86,10 +92,14 @@ function Clique:Enable()
 	self:RegisterEvent("LEARNED_SPELL_IN_TAB")
 	self:LEARNED_SPELL_IN_TAB()
 
+	-- Register for dongle events
+	self:RegisterEvent("DONGLE_PROFILE_CHANGED")
+	self:RegisterEvent("DONGLE_PROFILE_DELETED")
+
 	-- Run the OOC script if we need to
 	Clique:CombatUnlock()
 
-    -- Securehook the RaidFrame_LoadUI
+    -- Securehook CreateFrame to catch any new raid frames
     local raidFunc = function(type, name, parent, template)
 		if template == "RaidPulloutButtonTemplate" then
 			ClickCastFrames[getglobal(name.."ClearButton")] = true
@@ -123,8 +133,8 @@ function Clique:LEARNED_SPELL_IN_TAB()
 	for i=1,num do
 		local name = GetSpellName(i, BOOKTYPE_SPELL)
 		if forms[name] then
-			profile[name] = profile[name] or {}
-			self.profile[name] = self.profile[name] or {}
+			--profile[name] = profile[name] or {}
+			--self.profile[name] = self.profile[name] or {}
 		end
 	end
 end
@@ -166,9 +176,9 @@ function Clique:SpellBookButtonPressed()
     local type = "spell"
 	local button
 
-	if self.editSet == self.profile[L.CLICKSET_HARMFUL] then
+	if self.editSet == self.clicksets[L.CLICKSET_HARMFUL] then
 		button = string.format("%s%d", "harmbutton", self:GetButtonNumber())
-	elseif self.editSet == self.profile[L.CLICKSET_HELPFUL] then
+	elseif self.editSet == self.clicksets[L.CLICKSET_HELPFUL] then
 		button = string.format("%s%d", "helpbutton", self:GetButtonNumber())
 	else
 		button = self:GetButtonNumber()
@@ -200,21 +210,21 @@ end
 function Clique:CombatLockdown()
 	self:Debug(1, "Going into combat mode")
 	-- Remove all OOC clicks
-	for k,v in pairs(self.profile[L.CLICKSET_OOC]) do
+	for k,v in pairs(self.clicksets[L.CLICKSET_OOC]) do
 		self:DeleteAction(v)
 		self:Debug(1, "Removing %s, %s", v.type, tostring(v.arg1))
 	end
 
 	-- Just bluntly force our clicks back onto the frames
-    for frame in pairs(ClickCastFrames) do
+    for frame in pairs(self.ccframes) do
 		self:RegisterFrame(frame)
     end
 end	
 
 function Clique:CombatUnlock()
 	self:Debug(1, "Setting any out of combat clicks")
-    for frame in pairs(ClickCastFrames) do
-		for k,v in pairs(self.profile[L.CLICKSET_OOC]) do
+    for frame in pairs(self.cc.frames) do
+		for k,v in pairs(self.clicksets[L.CLICKSET_OOC]) do
 			self:SetAttribute(v,frame)
 		end
 	end
@@ -253,11 +263,24 @@ function Clique:ClearQueue()
 end
 
 function Clique:RegisterFrame(frame)
-	if self:CombatDelay(frame) then return end
+	local name = frame:GetName()
+	if self.profile.blacklist[name] then 
+		rawset(self.ccframes, frame, false)
+		return 
+	end
+
+--	if self:CombatDelay(frame) then return end
+	if not ClickCastFrames[frame] then 
+		rawset(self.ccframes, frame, true)
+		if CliqueTextListFrame then
+			Clique:TextListScrollUpdate()
+		end
+	end
+
 	-- Ensure we have all the buttons registered
 	frame:RegisterForClicks("LeftButtonUp", "MiddleButtonUp", "RightButtonUp", "Button4Up", "Button5Up")
 	
-	for name,set in pairs(self.profile) do
+	for name,set in pairs(self.clicksets) do
 		if name ~= L.CLICKSET_OOC then
 			for modifier,entry in pairs(set) do
 				self:SetAttribute(entry, frame)
@@ -266,26 +289,62 @@ function Clique:RegisterFrame(frame)
 	end
 end
 
-function Clique:ProfileChanged(new)
-	for name,set in pairs(self.profile) do
-	    for modifier,entry in pairs(set) do
-			self:DeleteAction(entry)
-	    end
+function Clique:UnregisterFrame(frame)
+	for name,set in pairs(self.clicksets) do
+		for modifier,entry in pairs(set) do
+			local type,button,value
+
+			if not tonumber(entry.button) then
+				type,button = select(3, string.find(entry.button, "(%a+)button(%d+)"))
+				frame:SetAttribute(entry.modifier..entry.button, nil)
+				button = string.format("-%s%s", type, button)
+			end
+
+			button = button or entry.button
+
+			entry.delete = true
+
+			frame:SetAttribute(entry.modifier.."type"..button, nil)
+			frame:SetAttribute(entry.modifier..entry.type..button, nil)
+		end
 	end
-
-	self.profile = self.db.profile
-    self.editSet = self.profile[L.CLICKSET_DEFAULT]
-	self.profileKey = new
-	
-	-- refresh the dropdown if its active
-	CliqueDropDownProfile:Hide()
-	CliqueDropDownProfile:Show()
-
-    for frame in pairs(ClickCastFrames) do
-		self:RegisterFrame(frame)
-    end
 end
 
+function Clique:DONGLE_PROFILE_CHANGED(event, addon, name)
+	if addon == "Clique" then
+		self:Print("Profile has changed to '%s'.", name)
+		for name,set in pairs(self.clicksets) do
+			for modifier,entry in pairs(set) do
+				self:DeleteAction(entry)
+			end
+		end
+
+		self.profile = self.db.profile
+		self.clicksets = self.profile.clicksets
+		self.editSet = self.clicksets[L.CLICKSET_DEFAULT]
+		self.profileKey = new
+	
+		-- Refresh the profile editor if it exists
+		self.textlistSelected = nil
+		self:TextListScrollUpdate()
+		self:ListScrollUpdate()
+
+		for frame in pairs(self.ccframes) do
+			self:RegisterFrame(frame)
+		end
+	end
+end
+
+function Clique:DONGLE_PROFILE_DELETED(event, addon, name)
+	if addon == "Clique" then
+		self:Print("Profile '%s' has been deleted.", name)
+	
+		self.textlistSelected = nil
+		self:TextListScrollUpdate()
+		self:ListScrollUpdate()
+	end
+end
+		
 function Clique:SetAttribute(entry, frame)
 	-- Set up any special attributes
 	local type,button,value
@@ -328,6 +387,7 @@ function Clique:SetAttribute(entry, frame)
 	elseif entry.type == "macro" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
 		frame:SetAttribute(entry.modifier.."macro"..button, entry.arg1)
+		frame:SetAttribute(entry.modifier.."macrotext"..button, entry.arg2)
 	elseif entry.type == "stop" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
 	elseif entry.type == "target" then
@@ -347,8 +407,10 @@ end
 
 function Clique:SetAction(entry)
 	if self:CombatDelay(entry) then return end
-	for frame in pairs(ClickCastFrames) do
-		self:SetAttribute(entry, frame)
+	for frame,enabled in pairs(self.ccframes) do
+		if enabled then
+			self:SetAttribute(entry, frame)
+		end
 	end
 end
 
@@ -357,7 +419,7 @@ function Clique:DeleteAction(entry)
 
 	if not tonumber(entry.button) then
 		type,button = select(3, string.find(entry.button, "(%a+)button(%d+)"))
-		for frame in pairs(ClickCastFrames) do
+		for frame in pairs(self.ccframes) do
 			frame:SetAttribute(entry.modifier..entry.button, nil)
 		end
 		button = string.format("-%s%s", type, button)
@@ -368,7 +430,7 @@ function Clique:DeleteAction(entry)
 	entry.delete = true
 
 	if self:CombatDelay(entry) then return end
-	for frame in pairs(ClickCastFrames) do
+	for frame in pairs(self.ccframes) do
 		frame:SetAttribute(entry.modifier.."type"..button, nil)
 		frame:SetAttribute(entry.modifier..entry.type..button, nil)
 	end

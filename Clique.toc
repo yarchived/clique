@@ -5,6 +5,7 @@
 ## SavedVariables: CliqueDB
 ## OptionalDeps: Dongle
 
+Dongle.lua
 Clique.lua
 Clique.xml
 Localization.en.lua
