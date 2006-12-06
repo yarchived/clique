@@ -29,7 +29,7 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------]]
 
-local major,minor = "DongleStub", 20061205.2
+local major,minor = "DongleStub", 20061205.3
 local g = getfenv(0)
 
 if not g.DongleStub or g.DongleStub:IsNewerVersion(major, minor) then
@@ -38,7 +38,7 @@ if not g.DongleStub or g.DongleStub:IsNewerVersion(major, minor) then
 			if type(t.versions == "table") and t.versions[k] then 
 				return t.versions[k] 
 			else
-				error("Cannot find a library with name '"..tostring(k).."'")
+				error("Cannot find a library with name '"..tostring(k).."'", 2)
 			end
 		end
 	})
