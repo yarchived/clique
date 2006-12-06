@@ -29,7 +29,7 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------]]
 
-local major,minor = "DongleStub", 1
+local major,minor = "DongleStub", 20061205.2
 local g = getfenv(0)
 
 if not g.DongleStub or g.DongleStub:IsNewerVersion(major, minor) then
@@ -57,10 +57,14 @@ if not g.DongleStub or g.DongleStub:IsNewerVersion(major, minor) then
 		if not self:IsNewerVersion(major, minor) then return false end
 		local old = self.versions and self.versions[major]
 		-- Run the new libraries activation
-		new:Activate(old)
+		if type(new.Activate) == "function" then
+			new:Activate(old)
+		end
 		
 		-- Deactivate the old libary if necessary
-		if old and old.Deactivate then old:Deactivate(new) end
+		if old and type(old.Deactivate) == "function" then
+			old:Deactivate(new) 
+		end
 		
 		self.versions[major] = new
 	end
@@ -86,7 +90,7 @@ Begin Library Implementation
 ---------------------------------------------------------------------------]]
 
 local major = "Dongle"
-local minor = tonumber(select(3,string.find("$Revision: 67 $", "(%d+)")) or 1)
+local minor = tonumber(select(3,string.find("$Revision: 70 $", "(%d+)")) or 1)
 
 assert(DongleStub, string.format("%s requires DongleStub.", major))
 if not DongleStub:IsNewerVersion(major, minor) then return end
@@ -128,7 +132,9 @@ end
 
 local function safecall(func,...)
 	local success,err = pcall(func,...)
-	if not success then geterrorhandler(err) end
+	if not success then 
+		geterrorhandler()(err)
+	end
 end
 
 function Dongle:New(obj, name)
