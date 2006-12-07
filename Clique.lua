@@ -235,7 +235,7 @@ local queue = {}
 function Clique:CombatDelay(tbl)
 	if InCombatLockdown() then
 		if #queue == 0 then 
-			self:Print("Cannot make changes in combat.  These changes will be delayed until you exit combat.")
+			self:Print(L.CANNOT_CHANGE_COMBAT)
 		end
 		table.insert(queue, tbl)
 		eventFrame:Show()		
@@ -247,7 +247,7 @@ function Clique:ClearQueue()
 	if InCombatLockdown() then return end
 
 	eventFrame:Hide()	
-	self:Print("Out of combat.  Applying all queued changes.")
+	self:Print(L.APPLY_QUEUE)
 	for k,v in ipairs(queue) do
 	    if v.GetAttribute then
 			self:RegisterFrame(v)
@@ -312,7 +312,7 @@ end
 
 function Clique:DONGLE_PROFILE_CHANGED(event, addon, name)
 	if addon == "Clique" then
-		self:Print("Profile has changed to '%s'.", name)
+		self:Print(L.PROFILE_CHANGED, name)
 		for name,set in pairs(self.clicksets) do
 			for modifier,entry in pairs(set) do
 				self:DeleteAction(entry)
@@ -337,7 +337,7 @@ end
 
 function Clique:DONGLE_PROFILE_DELETED(event, addon, name)
 	if addon == "Clique" then
-		self:Print("Profile '%s' has been deleted.", name)
+		self:Print(L.PROFILE_DELETED, name)
 	
 		self.textlistSelected = nil
 		self:TextListScrollUpdate()
@@ -402,6 +402,8 @@ function Clique:SetAttribute(entry, frame)
 	elseif entry.type == "click" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
 		frame:SetAttribute(entry.modifier.."delegate"..button, getglobal(entry.arg1))
+	elseif entry.type == "menu" then
+		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
 	end
 end
 
@@ -436,10 +438,3 @@ function Clique:DeleteAction(entry)
 	end
 end
 
-function Clique:Print(msg, ...)
-	if string.find(msg, "%%") then
-		-- This is a string format, so lets format
-		msg = string.format(msg, ...)
-	end
-	ChatFrame1:AddMessage("|cFF33FF99Clique|r: " .. tostring(msg))
-end

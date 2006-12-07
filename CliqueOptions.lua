@@ -574,17 +574,18 @@ function Clique:CreateOptionsFrame()
 	self.radio = {}
 
 	local buttons = {
-		{type = "actionbar", name = "Change ActionBar"},
-		{type = "action", name = "Action Button"},
-		{type = "pet", name = "Pet Action Button"},
-		{type = "spell", name = "Cast Spell"},
-		{type = "item", name = "Use Item"},
-		{type = "macro", name = "Run Custom Macro"},
-		{type = "stop", name = "Stop Casting"},
-		{type = "target", name = "Target Unit"},
-		{type = "focus", name = "Set Focus"},
-		{type = "assist", name = "Assist Unit"},
-		{type = "click", name = "Click Button"},
+		{type = "actionbar", name = L.ACTION_ACTIONBAR},
+		{type = "action", name = L.ACTION_ACTION},
+		{type = "pet", name = L.ACTION_PET},
+		{type = "spell", name = L.ACTION_SPELL},
+		{type = "item", name = L.ACTION_ITEM},
+		{type = "macro", name = L.ACTION_MACRO},
+		{type = "stop", name = L.ACTION_STOP},
+		{type = "target", name = L.ACTION_TARGET},
+		{type = "focus", name = L.ACTION_FOCUS},
+		{type = "assist", name = L.ACTION_ASSIST},
+		{type = "click", name = L.ACTION_CLICK},
+		{type = "menu", name = L.ACTION_MENU},
 	}
 
 	for i=1,#buttons do
@@ -721,6 +722,21 @@ function Clique:CreateOptionsFrame()
 	edit.label:SetPoint("RIGHT", edit, "LEFT", -10, 0)
 	edit.label:SetJustifyH("RIGHT")
 	edit:Hide()
+
+	-- Multi line edit box
+
+	local edit = CreateFrame("ScrollFrame", "CliqueMulti", CliqueCustomFrame, "CliqueEditTemplate")
+	edit:SetPoint("TOPRIGHT", CliqueCustomArg1, "BOTTOMRIGHT", -10, -27)
+	
+	local name = edit:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+	name:SetText("Macro Text:")
+	name:SetJustifyH("RIGHT")
+	name:SetPoint("RIGHT", CliqueCustomArg2.label)
+
+	local grabber = CreateFrame("Button", "CliqueFocusGrabber", edit)
+	grabber:SetPoint("TOPLEFT", 8, -8)
+	grabber:SetPoint("BOTTOMRIGHT", -8, 8)
+	grabber:SetScript("OnClick", function() CliqueMultiScrollFrameEditBox:SetFocus() end)
 
 	-- Argument 3
 
@@ -1031,6 +1047,8 @@ function Clique:FillListEntry(frame, idx)
 		else
 			frame.name:SetText(string.format("%s%s", entry.arg1, entry.arg5 and " on "..entry.arg5 or ""))
 		end
+	elseif entry.type == "menu" then
+		frame.name:SetText("Show Menu")
 	elseif entry.type == "stop" then
 		frame.name:SetText("Stop Casting")
 	elseif entry.type == "target" then
@@ -1045,6 +1063,8 @@ function Clique:FillListEntry(frame, idx)
 		elseif entry.arg3 then
 			frame.name:SetText(string.format("Item: %s", entry.arg3))
 		end
+	elseif entry.type == "macro" then
+		frame.name:SetText(string.format("Macro: %s", entry.arg1 and entry.arg1 or string.sub(entry.arg2, 1, 20)))
 	end
 
     frame:Show()
@@ -1151,6 +1171,9 @@ function Clique:ButtonOnClick(button)
 		CliqueCustomArg4:SetText(entry.arg4 or "")
 		CliqueCustomArg5:SetText(entry.arg5 or "")
 
+		CliqueMultiScrollFrameEditBox:SetText(entry.arg2 or "")
+		CliqueCustomButtonIcon.icon:SetTexture(entry.texture or "Interface\\Icons\\INV_Misc_QuestionMark")
+
 		CliqueCustomButtonBinding.modifier = entry.modifier
 		CliqueCustomButtonBinding.button = self:GetButtonNumber(entry.button)
 		CliqueCustomButtonBinding:SetText(string.format("%s%s", entry.modifier, self:GetButtonText(entry.button)))	
@@ -1186,6 +1209,13 @@ function Clique:ButtonOnClick(button)
 		if tonumber(entry.arg3) then entry.arg3 = tonumber(entry.arg3) end
 		if tonumber(entry.arg4) then entry.arg4 = tonumber(entry.arg4) end
 		if tonumber(entry.arg5) then entry.arg5 = tonumber(entry.arg5) end
+
+		if entry.type == "macro" then
+			local text = CliqueMultiScrollFrameEditBox:GetText()
+			if text ~= "" then
+				entry.arg2 = text
+			end
+		end
 
 		local pattern = "Hitem.+|h%[(.+)%]|h"
 		if entry.arg1 and string.find(entry.arg1, pattern) then
@@ -1296,27 +1326,27 @@ local buttonSetup = {
 	action = {
 		help = "Simulate a click on an action button.  Specify the number of the action button.",
 		arg1 = "Button Number:",
-		arg2 = "Unit:",
+		arg2 = "(Optional) Unit:",
 	},
 	pet = {
 		help = "Simulate a click on an pet's action button.  Specify the number of the button.",
 		arg1 = "Pet Button Number:",
-		arg2 = "Unit:",
+		arg2 = "(Optional) Unit:",
 	},
 	spell = {
 		help = "Cast a spell from the spellbook.  Takes a spell name, and optionally a bag and slot, or item name to use as the target of the spell (i.e. Feed Pet)",
 		arg1 = "Spell Name:",
-		arg2 = "Rank/Bag Number:",
-		arg3 = "Slot Number:",
-		arg4 = "Item Name:",
-		arg5 = "Unit:",
+		arg2 = "*Rank/Bag Number:",
+		arg3 = "*Slot Number:",
+		arg4 = "*Item Name:",
+		arg5 = "(Optional) Unit:",
 	},
 	item = {
 		help = "Use an item.  Can take either a bag and slot, or an item name.",
 		arg1 = "Bag Number:",
 		arg2 = "Slot Number:",
 		arg3 = "Item Name:",
-		arg4 = "Unit:",
+		arg4 = "(Optional) Unit:",
 	},
 	macro = {
 		help = "Use a custom macro in a given index",
@@ -1328,19 +1358,22 @@ local buttonSetup = {
 	},
 	target = {
 		help = "Targets the unit",
-		arg1 = "Unit:",
+		arg1 = "(Optional) Unit:",
 	},
 	focus = {
 		help = "Sets your \"focus\" unit",
-		arg1 = "Unit:",
+		arg1 = "(Optional) Unit:",
 	},
 	assist = {
 		help = "Assists the unit",
-		arg1 = "Unit:",
+		arg1 = "(Optional) Unit:",
 	},
 	click = {
 		help = "Simulate click on a button",
 		arg1 = "Button Name:",
+	},
+	menu = {
+		help = "Shows the unit pop up menu",
 	},
 }
 
@@ -1393,6 +1426,15 @@ function Clique:CustomRadio(button)
 	if entry.arg3 then CliqueCustomArg3:Show() else CliqueCustomArg3:Hide() end
 	if entry.arg4 then CliqueCustomArg4:Show() else CliqueCustomArg4:Hide() end
 	if entry.arg5 then CliqueCustomArg5:Show() else CliqueCustomArg5:Hide() end
+
+	-- Handle MacroText
+	if this.type == "macro" then
+		CliqueCustomArg2:Hide()
+		CliqueMulti:Show()
+		CliqueMultiScrollFrameEditBox:SetText("")
+	else
+		CliqueMulti:Hide()
+	end
 end
 
 function Clique:UpdateIconFrame()

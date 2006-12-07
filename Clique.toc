@@ -6,8 +6,8 @@
 ## OptionalDeps: Dongle
 
 Dongle.lua
-Clique.lua
 Clique.xml
+Clique.lua
 Localization.en.lua
 Localization.fr.lua
 Localization.de.lua
