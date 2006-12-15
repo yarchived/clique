@@ -1088,6 +1088,7 @@ function Clique:ButtonOnClick(button)
         end
 	
 		self:DeleteAction(entry)
+		self:UpdateClicks()
 		entry = nil
         
         self:ListScrollUpdate()
@@ -1098,7 +1099,7 @@ function Clique:ButtonOnClick(button)
     elseif this == CliqueButtonMax then
         entry.arg2 = nil
 		self:DeleteAction(entry)
-		self:SetAction(entry)
+		self:UpdateClicks()
     elseif this == CliqueButtonCustom then
         if CliqueCustomFrame:IsVisible() then
             CliqueCustomFrame:Hide()
@@ -1138,7 +1139,7 @@ function Clique:ButtonOnClick(button)
 	    local offset = FauxScrollFrame_GetOffset(CliqueTextListScroll)
 		local selected = self.textlistSelected - offset
 		local button = getglobal("CliqueTextList"..selected)
-		self:SetProfile(button.name:GetText())
+		self.db:SetProfile(button.name:GetText())
 	elseif this == CliqueButtonNewProfile then
 		StaticPopup_Show("CLIQUE_NEW_PROFILE")
 	elseif this == CliqueButtonDeleteProfile then
@@ -1262,12 +1263,13 @@ function Clique:ButtonOnClick(button)
 			local key = self.editEntry.modifier..self.editEntry.button
 			self.editSet[key] = nil
 			self:DeleteAction(self.editEntry)
+			self:UpdateClicks()
 			self.editEntry = nil
 		end
 
 		local key = entry.modifier..entry.button
 		self.editSet[key] = entry
-		self:SetAction(entry)
+		self:UpdateClicks()
 		self:ButtonOnClick(CliqueCustomButtonCancel)
 	end
     
@@ -1520,7 +1522,7 @@ StaticPopupDialogs["CLIQUE_NEW_PROFILE"] = {
 		local name = this:GetParent():GetName().."EditBox"
 		local button = getglobal(name)
 		local text = button:GetText()
-		Clique:SetProfile(text)
+		Clique.db:SetProfile(text)
 	end,
 	timeout = 0,
 	whileDead = 1,
@@ -1541,7 +1543,7 @@ StaticPopupDialogs["CLIQUE_NEW_PROFILE"] = {
 	end,
 	EditBoxOnEnterPressed = function()
 		if ( getglobal(this:GetParent():GetName().."Button1"):IsEnabled() == 1 ) then
-			Clique:SetProfile(this:GetText())
+			Clique.db:SetProfile(this:GetText())
 			this:GetParent():Hide();
 		end
 	end,
@@ -1620,7 +1622,7 @@ function Clique:TextListScrollUpdate()
 	if self.textlist == "PROFILES" then
 		for k,v in pairs(self.db.profiles) do table.insert(work, k) end
 		table.sort(work)
-		CliqueTextListFrame.title:SetText("Profile: " .. self.db.char.profileKey)
+		CliqueTextListFrame.title:SetText("Profile: " .. self.db.profileKey)
 
 	elseif self.textlist == "FRAMES" then
 		for k,v in pairs(self.ccframes) do 
@@ -1659,7 +1661,7 @@ function Clique:TextListScrollUpdate()
 			end
 
 			if self.textlistSelected == nil and self.textlist == "PROFILES" then
-				if work[idx] == self.db.char.profileKey then
+				if work[idx] == self.db.profileKey then
 					button:SetChecked(true)
 					CliqueButtonSetProfile:Disable()
 					CliqueButtonDeleteProfile:Disable()
@@ -1667,7 +1669,7 @@ function Clique:TextListScrollUpdate()
 					button:SetChecked(nil)
 				end
 			elseif idx == self.textlistSelected and self.textlist == "PROFILES" then
-				if work[idx] == self.db.char.profileKey then
+				if work[idx] == self.db.profileKey then
 					CliqueButtonSetProfile:Disable()
 					CliqueButtonDeleteProfile:Disable()
 				else

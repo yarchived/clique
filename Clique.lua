@@ -58,12 +58,13 @@ function Clique:Enable()
 	ClickCastFrames = setmetatable({}, {__newindex=newindex})
     
     -- Register all frames that snuck in before we did =)
-    for frame in pairs(self.ccframes) do
-		self:RegisterFrame(frame)
-    end
 
     Clique:OptionsOnLoad()
     Clique:EnableFrames()
+
+    for frame in pairs(self.ccframes) do
+		self:RegisterFrame(frame)
+    end
 
 	-- Define a state header for forms
 	self.stateheader = CreateFrame("Frame", "CliqueStateHeader", UIParent, "SecureStateDriverTemplate")
@@ -184,7 +185,7 @@ function Clique:SpellBookButtonPressed()
 		button = self:GetButtonNumber()
 	end
     
-    -- Build the SVN/live structure
+    -- Build the structure
     local t = {
 		["button"] = button,
 		["modifier"] = self:GetModifierText(),
@@ -202,74 +203,60 @@ function Clique:SpellBookButtonPressed()
     end
     
     self.editSet[key] = t
-    
-    self:SetAction(t)
+	self:UpdateClicks()
     self:ListScrollUpdate()
 end
 
+function Clique:UpdateClicks(frame)
+	for name in pairs(self.clicksets) do
+		self:RemoveClickSet(name, frame)
+	end
+
+	self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
+	self:ApplyClickSet(L.CLICKSET_HARMFUL, frame)
+	self:ApplyClickSet(L.CLICKSET_HELPFUL, frame)
+	if not InCombatLockdown() then
+		self:TrimClickSet(L.CLICKSET_HARMFUL, frame)
+		self:TrimClickSet(L.CLICKSET_HELPFUL, frame)
+	end
+	self:ApplyClickSet(L.CLICKSET_OOC, frame)
+end
+		
 function Clique:CombatLockdown()
 	self:Debug(1, "Going into combat mode")
 	-- Remove all OOC clicks
-	for k,v in pairs(self.clicksets[L.CLICKSET_OOC]) do
-		self:DeleteAction(v)
-		self:Debug(1, "Removing %s, %s", v.type, tostring(v.arg1))
-	end
-
-	-- Just bluntly force our clicks back onto the frames
-    for frame in pairs(self.ccframes) do
-		self:RegisterFrame(frame)
-    end
+	self:RemoveClickSet(L.CLICKSET_OOC)
+	self:ApplyClickSet(L.CLICKSET_DEFAULT)
+	self:ApplyClickSet(L.CLICKSET_HARMFUL)
+	self:ApplyClickSet(L.CLICKSET_HELPFUL)
 end	
 
 function Clique:CombatUnlock()
 	self:Debug(1, "Setting any out of combat clicks")
-    for frame in pairs(self.ccframes) do
-		for k,v in pairs(self.clicksets[L.CLICKSET_OOC]) do
-			self:SetAttribute(v,frame)
-		end
-	end
-end
-
-local queue = {}
-
-function Clique:CombatDelay(tbl)
-	if InCombatLockdown() then
-		if #queue == 0 then 
-			self:Print(L.CANNOT_CHANGE_COMBAT)
-		end
-		table.insert(queue, tbl)
-		eventFrame:Show()		
-		return true
-	end
-end
-
-function Clique:ClearQueue()
-	if InCombatLockdown() then return end
-
-	eventFrame:Hide()	
-	self:Print(L.APPLY_QUEUE)
-	for k,v in ipairs(queue) do
-	    if v.GetAttribute then
-			self:RegisterFrame(v)
-	    else
-			if v.delete then
-				self:DeleteAction(v)
-			else
-				self:SetAction(v)
-			end
-	    end
-	end
-	queue = {}
+	self:ApplyClickSet(L.CLICKSET_DEFAULT)
+	self:ApplyClickSet(L.CLICKSET_HARMFUL)
+	self:ApplyClickSet(L.CLICKSET_HELPFUL)
+	self:TrimClickSet(L.CLICKSET_HARMFUL, frame)
+	self:TrimClickSet(L.CLICKSET_HELPFUL, frame)
+	self:RemoveClickSet(L.CLICKSET_OOC)
 end
 
 function Clique:RegisterFrame(frame)
 	local name = frame:GetName()
+
+	-- Check to see if we can register this frame at this time
+	frame:SetAttribute("Clique-test", true)
+	if frame:GetAttribute("Clique-test") then
+		frame:SetAttribute("Clique-test", nil)
+	else
+		self:Print("Cannot register frame %s", tostring(name))
+	end
+
 	if self.profile.blacklist[name] then 
 		rawset(self.ccframes, frame, false)
 		return 
 	end
 
---	if self:CombatDelay(frame) then return end
 	if not ClickCastFrames[frame] then 
 		rawset(self.ccframes, frame, true)
 		if CliqueTextListFrame then
@@ -277,13 +264,48 @@ function Clique:RegisterFrame(frame)
 		end
 	end
 
-	-- Ensure we have all the buttons registered
 	frame:RegisterForClicks("LeftButtonUp", "MiddleButtonUp", "RightButtonUp", "Button4Up", "Button5Up")
-	
-	for name,set in pairs(self.clicksets) do
-		if name ~= L.CLICKSET_OOC then
-			for modifier,entry in pairs(set) do
-				self:SetAttribute(entry, frame)
+	self:UpdateClicks()
+end
+
+function Clique:ApplyClickSet(name, frame)
+	local set = self.clicksets[name]
+
+	if frame then
+		for modifier,entry in pairs(set) do
+			self:SetAttribute(entry, frame)
+		end
+	else
+		for modifier,entry in pairs(set) do
+			self:SetAction(entry)
+		end
+	end					
+end
+
+function Clique:RemoveClickSet(name, frame)
+	local set = self.clicksets[name]
+
+	if frame then
+		for modifier,entry in pairs(set) do
+			self:DeleteAttribute(entry, frame)
+		end
+	else
+		for modifier,entry in pairs(set) do
+			self:DeleteAction(entry)
+		end
+	end					
+end
+
+function Clique:TrimClickSet(name)
+	local base = self.clicksets[L.CLICKSET_OOC]
+	local set = self.clicksets[name]
+
+	for modifier,entry in pairs(set) do
+		for modifierbase,entrybase in pairs(base) do
+			local button = string.format("%s%d", "harmbutton", entrybase.button)
+			local button2 = string.format("%s%d", "helpbutton", entrybase.button)
+			if entry.button == button or entry.button == button2 then
+				self:DeleteAction(entry)
 			end
 		end
 	end
@@ -292,25 +314,12 @@ end
 function Clique:UnregisterFrame(frame)
 	for name,set in pairs(self.clicksets) do
 		for modifier,entry in pairs(set) do
-			local type,button,value
-
-			if not tonumber(entry.button) then
-				type,button = select(3, string.find(entry.button, "(%a+)button(%d+)"))
-				frame:SetAttribute(entry.modifier..entry.button, nil)
-				button = string.format("-%s%s", type, button)
-			end
-
-			button = button or entry.button
-
-			entry.delete = true
-
-			frame:SetAttribute(entry.modifier.."type"..button, nil)
-			frame:SetAttribute(entry.modifier..entry.type..button, nil)
+			self:DeleteAttribute(entry, frame)
 		end
 	end
 end
 
-function Clique:DONGLE_PROFILE_CHANGED(event, addon, name)
+function Clique:DONGLE_PROFILE_CHANGED(event, addon, svname, name)
 	if addon == "Clique" then
 		self:Print(L.PROFILE_CHANGED, name)
 		for name,set in pairs(self.clicksets) do
@@ -335,7 +344,7 @@ function Clique:DONGLE_PROFILE_CHANGED(event, addon, name)
 	end
 end
 
-function Clique:DONGLE_PROFILE_DELETED(event, addon, name)
+function Clique:DONGLE_PROFILE_DELETED(event, addon, svname, name)
 	if addon == "Clique" then
 		self:Print(L.PROFILE_DELETED, name)
 	
@@ -344,8 +353,13 @@ function Clique:DONGLE_PROFILE_DELETED(event, addon, name)
 		self:ListScrollUpdate()
 	end
 end
-		
+
 function Clique:SetAttribute(entry, frame)
+	local name = frame:GetName()
+	if	self.profile.blacklist[name] then
+		return
+	end
+
 	-- Set up any special attributes
 	local type,button,value
 
@@ -401,22 +415,13 @@ function Clique:SetAttribute(entry, frame)
 		frame:SetAttribute(entry.modifier.."unit"..button, entry.arg1)
 	elseif entry.type == "click" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
-		frame:SetAttribute(entry.modifier.."delegate"..button, getglobal(entry.arg1))
+		frame:SetAttribute(entry.modifier.."clickbutton"..button, getglobal(entry.arg1))
 	elseif entry.type == "menu" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
 	end
 end
 
-function Clique:SetAction(entry)
-	if self:CombatDelay(entry) then return end
-	for frame,enabled in pairs(self.ccframes) do
-		if enabled then
-			self:SetAttribute(entry, frame)
-		end
-	end
-end
-
-function Clique:DeleteAction(entry)
+function Clique:DeleteAttribute(entry, frame)
 	local type,button,value
 
 	if not tonumber(entry.button) then
@@ -431,10 +436,35 @@ function Clique:DeleteAction(entry)
 
 	entry.delete = true
 
-	if self:CombatDelay(entry) then return end
-	for frame in pairs(self.ccframes) do
-		frame:SetAttribute(entry.modifier.."type"..button, nil)
-		frame:SetAttribute(entry.modifier..entry.type..button, nil)
+	frame:SetAttribute(entry.modifier.."type"..button, nil)
+	frame:SetAttribute(entry.modifier..entry.type..button, nil)
+end
+
+function Clique:SetAction(entry)
+	for frame,enabled in pairs(self.ccframes) do
+		if enabled then
+			self:SetAttribute(entry, frame)
+		end
 	end
 end
 
+function Clique:DeleteAction(entry)
+	for frame in pairs(self.ccframes) do
+			self:DeleteAttribute(entry, frame)
+	end
+end
+
+
+function test(func, num)
+	local start = GetTime()
+
+	debugprofilestart()
+	for i=1,num do
+		func()
+	end
+	local total = GetTime() - start
+	
+	ChatFrame1:AddMessage("Calls took a total of " .. total .. "msec")
+	ChatFrame1:AddMessage("Time per call: " ..(total / num))
+end
+	
