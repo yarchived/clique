@@ -4,20 +4,9 @@
 
 Clique = {Locals = {}}
 
-DongleStub("Dongle"):New(Clique, "Clique")
+DongleStub("Dongle"):New("Clique", Clique)
 
 local L = Clique.Locals
--- Create a frame for event registration
-local eventFrame = CreateFrame("Frame")
-local elapsed = 0
-eventFrame:SetScript("OnUpdate", function()
-	elapsed = elapsed + arg1
-	if elapsed >= 2.0 then 
-		elapsed = 0
-		Clique:ClearQueue()
-	end
-end)
-eventFrame:Hide()
    
 function Clique:Enable()
 	-- Grab the localisation header
@@ -249,7 +238,7 @@ function Clique:RegisterFrame(frame)
 	if frame:GetAttribute("Clique-test") then
 		frame:SetAttribute("Clique-test", nil)
 	else
-		self:Print("Cannot register frame %s", tostring(name))
+		self:PrintF("Cannot register frame %s", tostring(name))
 	end
 
 	if self.profile.blacklist[name] then 
@@ -321,7 +310,7 @@ end
 
 function Clique:DONGLE_PROFILE_CHANGED(event, addon, svname, name)
 	if addon == "Clique" then
-		self:Print(L.PROFILE_CHANGED, name)
+		self:PrintF(L.PROFILE_CHANGED, name)
 		for name,set in pairs(self.clicksets) do
 			for modifier,entry in pairs(set) do
 				self:DeleteAction(entry)
@@ -346,7 +335,7 @@ end
 
 function Clique:DONGLE_PROFILE_DELETED(event, addon, svname, name)
 	if addon == "Clique" then
-		self:Print(L.PROFILE_DELETED, name)
+		self:PrintF(L.PROFILE_DELETED, name)
 	
 		self.textlistSelected = nil
 		self:TextListScrollUpdate()

@@ -1146,7 +1146,7 @@ function Clique:ButtonOnClick(button)
 	    local offset = FauxScrollFrame_GetOffset(CliqueTextListScroll)
 		local selected = self.textlistSelected - offset
 		local button = getglobal("CliqueTextList"..selected)
-		self:DeleteProfile(button.name:GetText())
+		self.db:DeleteProfile(button.name:GetText())
 	elseif this == CliqueButtonEdit then
 		-- Make a copy of the entry
 		self.customEntry = {}
@@ -1567,7 +1567,7 @@ StaticPopupDialogs["CLIQUE_DELETE_PROFILE"] = {
 	button1 = TEXT(OKAY),
 	button2 = TEXT(CANCEL),
 	OnAccept = function()
-		Clique:DeleteProfile(getglobal(this:GetName().."EditBox"):GetText())
+		Clique.db:DeleteProfile(getglobal(this:GetName().."EditBox"):GetText())
 		Clique:DropDownProfile_OnShow()
 	end,
 	timeout = 0,
@@ -1589,7 +1589,7 @@ StaticPopupDialogs["CLIQUE_DELETE_PROFILE"] = {
 	end,
 	EditBoxOnEnterPressed = function()
 		if ( getglobal(this:GetParent():GetName().."Button1"):IsEnabled() == 1 ) then
-			Clique:DeleteProfile(this:GetText())
+			Clique.db:DeleteProfile(this:GetText())
 			Clique:DropDownProfile_OnShow()
 			this:GetParent():Hide();
 		end
