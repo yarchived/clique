@@ -7,7 +7,7 @@ Clique = {Locals = {}}
 DongleStub("Dongle"):New("Clique", Clique)
 
 local L = Clique.Locals
-   
+
 function Clique:Enable()
 	-- Grab the localisation header
 	L = Clique.Locals
@@ -227,7 +227,7 @@ function Clique:CombatUnlock()
 	self:ApplyClickSet(L.CLICKSET_HELPFUL)
 	self:TrimClickSet(L.CLICKSET_HARMFUL, frame)
 	self:TrimClickSet(L.CLICKSET_HELPFUL, frame)
-	self:RemoveClickSet(L.CLICKSET_OOC)
+	self:ApplyClickSet(L.CLICKSET_OOC)
 end
 
 function Clique:RegisterFrame(frame)
