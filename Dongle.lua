@@ -35,7 +35,7 @@ local g = getfenv(0)
 if not g.DongleStub or g.DongleStub:IsNewerVersion(major, minor) then
 	local lib = setmetatable({}, {
 		__call = function(t,k) 
-			if type(t.versions == "table") and t.versions[k] then 
+			if type(t.versions) == "table" and t.versions[k] then 
 				return t.versions[k] 
 			else
 				error("Cannot find a library with name '"..tostring(k).."'", 2)
