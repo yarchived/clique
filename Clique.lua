@@ -411,6 +411,11 @@ function Clique:SetAttribute(entry, frame)
 end
 
 function Clique:DeleteAttribute(entry, frame)
+	local name = frame:GetName()
+	if	self.profile.blacklist[name] then
+		return
+	end
+
 	local type,button,value
 
 	if not tonumber(entry.button) then
