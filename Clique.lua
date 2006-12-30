@@ -200,7 +200,8 @@ end
 		
 function Clique:CombatLockdown(frame)
 	-- Remove all OOC clicks
-	self:RemoveClickSet(L.CLICKSET_OOC, frame)
+	self:RemoveClickSet(oocClicks, frame)
+	self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
 	self:ApplyClickSet(L.CLICKSET_HARMFUL, frame)
 	self:ApplyClickSet(L.CLICKSET_HELPFUL, frame)
 end	
@@ -236,6 +237,7 @@ function Clique:UpdateClicks()
 	for modifier,entry in pairs(ooc) do
 		table.insert(oocClicks, entry)
 	end
+	self:CombatUnlock()
 end
 
 function Clique:RegisterFrame(frame)
@@ -439,3 +441,15 @@ function Clique:DeleteAction(entry)
 	end
 end
 
+
+--[[
+local n = string.char(10)
+
+local frame = CreateFrame("Button", "SuperMacro1", UIParent, "SecureActionButtonTemplate")
+frame:SetAttribute("type1", "macro")
+frame:SetAttribute("macrotext1", "/say Casting a spell"..n.."/cast Demon Skin"..n.."/click SuperMacro2")
+
+local frame = CreateFrame("Button", "SuperMacro2", UIParent, "SecureActionButtonTemplate")
+frame:SetAttribute("type1", "macro")
+frame:SetAttribute("macrotext1", "/say Something else!")
+--]]
