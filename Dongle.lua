@@ -12,7 +12,7 @@
         copyright notice, this list of conditions and the following
         disclaimer in the documentation and/or other materials provided
         with the distribution.
-      * Neither the name of the Dongle Development Team nor the names of 
+      * Neither the name of the Dongle Development Team nor the names of
         its contributors may be used to endorse or promote products derived
         from this software without specific prior written permission.
 
@@ -28,8 +28,9 @@
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------]]
+local major = "DongleStub"
+local minor = tonumber(string.match("$Revision: 173 $", "(%d+)") or 1)
 
-local major,minor = "DongleStub", 20061205.3
 local g = getfenv(0)
 
 if not g.DongleStub or g.DongleStub:IsNewerVersion(major, minor) then
@@ -86,11 +87,11 @@ if not g.DongleStub or g.DongleStub:IsNewerVersion(major, minor) then
 end
 
 --[[-------------------------------------------------------------------------
-Begin Library Implementation
+  Begin Library Implementation
 ---------------------------------------------------------------------------]]
 
 local major = "Dongle"
-local minor = tonumber(select(3,string.find("$Revision: 92 $", "(%d+)")) or 1)
+local minor = tonumber(string.match("$Revision: 169 $", "(%d+)") or 1)
 
 assert(DongleStub, string.format("%s requires DongleStub.", major))
 if not DongleStub:IsNewerVersion(major, minor) then return end
@@ -100,6 +101,7 @@ local methods = {
 	"RegisterEvent", "UnregisterEvent", "UnregisterAllEvents", "TriggerEvent",
 	"EnableDebug", "Print", "PrintF", "Debug", "DebugF",
 	"InitializeDB",
+	"InitializeSlashCommand",
 	"NewModule", "HasModule", "IterateModules",
 }
 
@@ -199,7 +201,7 @@ function Dongle:IterateModules()
 	return ipairs(reg.modules or EMPTY_TABLE)
 end
 
-function Dongle:ADDON_LOADED(frame, event, ...)
+function Dongle:ADDON_LOADED(event, ...)
 	for i=1, #loadqueue do
 		local obj = loadqueue[i]
 		table.insert(loadorder, obj)
@@ -231,7 +233,7 @@ function Dongle:TriggerEvent(event, ...)
 		for obj,func in pairs(eventTbl) do
 			if type(func) == "string" then
 				if type(obj[func]) == "function" then
-					safecall(obj[func], obj, event, ...)
+					safecall(obj[func], obj, event, ...) 
 				end
 			else
 				safecall(func,event,...)
@@ -372,7 +374,7 @@ do
 		assert(3, reg, "You must call 'Debug' from a registered Dongle.")
 		argcheck(level, 2, "number")
 
-		if reg.debugLevel and level >= reg.debugLevel then
+		if reg.debugLevel and level <= reg.debugLevel then
 			printHelp(self, "Debug", ...)
 		end
 	end
@@ -382,7 +384,7 @@ do
 		assert(3, reg, "You must call 'DebugF' from a registered Dongle.")
 		argcheck(level, 2, "number")
 
-		if reg.debugLevel and level >= reg.debugLevel then
+		if reg.debugLevel and level <= reg.debugLevel then
 			printFHelp(self, "DebugF", ...)
 		end
 	end
@@ -462,6 +464,7 @@ function Dongle:InitializeDB(name, defaults, defaultProfile)
 	db.sv = sv
 	db.sv_name = name
 	db.profileKey = profileKey
+	-- FIXME: Why not just db.parent = self?
 	db.parent = reg.name
 	db.charKey = char
 	db.realmKey = realm
@@ -661,24 +664,83 @@ function Dongle.ResetDB(db, defaultProfile)
 	return newdb
 end
 
-function Dongle:RegisterSlashCommand(command, prefix, pattern, validator)
-	local reg = lookup[self]
-	assert(3, reg, "You must call 'RegisterSlashCommand' from a registered Dongle.")
-	argcheck(prefix, 2, "string")
-	argcheck(pattern, 3, "string", "nil")
-	argcheck(validator, 4, "function", "nil")
+local slashCmdMethods = {
+	"RegisterSlashHandler",
+	"PrintUsage",
+}
 
-	if not reg.cmd then
-		reg.cmd = {}
+local function OnSlashCommand(cmd, cmd_line)
+	if cmd.patterns then
+		for pattern, tbl in pairs(cmd.patterns) do
+			if string.match(cmd_line, pattern) then
+				if type(tbl.handler) == "string" then
+					cmd.parent[tbl.handler](cmd.parent, string.match(cmd_line, pattern))
+				else
+					tbl.handler(cmd.parent, string.match(cmd_line, pattern))
+				end
+				return
+			end
+		end
 	end
-	reg.cmd[prefix] = {
-		["pattern"] = pattern,
-		["validator"] = validator,
+	cmd:PrintUsage()
+end
+
+function Dongle:InitializeSlashCommand(desc, name, ...)
+	local reg = lookup[self]
+	assert(3, reg, "You must call 'InitializeSlashCommand' from a registered Dongle.")
+	argcheck(desc, 2, "string")
+	argcheck(name, 3, "string")
+	argcheck(select(1, ...), 4, "string")
+	for i = 2,select("#", ...) do
+		argcheck(select(i, ...), i+2, "string")
+	end
+	
+	local cmd = {}
+	cmd.desc = desc
+	cmd.name = name
+	cmd.parent = self
+	cmd.slashes = { ... }
+	for idx,method in pairs(slashCmdMethods) do
+		cmd[method] = Dongle[method]
+	end
+	
+	local genv = getfenv(0)
+
+	for i = 1,select("#", ...) do
+		genv["SLASH_"..name..tostring(i)] = "/"..select(i, ...)
+	end
+
+	genv.SlashCmdList[name] = function(...) OnSlashCommand(cmd, ...) end
+	return cmd
+end
+
+function Dongle.RegisterSlashHandler(cmd, desc, pattern, handler)
+	argcheck(desc, 2, "string")
+	argcheck(pattern, 3, "string")
+	argcheck(handler, 4, "function", "string")
+
+	if not cmd.patterns then
+		cmd.patterns = {}
+	end
+	cmd.patterns[pattern] = {
+		["desc"] = desc,
+		["handler"] = handler,
 	}
+end
 
-	-- Register the slash command here
-
-
+function Dongle.PrintUsage(cmd)
+	local usage = cmd.desc.."\n".."/"..table.concat(cmd.slashes, ", /")..":\n"
+	if cmd.patterns then
+		local descs = {}
+		for pattern,tbl in pairs(cmd.patterns) do
+			table.insert(descs, tbl.desc)
+		end
+		table.sort(descs)
+		for _,desc in pairs(descs) do
+			usage = usage.." - "..desc.."\n"
+		end
+	end
+	cmd.parent:Print(usage)
 end
 
 --[[-------------------------------------------------------------------------
