@@ -440,16 +440,3 @@ function Clique:DeleteAction(entry)
 			self:DeleteAttribute(entry, frame)
 	end
 end
-
-
---[[
-local n = string.char(10)
-
-local frame = CreateFrame("Button", "SuperMacro1", UIParent, "SecureActionButtonTemplate")
-frame:SetAttribute("type1", "macro")
-frame:SetAttribute("macrotext1", "/say Casting a spell"..n.."/cast Demon Skin"..n.."/click SuperMacro2")
-
-local frame = CreateFrame("Button", "SuperMacro2", UIParent, "SecureActionButtonTemplate")
-frame:SetAttribute("type1", "macro")
-frame:SetAttribute("macrotext1", "/say Something else!")
---]]
