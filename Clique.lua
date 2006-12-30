@@ -301,6 +301,7 @@ end
 function Clique:DONGLE_PROFILE_CHANGED(event, addon, svname, name)
 	if addon == "Clique" then
 		self:PrintF(L.PROFILE_CHANGED, name)
+
 		for name,set in pairs(self.clicksets) do
 			for modifier,entry in pairs(set) do
 				self:DeleteAction(entry)
@@ -335,7 +336,7 @@ end
 
 function Clique:SetAttribute(entry, frame)
 	local name = frame:GetName()
-	if	self.profile.blacklist[name] then
+	if	self.profile.blacklist and self.profile.blacklist[name] then
 		return
 	end
 
@@ -402,7 +403,7 @@ end
 
 function Clique:DeleteAttribute(entry, frame)
 	local name = frame:GetName()
-	if	self.profile.blacklist[name] then
+	if	self.profile.blacklist and self.profile.blacklist[name] then
 		return
 	end
 
