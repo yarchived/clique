@@ -7,6 +7,7 @@ Clique = {Locals = {}}
 DongleStub("Dongle"):New("Clique", Clique)
 
 local L = Clique.Locals
+local oocClicks = {}
 
 function Clique:Enable()
 	-- Grab the localisation header
@@ -87,7 +88,8 @@ function Clique:Enable()
 	self:RegisterEvent("DONGLE_PROFILE_DELETED")
 
 	-- Run the OOC script if we need to
-	Clique:CombatUnlock()
+	self:UpdateClicks()
+	self:CombatUnlock()
 
     -- Securehook CreateFrame to catch any new raid frames
     local raidFunc = function(type, name, parent, template)
@@ -195,50 +197,53 @@ function Clique:SpellBookButtonPressed()
 	self:UpdateClicks()
     self:ListScrollUpdate()
 end
-
-function Clique:UpdateClicks(frame)
-	for name in pairs(self.clicksets) do
-		self:RemoveClickSet(name, frame)
-	end
-
-	self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
+		
+function Clique:CombatLockdown(frame)
+	-- Remove all OOC clicks
+	self:RemoveClickSet(L.CLICKSET_OOC, frame)
 	self:ApplyClickSet(L.CLICKSET_HARMFUL, frame)
 	self:ApplyClickSet(L.CLICKSET_HELPFUL, frame)
-	if not InCombatLockdown() then
-		self:TrimClickSet(L.CLICKSET_HARMFUL, frame)
-		self:TrimClickSet(L.CLICKSET_HELPFUL, frame)
-	end
-	self:ApplyClickSet(L.CLICKSET_OOC, frame)
-end
-		
-function Clique:CombatLockdown()
-	self:Debug(1, "Going into combat mode")
-	-- Remove all OOC clicks
-	self:RemoveClickSet(L.CLICKSET_OOC)
-	self:ApplyClickSet(L.CLICKSET_DEFAULT)
-	self:ApplyClickSet(L.CLICKSET_HARMFUL)
-	self:ApplyClickSet(L.CLICKSET_HELPFUL)
 end	
 
-function Clique:CombatUnlock()
-	self:Debug(1, "Setting any out of combat clicks")
-	self:ApplyClickSet(L.CLICKSET_DEFAULT)
-	self:ApplyClickSet(L.CLICKSET_HARMFUL)
-	self:ApplyClickSet(L.CLICKSET_HELPFUL)
-	self:TrimClickSet(L.CLICKSET_HARMFUL, frame)
-	self:TrimClickSet(L.CLICKSET_HELPFUL, frame)
-	self:ApplyClickSet(L.CLICKSET_OOC)
+function Clique:CombatUnlock(frame)
+	self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
+	self:RemoveClickSet(L.CLICKSET_HARMFUL, frame)
+	self:RemoveClickSet(L.CLICKSET_HELPFUL, frame)
+	self:ApplyClickSet(oocClicks, frame)
+end
+
+function Clique:UpdateClicks()
+	local ooc = self.clicksets[L.CLICKSET_OOC]
+	local harm = self.clicksets[L.CLICKSET_HARMFUL]
+	local help = self.clicksets[L.CLICKSET_HELPFUL]
+
+	for modifier,entry in pairs(harm) do
+		local button = string.gsub(entry.button, "harmbutton", "")
+		button = string.gsub(button, "helpbutton", "")
+		local mask = false
+
+		for k,v in pairs(ooc) do
+			if button == v.button then
+				mask = true
+			end
+		end
+
+		if not mask then
+			table.insert(oocClicks, entry)
+		end
+	end
+
+	for modifier,entry in pairs(ooc) do
+		table.insert(oocClicks, entry)
+	end
 end
 
 function Clique:RegisterFrame(frame)
 	local name = frame:GetName()
 
 	-- Check to see if we can register this frame at this time
-	frame:SetAttribute("Clique-test", true)
-	if frame:GetAttribute("Clique-test") then
-		frame:SetAttribute("Clique-test", nil)
-	else
-		self:PrintF("Cannot register frame %s", tostring(name))
+	if InCombatLockdown() and not frame:CanChangeProtectedState() then
+		self:PrintF("Cannot register frame %s.  The addon which attempted to register this frame is doing so while in-combat.", tostring(name))
 	end
 
 	if self.profile.blacklist[name] then 
@@ -253,12 +258,12 @@ function Clique:RegisterFrame(frame)
 		end
 	end
 
-	frame:RegisterForClicks("LeftButtonUp", "MiddleButtonUp", "RightButtonUp", "Button4Up", "Button5Up")
-	self:UpdateClicks()
+	frame:RegisterForClicks("AnyUp")
+	self:CombatUnlock(frame)
 end
 
 function Clique:ApplyClickSet(name, frame)
-	local set = self.clicksets[name]
+	local set = self.clicksets[name] or name
 
 	if frame then
 		for modifier,entry in pairs(set) do
@@ -272,7 +277,7 @@ function Clique:ApplyClickSet(name, frame)
 end
 
 function Clique:RemoveClickSet(name, frame)
-	local set = self.clicksets[name]
+	local set = self.clicksets[name] or name
 
 	if frame then
 		for modifier,entry in pairs(set) do
@@ -283,21 +288,6 @@ function Clique:RemoveClickSet(name, frame)
 			self:DeleteAction(entry)
 		end
 	end					
-end
-
-function Clique:TrimClickSet(name)
-	local base = self.clicksets[L.CLICKSET_OOC]
-	local set = self.clicksets[name]
-
-	for modifier,entry in pairs(set) do
-		for modifierbase,entrybase in pairs(base) do
-			local button = string.format("%s%d", "harmbutton", entrybase.button)
-			local button2 = string.format("%s%d", "helpbutton", entrybase.button)
-			if entry.button == button or entry.button == button2 then
-				self:DeleteAction(entry)
-			end
-		end
-	end
 end
 
 function Clique:UnregisterFrame(frame)
@@ -448,17 +438,3 @@ function Clique:DeleteAction(entry)
 	end
 end
 
-
-function test(func, num)
-	local start = GetTime()
-
-	debugprofilestart()
-	for i=1,num do
-		func()
-	end
-	local total = GetTime() - start
-	
-	ChatFrame1:AddMessage("Calls took a total of " .. total .. "msec")
-	ChatFrame1:AddMessage("Time per call: " ..(total / num))
-end
-	
