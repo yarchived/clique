@@ -234,6 +234,22 @@ function Clique:UpdateClicks()
 		end
 	end
 
+	for modifier,entry in pairs(helpv) do
+		local button = string.gsub(entry.button, "harmbutton", "")
+		button = string.gsub(button, "helpbutton", "")
+		local mask = false
+
+		for k,v in pairs(ooc) do
+			if button == v.button then
+				mask = true
+			end
+		end
+
+		if not mask then
+			table.insert(oocClicks, entry)
+		end
+	end
+
 	for modifier,entry in pairs(ooc) do
 		table.insert(oocClicks, entry)
 	end
