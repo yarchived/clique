@@ -12,6 +12,7 @@ local oocClicks = {}
 function Clique:Enable()
 	-- Grab the localisation header
 	L = Clique.Locals
+	self.ooc = oocClicks
 
 	self.defaults = {
 		profile = {
@@ -81,6 +82,7 @@ function Clique:Enable()
 
 	-- Register for LEARNED_SPELL_IN_TAB
 	self:RegisterEvent("LEARNED_SPELL_IN_TAB")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:LEARNED_SPELL_IN_TAB()
 
 	-- Register for dongle events
@@ -89,7 +91,7 @@ function Clique:Enable()
 
 	-- Run the OOC script if we need to
 	self:UpdateClicks()
-	self:CombatUnlock()
+	self:PLAYER_ENTERING_WORLD()
 
     -- Securehook CreateFrame to catch any new raid frames
     local raidFunc = function(type, name, parent, template)
@@ -128,6 +130,14 @@ function Clique:LEARNED_SPELL_IN_TAB()
 			--profile[name] = profile[name] or {}
 			--self.profile[name] = self.profile[name] or {}
 		end
+	end
+end
+
+function Clique:PLAYER_ENTERING_WORLD()
+	if InCombatLockdown() then
+		self:CombatLockdown()
+	else
+		self:CombatUnlock()
 	end
 end
 
@@ -218,9 +228,12 @@ function Clique:UpdateClicks()
 	local harm = self.clicksets[L.CLICKSET_HARMFUL]
 	local help = self.clicksets[L.CLICKSET_HELPFUL]
 
+	oocClicks = {}
+
 	for modifier,entry in pairs(harm) do
 		local button = string.gsub(entry.button, "harmbutton", "")
 		button = string.gsub(button, "helpbutton", "")
+		button = tonumber(button)
 		local mask = false
 
 		for k,v in pairs(ooc) do
@@ -234,9 +247,10 @@ function Clique:UpdateClicks()
 		end
 	end
 
-	for modifier,entry in pairs(helpv) do
+	for modifier,entry in pairs(help) do
 		local button = string.gsub(entry.button, "harmbutton", "")
 		button = string.gsub(button, "helpbutton", "")
+		button = tonumber(button)
 		local mask = false
 
 		for k,v in pairs(ooc) do
