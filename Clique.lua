@@ -330,9 +330,9 @@ function Clique:UnregisterFrame(frame)
 	end
 end
 
-function Clique:DONGLE_PROFILE_CHANGED(event, addon, svname, name)
-	if addon == "Clique" then
-		self:PrintF(L.PROFILE_CHANGED, name)
+function Clique:DONGLE_PROFILE_CHANGED(event, db, parent, svname, profileKey)
+	if db == self.db then
+		self:PrintF(L.PROFILE_CHANGED, profileKey)
 
 		for name,set in pairs(self.clicksets) do
 			for modifier,entry in pairs(set) do
@@ -343,7 +343,7 @@ function Clique:DONGLE_PROFILE_CHANGED(event, addon, svname, name)
 		self.profile = self.db.profile
 		self.clicksets = self.profile.clicksets
 		self.editSet = self.clicksets[L.CLICKSET_DEFAULT]
-		self.profileKey = new
+		self.profileKey = profileKey
 	
 		-- Refresh the profile editor if it exists
 		self.textlistSelected = nil
@@ -356,9 +356,9 @@ function Clique:DONGLE_PROFILE_CHANGED(event, addon, svname, name)
 	end
 end
 
-function Clique:DONGLE_PROFILE_DELETED(event, addon, svname, name)
-	if addon == "Clique" then
-		self:PrintF(L.PROFILE_DELETED, name)
+function Clique:DONGLE_PROFILE_DELETED(event, db, parent, svname, profileKey)
+	if db == self.db then
+		self:PrintF(L.PROFILE_DELETED, profileKey)
 	
 		self.textlistSelected = nil
 		self:TextListScrollUpdate()
