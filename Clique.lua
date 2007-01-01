@@ -134,6 +134,7 @@ function Clique:LEARNED_SPELL_IN_TAB()
 end
 
 function Clique:PLAYER_ENTERING_WORLD()
+	self:Print("PLAYER_ENTERING_WORLD")
 	if InCombatLockdown() then
 		self:CombatLockdown()
 	else
@@ -210,6 +211,9 @@ end
 		
 function Clique:CombatLockdown(frame)
 	-- Remove all OOC clicks
+	if not frame then
+		self:Print("Going into combat lockdown", event)
+	end
 	self:RemoveClickSet(oocClicks, frame)
 	self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
 	self:ApplyClickSet(L.CLICKSET_HARMFUL, frame)
@@ -217,6 +221,9 @@ function Clique:CombatLockdown(frame)
 end	
 
 function Clique:CombatUnlock(frame)
+	if not frame then
+		self:Print("Coming out of lockdown, applying ooc stuff", event)
+	end
 	self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
 	self:RemoveClickSet(L.CLICKSET_HARMFUL, frame)
 	self:RemoveClickSet(L.CLICKSET_HELPFUL, frame)
@@ -224,6 +231,7 @@ function Clique:CombatUnlock(frame)
 end
 
 function Clique:UpdateClicks()
+	self:Print("Updating clicks")
 	local ooc = self.clicksets[L.CLICKSET_OOC]
 	local harm = self.clicksets[L.CLICKSET_HARMFUL]
 	local help = self.clicksets[L.CLICKSET_HELPFUL]
@@ -244,6 +252,9 @@ function Clique:UpdateClicks()
 
 		if not mask then
 			table.insert(oocClicks, entry)
+			self:Print("Adding", entry.type, entry.arg1, " to ooc clicks")
+		else
+			self:Print("* Masking", entry.type, entry.arg1, " to ooc clicks")
 		end
 	end
 
@@ -261,11 +272,15 @@ function Clique:UpdateClicks()
 
 		if not mask then
 			table.insert(oocClicks, entry)
+			self:Print("Adding", entry.type, entry.arg1, " to ooc clicks")
+		else
+			self:Print("* Masking", entry.type, entry.arg1, " to ooc clicks")
 		end
 	end
 
 	for modifier,entry in pairs(ooc) do
 		table.insert(oocClicks, entry)
+		self:Print("Adding", entry.type, entry.arg1, " to ooc clicks")
 	end
 	self:CombatUnlock()
 end
@@ -291,7 +306,11 @@ function Clique:RegisterFrame(frame)
 	end
 
 	frame:RegisterForClicks("AnyUp")
-	self:CombatUnlock(frame)
+	if InCombatLockdown() then
+		self:CombatLockdown(frame)
+	else
+		self:CombatUnlock(frame)
+	end
 end
 
 function Clique:ApplyClickSet(name, frame)
@@ -470,3 +489,40 @@ function Clique:DeleteAction(entry)
 			self:DeleteAttribute(entry, frame)
 	end
 end
+
+local mods = {"Shift", "Ctrl", "Alt"}
+local buttonsraw = {1,2,3,4,5}
+local buttonmods = {"-help", "-harm"}
+
+local buttons = {}
+for idx,button in pairs(buttonsraw) do
+	for k,v in pairs(buttonmods) do
+		table.insert(buttons, v..button)
+	end
+end
+for k,v in pairs(buttonsraw) do
+	table.insert(buttons, v)
+end
+
+function dump(frame)
+
+	for k,v in pairs(buttons) do
+		local attr = frame:GetAttribute("type"..v)
+		if attr then 
+			local val = frame:GetAttribute(attr..v)
+			Clique:Print("type"..v, attr, val) 
+		end
+	end
+
+	for k,v in pairs(buttons) do
+		for i,mod in ipairs(mods) do
+			local attr = frame:GetAttribute(mod.."-type"..v)
+			if attr then 
+				local val = frame:GetAttribute(mod.."-"..attr..v)
+				Clique:Print(mod.."-type"..v,attr, val) 
+			end
+		end
+	end
+end
+
+	
