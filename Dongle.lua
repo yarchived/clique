@@ -91,7 +91,7 @@ end
 ---------------------------------------------------------------------------]]
 
 local major = "Dongle"
-local minor = tonumber(string.match("$Revision: 169 $", "(%d+)") or 1)
+local minor = tonumber(string.match("$Revision: 188 $", "(%d+)") or 1)
 
 assert(DongleStub, string.format("%s requires DongleStub.", major))
 if not DongleStub:IsNewerVersion(major, minor) then return end
@@ -192,13 +192,21 @@ function Dongle:HasModule(module)
 	return reg.modules[module]
 end
 
-local EMPTY_TABLE = {}
+local NIL_FUNC = function() end
 
 function Dongle:IterateModules()
 	local reg = lookup[self]
 	assert(3, reg, "You must call 'IterateModules' from a registered Dongle.")
+	
+	if not reg.modules or not next(reg.modules) then return NIL_FUNC end
 
-	return ipairs(reg.modules or EMPTY_TABLE)
+	local i=1
+	return function()
+		local name = reg.modules[i]
+		if not name then return end
+		i = i + 1
+		return name, reg.modules[name]
+	end
 end
 
 function Dongle:ADDON_LOADED(event, ...)
@@ -395,13 +403,7 @@ local dbMethods = {
 	"ResetProfile", "ResetDB",
 }
 
-function Dongle:InitializeDB(name, defaults, defaultProfile)
-	local reg = lookup[self]
-	assert(3, reg, "You must call 'InitializeDB' from a registered Dongle.")
-	argcheck(name, 2, "string")
-	argcheck(defaults, 3, "table", "nil")
-	argcheck(defaultProfile, 4, "string", "nil")
-
+local function initdb(parent, name, defaults, defaultProfile, olddb)
 	local sv = getglobal(name)
 
 	if not sv then
@@ -409,6 +411,7 @@ function Dongle:InitializeDB(name, defaults, defaultProfile)
 		setglobal(name, sv)
 
 		-- Lets do the initial setup
+        
 		sv.char = {}
 		sv.faction = {}
 		sv.realm = {}
@@ -443,17 +446,21 @@ function Dongle:InitializeDB(name, defaults, defaultProfile)
 	local profileKey = sv.profileKeys[char] or defaultProfile or char
 	sv.profileKeys[char] = profileKey
 
-	if not sv.profiles[profileKey] then sv.profiles[profileKey] = {} end
+	local profileCreated
+    if not sv.profiles[profileKey] then sv.profiles[profileKey] = {} profileCreated = true end
 
-	local db = {
-		["char"] = sv.char[char],
-		["realm"] = sv.realm[realm],
-		["class"] = sv.class[class],
-		["faction"] = sv.faction[faction],
-		["profile"] = sv.profiles[profileKey],
-		["global"] = sv.global,
-		["profiles"] = sv.profiles,
-	}
+	if olddb then
+		for k,v in pairs(olddb) do olddb[k] = nil end
+	end
+
+	local db = olddb or {}
+	db.char = sv.char[char]
+	db.realm = sv.realm[realm]
+	db.class = sv.class[class]
+	db.faction = sv.faction[faction]
+	db.profile = sv.profiles[profileKey]
+	db.global = sv.global
+	db.profiles = sv.profiles
 
 	-- Copy methods locally
 	for idx,method in pairs(dbMethods) do
@@ -464,8 +471,7 @@ function Dongle:InitializeDB(name, defaults, defaultProfile)
 	db.sv = sv
 	db.sv_name = name
 	db.profileKey = profileKey
-	-- FIXME: Why not just db.parent = self?
-	db.parent = reg.name
+	db.parent = parent
 	db.charKey = char
 	db.realmKey = realm
 	db.classKey = class
@@ -477,6 +483,21 @@ function Dongle:InitializeDB(name, defaults, defaultProfile)
 		db:RegisterDefaults(defaults)
 	end
 
+	return db,profileCreated
+end
+
+function Dongle:InitializeDB(name, defaults, defaultProfile)
+	local reg = lookup[self]
+	assert(3, reg, "You must call 'InitializeDB' from a registered Dongle.")
+	argcheck(name, 2, "string")
+	argcheck(defaults, 3, "table", "nil")
+	argcheck(defaultProfile, 4, "string", "nil")
+
+	local db,profileCreated = initdb(self, name, defaults, defaultProfile)
+
+	if profileCreated then
+		Dongle:TriggerEvent("DONGLE_PROFILE_CREATED", db, self, db.sv_name, db.profileKey)	
+	end
 	return db
 end
 
@@ -486,7 +507,7 @@ local function copyDefaults(dest, src, force)
 			if not dest[k] then dest[k] = {} end
 			copyDefaults(dest[k], v, force)
 		else
-			if not dest[k] or force then
+			if (dest[k] == nil) or force then
 				dest[k] = v
 			end
 		end
@@ -558,10 +579,12 @@ function Dongle.SetProfile(db, name)
 	local sv = db.sv
 	local old = sv.profiles[db.profileKey]
 	local new = sv.profiles[name]
-
+	local profileCreated
+	
 	if not new then
 		sv.profiles[name] = {}
 		new = sv.profiles[name]
+		profileCreated = true
 	end
 
 	if db.defaults and db.defaults.profile then
@@ -578,9 +601,11 @@ function Dongle.SetProfile(db, name)
 	sv.profileKeys[db.charKey] = name
     db.profileKey = name
 
-	-- FIRE: DONGLE_PROFILE_CHANGED, "DongleName", "SVName", "ProfileName"
-	local parent = lookup[db.parent].obj
-	parent:TriggerEvent("DONGLE_PROFILE_CHANGED", db.parent, db.sv_name, name)
+	if profileCreated then
+		Dongle:TriggerEvent("DONGLE_PROFILE_CREATED", db, db.parent, db.sv_name, db.profileKey)	
+	end
+	
+	Dongle:TriggerEvent("DONGLE_PROFILE_CHANGED", db, db.parent, db.sv_name, db.profileKey)
 end
 
 function Dongle.GetProfiles(db, t)
@@ -605,8 +630,7 @@ function Dongle.DeleteProfile(db, name)
 	end
 
 	db.sv.profiles[name] = nil
-	local parent = lookup[db.parent].obj
-	parent:TriggerEvent("DONGLE_PROFILE_DELETED", db.parent, db.sv_name, name)
+	Dongle:TriggerEvent("DONGLE_PROFILE_DELETED", db, db.parent, db.sv_name, name)
 end
 
 function Dongle.CopyProfile(db, name)
@@ -619,11 +643,8 @@ function Dongle.CopyProfile(db, name)
 	local profile = db.profile
 	local source = db.sv.profiles[name]
 
-	-- Don't do a destructive copy, just do what we're told
 	copyDefaults(profile, source, true)
-	-- FIRE: DONGLE_PROFILE_COPIED, "DongleName", "SVName", "SourceProfile", "DestProfile"
-	local parent = lookup[db.parent].obj
-	parent:TriggerEvent("DONGLE_PROFILE_COPIED", db.parent, db.sv_name, name, db.profileKey)
+	Dongle:TriggerEvent("DONGLE_PROFILE_COPIED", db, db.parent, db.sv_name, name, db.profileKey)
 end
 
 function Dongle.ResetProfile(db)
@@ -637,9 +658,7 @@ function Dongle.ResetProfile(db)
 	if db.defaults and db.defaults.profile then
 		copyDefaults(profile, db.defaults.profile)
 	end
-	-- FIRE: DONGLE_PROFILE_RESET, "DongleName", "SVName", "ProfileName"
-	local parent = lookup[db.parent].obj
-	parent:TriggerEvent("DONGLE_PROFILE_RESET", db.parent, db.sv_name, db.profileKey)
+	Dongle:TriggerEvent("DONGLE_PROFILE_RESET", db, db.parent, db.sv_name, db.profileKey)
 end
 
 
@@ -651,17 +670,14 @@ function Dongle.ResetDB(db, defaultProfile)
 	for k,v in pairs(sv) do
 		sv[k] = nil
 	end
+	
+	local parent = db.parent
 
-	local parent = lookup[db.parent].obj
-
-	local newdb = parent:InitializeDB(db.sv_name, db.defaults, defaultProfile)
-	newdb:SetProfile(newdb.profileKey)
-	local parent = lookup[db.parent].obj
-	parent:TriggerEvent("DONGLE_DATABASE_RESET", newdb.parent, newdb.sv_name, newdb.profileKey)
-
-	-- Remove the old database from the lookup table
-	databases[db] = nil
-	return newdb
+	initdb(parent, db.sv_name, db.defaults, defaultProfile, db)
+	Dongle:TriggerEvent("DONGLE_DATABASE_RESET", db, parent, db.sv_name, db.profileKey)
+	Dongle:TriggerEvent("DONGLE_PROFILE_CREATED", db, db.parent, db.sv_name, db.profileKey)
+	Dongle:TriggerEvent("DONGLE_PROFILE_CHANGED", db, db.parent, db.sv_name, db.profileKey)
+	return db
 end
 
 local slashCmdMethods = {
