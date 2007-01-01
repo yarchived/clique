@@ -373,8 +373,8 @@ function Clique:CreateOptionsFrame()
 				self.profile.blacklist[name] = nil
 				self:RegisterFrame(getglobal(name))
 			else
-				self.profile.blacklist[name] = true
 				self:UnregisterFrame(frame)
+				self.profile.blacklist[name] = true
 			end
 		end
         Clique:TextListScrollUpdate()
