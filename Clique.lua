@@ -7,12 +7,28 @@ Clique = {Locals = {}}
 DongleStub("Dongle"):New("Clique", Clique)
 
 local L = Clique.Locals
-local oocClicks = {}
+
+function Clique:Initialize()
+	ClickCastFrames = ClickCastFrames or {}
+	self.ccframes = ClickCastFrames
+
+    local newindex = function(t,k,v)
+		if v == nil then
+			Clique:UnregisterFrame(k)
+			rawset(self.ccframes, k, nil)
+		else
+			Clique:RegisterFrame(k)
+			rawset(self.ccframes, k, v)
+		end
+    end
+    
+	ClickCastFrames = setmetatable({}, {__newindex=newindex})
+end
 
 function Clique:Enable()
 	-- Grab the localisation header
 	L = Clique.Locals
-	self.ooc = oocClicks
+	self.ooc = {}
 
 	self.defaults = {
 		profile = {
@@ -33,65 +49,23 @@ function Clique:Enable()
 
     self.editSet = self.clicksets[L.CLICKSET_DEFAULT]
 
-	ClickCastFrames = ClickCastFrames or {}
-	self.ccframes = ClickCastFrames
-
-    local newindex = function(t,k,v)
-		if v == nil then
-			Clique:UnregisterFrame(k)
-			rawset(self.ccframes, k, nil)
-		else
-			Clique:RegisterFrame(k)
-			rawset(self.ccframes, k, v)
-		end
-    end
-    
-	ClickCastFrames = setmetatable({}, {__newindex=newindex})
-    
-    -- Register all frames that snuck in before we did =)
-
     Clique:OptionsOnLoad()
     Clique:EnableFrames()
 
-    for frame in pairs(self.ccframes) do
-		self:RegisterFrame(frame)
-    end
-
-	-- Define a state header for forms
-	self.stateheader = CreateFrame("Frame", "CliqueStateHeader", UIParent, "SecureStateDriverTemplate")
-	self.stateheader:SetAttribute("statemap-stance-0", "s0")
-	self.stateheader:SetAttribute("statemap-stance-1", "s1")
-	self.stateheader:SetAttribute("statemap-stance-2", "s2")
-	self.stateheader:SetAttribute("statemap-stance-3", "s3")
-	self.stateheader:SetAttribute("statemap-stance-4", "s4")
-	self.stateheader:SetAttribute("statemap-stance-5", "s5")
-
-	--PlayerFrame:SetAttribute("shift-statebutton1", "s0:s0;s1:s1;s2:s2;s3:s3;s4:s4;s5:s5")
---[[
-	PlayerFrame:SetAttribute("shift-unit-s1", "player")
-	PlayerFrame:SetAttribute("shift-type-s1", "spell")
-	PlayerFrame:SetAttribute("shift-spell-s1", "Enrage")
-
-	PlayerFrame:SetAttribute("shift-unit1", "player")
-	PlayerFrame:SetAttribute("shift-type1", "spell")
-	PlayerFrame:SetAttribute("shift-spell1", "Rejuvenation")
-
-	PlayerFrame:SetAttribute("alt-type1", "spell")
-	PlayerFrame:SetAttribute("alt-spell1", "Attack")
---]]
-
 	-- Register for LEARNED_SPELL_IN_TAB
 	self:RegisterEvent("LEARNED_SPELL_IN_TAB")
-	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:LEARNED_SPELL_IN_TAB()
 
 	-- Register for dongle events
 	self:RegisterEvent("DONGLE_PROFILE_CHANGED")
 	self:RegisterEvent("DONGLE_PROFILE_DELETED")
 
-	-- Run the OOC script if we need to
 	self:UpdateClicks()
-	self:PLAYER_ENTERING_WORLD()
+
+    -- Register all frames that snuck in before we did =)
+    for frame in pairs(self.ccframes) do
+		self:RegisterFrame(frame)
+    end
 
     -- Securehook CreateFrame to catch any new raid frames
     local raidFunc = function(type, name, parent, template)
@@ -159,7 +133,7 @@ function Clique:EnableFrames()
     }
     
     for i,frame in pairs(tbl) do
-		ClickCastFrames[frame] = true
+		rawset(self.ccframes, frame, true)
     end
 end	   
 
@@ -211,32 +185,25 @@ end
 		
 function Clique:CombatLockdown(frame)
 	-- Remove all OOC clicks
-	if not frame then
-		self:Print("Going into combat lockdown", event)
-	end
-	self:RemoveClickSet(oocClicks, frame)
+	self:RemoveClickSet(self.ooc, frame)
 	self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
 	self:ApplyClickSet(L.CLICKSET_HARMFUL, frame)
 	self:ApplyClickSet(L.CLICKSET_HELPFUL, frame)
 end	
 
 function Clique:CombatUnlock(frame)
-	if not frame then
-		self:Print("Coming out of lockdown, applying ooc stuff", event)
-	end
 	self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
 	self:RemoveClickSet(L.CLICKSET_HARMFUL, frame)
 	self:RemoveClickSet(L.CLICKSET_HELPFUL, frame)
-	self:ApplyClickSet(oocClicks, frame)
+	self:ApplyClickSet(self.ooc, frame)
 end
 
 function Clique:UpdateClicks()
-	self:Print("Updating clicks")
 	local ooc = self.clicksets[L.CLICKSET_OOC]
 	local harm = self.clicksets[L.CLICKSET_HARMFUL]
 	local help = self.clicksets[L.CLICKSET_HELPFUL]
 
-	oocClicks = {}
+	self.ooc = {}
 
 	for modifier,entry in pairs(harm) do
 		local button = string.gsub(entry.button, "harmbutton", "")
@@ -251,10 +218,7 @@ function Clique:UpdateClicks()
 		end
 
 		if not mask then
-			table.insert(oocClicks, entry)
-			self:Print("Adding", entry.type, entry.arg1, " to ooc clicks")
-		else
-			self:Print("* Masking", entry.type, entry.arg1, " to ooc clicks")
+			table.insert(self.ooc, entry)
 		end
 	end
 
@@ -271,16 +235,12 @@ function Clique:UpdateClicks()
 		end
 
 		if not mask then
-			table.insert(oocClicks, entry)
-			self:Print("Adding", entry.type, entry.arg1, " to ooc clicks")
-		else
-			self:Print("* Masking", entry.type, entry.arg1, " to ooc clicks")
+			table.insert(self.ooc, entry)
 		end
 	end
 
 	for modifier,entry in pairs(ooc) do
-		table.insert(oocClicks, entry)
-		self:Print("Adding", entry.type, entry.arg1, " to ooc clicks")
+		table.insert(self.ooc, entry)
 	end
 	self:CombatUnlock()
 end
@@ -397,6 +357,7 @@ function Clique:SetAttribute(entry, frame)
 	if not tonumber(entry.button) then
 		type,button = select(3, string.find(entry.button, "(%a+)button(%d+)"))
 		frame:SetAttribute(entry.modifier..entry.button, type..button)
+		assert(frame:GetAttribute(entry.modifier..entry.button, type..button))
 		button = string.format("-%s%s", type, button)
 	end
 
@@ -462,9 +423,7 @@ function Clique:DeleteAttribute(entry, frame)
 
 	if not tonumber(entry.button) then
 		type,button = select(3, string.find(entry.button, "(%a+)button(%d+)"))
-		for frame in pairs(self.ccframes) do
-			frame:SetAttribute(entry.modifier..entry.button, nil)
-		end
+		frame:SetAttribute(entry.modifier..entry.button, nil)
 		button = string.format("-%s%s", type, button)
 	end
 
@@ -486,7 +445,7 @@ end
 
 function Clique:DeleteAction(entry)
 	for frame in pairs(self.ccframes) do
-			self:DeleteAttribute(entry, frame)
+		self:DeleteAttribute(entry, frame)
 	end
 end
 
@@ -503,26 +462,3 @@ end
 for k,v in pairs(buttonsraw) do
 	table.insert(buttons, v)
 end
-
-function dump(frame)
-
-	for k,v in pairs(buttons) do
-		local attr = frame:GetAttribute("type"..v)
-		if attr then 
-			local val = frame:GetAttribute(attr..v)
-			Clique:Print("type"..v, attr, val) 
-		end
-	end
-
-	for k,v in pairs(buttons) do
-		for i,mod in ipairs(mods) do
-			local attr = frame:GetAttribute(mod.."-type"..v)
-			if attr then 
-				local val = frame:GetAttribute(mod.."-"..attr..v)
-				Clique:Print(mod.."-type"..v,attr, val) 
-			end
-		end
-	end
-end
-
-	
