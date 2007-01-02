@@ -570,7 +570,7 @@ function Clique:CreateOptionsFrame()
 	font:SetPoint("TOPRIGHT", -10, -25)
 	font:SetText(L.CUSTOM_HELP)
 
-	local checkFunc = function() Clique:CustomRadio() end
+	local checkFunc = function(self) Clique:CustomRadio(self) end
 	self.radio = {}
 
 	local buttons = {
@@ -1380,13 +1380,24 @@ local buttonSetup = {
 }
 
 function Clique:CustomRadio(button)
-	this = button or this
+	local this = button
 
 	local anySelected
 	for k,v in pairs(self.radio) do
 		if k ~= this then
 			k:SetChecked(nil)
 		end
+	end
+
+	if not this or not buttonSetup[this.type] then
+		CliqueCustomHelpText:SetText(L.CUSTOM_HELP)
+		CliqueCustomArg1:Hide()
+		CliqueCustomArg2:Hide()
+		CliqueCustomArg3:Hide()
+		CliqueCustomArg4:Hide()
+		CliqueCustomArg5:Hide()
+		CliqueCustomButtonBinding:SetText("Set Click Binding")
+		return
 	end
 
 	local entry = buttonSetup[this.type]
@@ -1396,17 +1407,6 @@ function Clique:CustomRadio(button)
 		if not this:GetChecked() then
 			self.customEntry.type = nil
 		end
-	end
-
-	if not entry then
-		CliqueCustomHelpText:SetText(L.CUSTOM_HELP)
-		CliqueCustomArg1:Hide()
-		CliqueCustomArg2:Hide()
-		CliqueCustomArg3:Hide()
-		CliqueCustomArg4:Hide()
-		CliqueCustomArg5:Hide()
-		CliqueCustomButtonBinding:SetText("Set Click Binding")
-		return
 	end
 	
 	-- Clear any open arguments
@@ -1447,6 +1447,7 @@ function Clique:UpdateIconFrame()
     local MACRO_ICON_ROW_HEIGHT = 36;
     local macroPopupOffset = FauxScrollFrame_GetOffset(CliqueIconScrollFrame);
     local numMacroIcons = GetNumMacroIcons();
+	local macroPopupIcon,macroPopupButton
 
     -- Icon list
     for i=1, NUM_MACRO_ICONS_SHOWN do
@@ -1457,7 +1458,7 @@ function Clique:UpdateIconFrame()
             macroPopupButton.icon = macroPopupIcon
         end
         
-        index = (macroPopupOffset * NUM_ICONS_PER_ROW) + i;
+        local index = (macroPopupOffset * NUM_ICONS_PER_ROW) + i;
         if ( index <= numMacroIcons ) then
             macroPopupIcon:SetTexture(GetMacroIconInfo(index));
             macroPopupButton:Show();
