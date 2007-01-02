@@ -8,23 +8,6 @@ DongleStub("Dongle"):New("Clique", Clique)
 
 local L = Clique.Locals
 
-function Clique:Initialize()
-	ClickCastFrames = ClickCastFrames or {}
-	self.ccframes = ClickCastFrames
-
-    local newindex = function(t,k,v)
-		if v == nil then
-			Clique:UnregisterFrame(k)
-			rawset(self.ccframes, k, nil)
-		else
-			Clique:RegisterFrame(k)
-			rawset(self.ccframes, k, v)
-		end
-    end
-    
-	ClickCastFrames = setmetatable({}, {__newindex=newindex})
-end
-
 function Clique:Enable()
 	-- Grab the localisation header
 	L = Clique.Locals
@@ -48,6 +31,21 @@ function Clique:Enable()
 	self.clicksets = self.profile.clicksets
 
     self.editSet = self.clicksets[L.CLICKSET_DEFAULT]
+
+	ClickCastFrames = ClickCastFrames or {}
+	self.ccframes = ClickCastFrames
+
+    local newindex = function(t,k,v)
+		if v == nil then
+			Clique:UnregisterFrame(k)
+			rawset(self.ccframes, k, nil)
+		else
+			Clique:RegisterFrame(k)
+			rawset(self.ccframes, k, v)
+		end
+    end
+    
+	ClickCastFrames = setmetatable({}, {__newindex=newindex})
 
     Clique:OptionsOnLoad()
     Clique:EnableFrames()
