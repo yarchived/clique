@@ -91,7 +91,7 @@ end
 ---------------------------------------------------------------------------]]
 
 local major = "Dongle"
-local minor = tonumber(string.match("$Revision: 188 $", "(%d+)") or 1)
+local minor = tonumber(string.match("$Revision: 194 $", "(%d+)") or 1)
 
 assert(DongleStub, string.format("%s requires DongleStub.", major))
 if not DongleStub:IsNewerVersion(major, minor) then return end
@@ -112,6 +112,7 @@ local loadorder = {}
 local events = {}
 local databases = {}
 local commands = {}
+local frame
 
 local function assert(level,condition,message)
 	if not condition then
