@@ -6,6 +6,7 @@
 ## OptionalDeps: Dongle
 
 Dongle.lua
+LockdownLine.lua
 Clique.xml
 Clique.lua
 Localization.en.lua

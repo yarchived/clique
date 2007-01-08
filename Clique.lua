@@ -4,7 +4,7 @@
 
 Clique = {Locals = {}}
 
-DongleStub("Dongle"):New("Clique", Clique)
+DongleStub("Dongle-Beta0"):New("Clique", Clique)
 
 local L = Clique.Locals
 
@@ -50,13 +50,11 @@ function Clique:Enable()
     Clique:OptionsOnLoad()
     Clique:EnableFrames()
 
-	-- Register for LEARNED_SPELL_IN_TAB
-	self:RegisterEvent("LEARNED_SPELL_IN_TAB")
-	self:LEARNED_SPELL_IN_TAB()
-
 	-- Register for dongle events
-	self:RegisterEvent("DONGLE_PROFILE_CHANGED")
-	self:RegisterEvent("DONGLE_PROFILE_DELETED")
+	self:RegisterMessage("DONGLE_PROFILE_CHANGED")
+	self:RegisterMessage("DONGLE_PROFILE_DELETED")
+	self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 
 	self:UpdateClicks()
 
@@ -73,45 +71,6 @@ function Clique:Enable()
 	end
 		 
     hooksecurefunc("CreateFrame", raidFunc)
-end
-
-function Clique:LEARNED_SPELL_IN_TAB()
-	local forms = {
-		[L.DIRE_BEAR_FORM] = L.CLICKSET_BEARFORM,
-		[L.BEAR_FORM] = L.CLICKSET_BEARFORM,
-		[L.AQUATIC_FORM] = L.CLICKSET_AQUATICFORM,
-		[L.CAT_FORM] = L.CLICKSET_CATFORM,
-		[L.TRAVEL_FORM] = L.CLICKSET_TRAVELFORM,
-		[L.MOONKIN_FORM] = L.CLICKSET_MOONKINFORM,
-		[L.TREEOFLIFE] = L.CLICKSET_TREEOFLIFE,
-		[L.STEALTH] = L.CLICKSET_STEALTHED,
-		[L.BATTLESTANCE] = L.CLICKSET_BATTLESTANCE,
-		[L.DEFENSIVESTANCE] = L.CLICKSET_DEFENSIVESTANCE,
-		[L.BERSERKERSTANCE] = L.CLICKSET_BERSERKERSTANCE,
-		[L.SHADOWFORM] = L.CLICKSET_SHADOWFORM,
-	}
-	self.forms = forms
-	local profile = self.defaults.profile
-
-	local offset,num = select(3, GetSpellTabInfo(GetNumSpellTabs()))
-	local num = num + offset
-
-	for i=1,num do
-		local name = GetSpellName(i, BOOKTYPE_SPELL)
-		if forms[name] then
-			--profile[name] = profile[name] or {}
-			--self.profile[name] = self.profile[name] or {}
-		end
-	end
-end
-
-function Clique:PLAYER_ENTERING_WORLD()
-	self:Print("PLAYER_ENTERING_WORLD")
-	if InCombatLockdown() then
-		self:CombatLockdown()
-	else
-		self:CombatUnlock()
-	end
 end
 
 function Clique:EnableFrames()
@@ -180,20 +139,19 @@ function Clique:SpellBookButtonPressed()
 	self:UpdateClicks()
     self:ListScrollUpdate()
 end
-		
-function Clique:CombatLockdown(frame)
-	-- Remove all OOC clicks
-	self:RemoveClickSet(self.ooc, frame)
-	self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
-	self:ApplyClickSet(L.CLICKSET_HARMFUL, frame)
-	self:ApplyClickSet(L.CLICKSET_HELPFUL, frame)
-end	
 
-function Clique:CombatUnlock(frame)
-	self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
-	self:RemoveClickSet(L.CLICKSET_HARMFUL, frame)
-	self:RemoveClickSet(L.CLICKSET_HELPFUL, frame)
+function Clique:PLAYER_REGEN_ENABLED()
+	self:ApplyClickSet(L.CLICKSET_DEFAULT)
+	self:RemoveClickSet(L.CLICKSET_HARMFUL)
+	self:RemoveClickSet(L.CLICKSET_HELPFUL)
 	self:ApplyClickSet(self.ooc, frame)
+end
+
+function Clique:PLAYER_REGEN_DISABLED()
+	self:RemoveClickSet(self.ooc)
+	self:ApplyClickSet(L.CLICKSET_DEFAULT)
+	self:ApplyClickSet(L.CLICKSET_HARMFUL)
+	self.ApplyClickSet(L.CLICKSET_HELPFUL)
 end
 
 function Clique:UpdateClicks()
@@ -240,16 +198,10 @@ function Clique:UpdateClicks()
 	for modifier,entry in pairs(ooc) do
 		table.insert(self.ooc, entry)
 	end
-	self:CombatUnlock()
 end
 
 function Clique:RegisterFrame(frame)
 	local name = frame:GetName()
-
-	-- Check to see if we can register this frame at this time
-	if InCombatLockdown() and not frame:CanChangeProtectedState() then
-		self:PrintF("Cannot register frame %s.  The addon which attempted to register this frame is doing so while in-combat.", tostring(name))
-	end
 
 	if self.profile.blacklist[name] then 
 		rawset(self.ccframes, frame, false)
@@ -264,10 +216,16 @@ function Clique:RegisterFrame(frame)
 	end
 
 	frame:RegisterForClicks("AnyUp")
-	if InCombatLockdown() then
-		self:CombatLockdown(frame)
-	else
-		self:CombatUnlock(frame)
+
+	if frame:CanChangeProtectedState() then
+		if InCombatLockdown() then
+			self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
+			self:ApplyClickSet(L.CLICKSET_HOSTILE, frame)
+			self:ApplyClickSet(L.CLICKSET_HARMFUL, frame)
+		else
+			self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
+			self:ApplyClickSet(self.ooc, frame)
+		end
 	end
 end
 
@@ -300,6 +258,7 @@ function Clique:RemoveClickSet(name, frame)
 end
 
 function Clique:UnregisterFrame(frame)
+	assert(not InCombatLockdown(), "An addon attempted to unregister a frame from Clique while in combat.")
 	for name,set in pairs(self.clicksets) do
 		for modifier,entry in pairs(set) do
 			self:DeleteAttribute(entry, frame)
