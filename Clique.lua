@@ -4,6 +4,7 @@
 
 Clique = {Locals = {}}
 
+
 DongleStub("Dongle-Beta0"):New("Clique", Clique)
 
 local L = Clique.Locals
@@ -136,7 +137,6 @@ function Clique:SpellBookButtonPressed()
     end
     
     self.editSet[key] = t
-	self:UpdateClicks()
     self:ListScrollUpdate()
 end
 
@@ -151,7 +151,7 @@ function Clique:PLAYER_REGEN_DISABLED()
 	self:RemoveClickSet(self.ooc)
 	self:ApplyClickSet(L.CLICKSET_DEFAULT)
 	self:ApplyClickSet(L.CLICKSET_HARMFUL)
-	self.ApplyClickSet(L.CLICKSET_HELPFUL)
+	self:ApplyClickSet(L.CLICKSET_HELPFUL)
 end
 
 function Clique:UpdateClicks()
@@ -230,6 +230,9 @@ function Clique:RegisterFrame(frame)
 end
 
 function Clique:ApplyClickSet(name, frame)
+	if not self.clicksets then
+		Clique:Print(name, frame, debugstack())
+	end
 	local set = self.clicksets[name] or name
 
 	if frame then
