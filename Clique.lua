@@ -4,6 +4,11 @@
 
 Clique = {Locals = {}}
 
+assert(DongleStub, string.format("Clique requires DongleStub."))
+assert(DongleStub:GetVersion() == "DongleStub-Beta0", 
+	string.format("Clique requires DongelStub-Beta0.  You are using an older version."))
+assert(DongleStub("Dongle-Beta0"), 
+	string.format("Clique requires Dongle-Beta0.  You are using an older version."))
 
 DongleStub("Dongle-Beta0"):New("Clique", Clique)
 
@@ -422,3 +427,65 @@ end
 for k,v in pairs(buttonsraw) do
 	table.insert(buttons, v)
 end
+
+--collectgarbage("setpause", 100)
+--collectgarbage("setstepmul", 2000)
+
+--[[
+local tbl = {}
+
+local min 
+local max
+local elapsed = 0
+local frame = CreateFrame("Frame", "gctest")
+frame:SetScript("OnUpdate", function(f, t)
+	elapsed = elapsed + t
+	if elapsed >= 0.3 then
+		local count = collectgarbage("count")
+		if not min then
+			min = count
+			max = count
+		end
+	
+		if count > max then max = count end
+		if count < min then min = count end
+		Clique:Print(string.format("%2.f (min %2.f, max %2.f)", count, min, max), count < max and "Cycle" or "")
+		elapsed = 0
+		for i=1,500 do
+			table.insert(tbl, {1,2,3,4,5})
+		end
+		tbl = {}
+	end
+end)
+--]]
+
+-- pause, mul
+-- 100,200
+-- min: 16096
+-- max: 20993
+-- cycle: 19794
+
+-- 100,500
+-- min: 16096
+-- max: 18292
+-- cycle: 16500
+
+-- 100,1000
+-- min: 16095
+-- max: 17225
+-- cycle: 16500
+
+-- 100,2000
+-- min: 16095
+-- max: 16722
+-- cycle: 16300
+
+-- Default Settings
+-- min: 16095
+-- max: 36114
+-- cycle: 18600
+
+-- 100 pause, default mult
+-- min: 16095
+-- max: 20052
+-- cycle: 17857

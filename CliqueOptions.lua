@@ -12,37 +12,6 @@ function Clique:OptionsOnLoad()
         this.updateTooltip = nil
         GameTooltip:Hide()
     end
-	
-	self.special = CreateFrame("Frame", UIParent)
-	self.special:SetFrameStrata("DIALOG")
-	self.special:SetHeight(32)
-	self.special:SetWidth(32)
-	self.special.texture = self.special:CreateTexture("ARTWORK")
-	self.special.texture:SetTexture("Interface\\AddOns\\Clique\\Images\\myborder")
-	self.special.texture:SetAllPoints()
-	self.special:SetAlpha(1.0)
-
-	CreateFrame("Button", "CliqueSpecialButton")
-	
-	CliqueSpecialButton:SetScript("OnClick", function()
-		if not self.sequence then self.sequence = 1 end
-		ClearOverrideBindings(CliqueSpecialButton)
-		if self.sequence == 1 then
-			SetOverrideBindingClick(CliqueSpecialButton, true, "O", "CliqueSpecialButton")
-		elseif self.sequence == 2 then
-			SetOverrideBindingClick(CliqueSpecialButton, true, "L", "CliqueSpecialButton")
-		elseif self.sequence == 3 then
-			SetOverrideBindingClick(CliqueSpecialButton, true, "E", "CliqueSpecialButton")
-		elseif self.sequence == 4 then
-			self:Print("Special mode activated")
-			for k,v in pairs(self.ccframes) do
-				k:SetScript("PostClick", function()
-					self.special:SetPoint("CENTER", k, "CENTER", 0, 0)
-				end)
-			end		
-		end
-		self.sequence = self.sequence + 1
-	end)
 
     for i=1,12 do
         local parent = getglobal("SpellButton"..i)
@@ -162,10 +131,6 @@ function Clique:Toggle()
         Clique:CreateOptionsFrame()
 		CliqueFrame:Hide()
 		CliqueFrame:Show()
-		SetOverrideBindingClick(CliqueSpecialButton, true, "M", "CliqueSpecialButton")
-		CliqueFrame:SetScript("OnHide", function()
-			ClearOverrideBindings(CliqueSpecialButton)
-		end)			
 	else
         if CliqueFrame:IsVisible() then
             CliqueFrame:Hide()
@@ -173,7 +138,6 @@ function Clique:Toggle()
         else
             CliqueFrame:Show()
 			CliquePulloutTab:SetChecked(true)
-			SetOverrideBindingClick(CliqueSpecialButton, true, "M", "CliqueSpecialButton")
         end
     end    
 
@@ -559,8 +523,8 @@ function Clique:CreateOptionsFrame()
 	frame:SetWidth(450)
 	frame:SetPoint("CENTER", 70, -50)
 	self:SkinFrame(frame)
+	frame:SetFrameStrata("DIALOG")
 	frame.title:SetText("Clique Custom Editor");
-	frame:SetFrameStrata("HIGH")
     frame:Hide()
 
 	-- Help text for Custom screen
