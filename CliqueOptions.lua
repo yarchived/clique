@@ -1053,6 +1053,7 @@ function Clique:ButtonOnClick(button)
 	
 		self:DeleteAction(entry)
 		self:UpdateClicks()
+		self:PLAYER_REGEN_ENABLED()
 		entry = nil
         
         self:ListScrollUpdate()
@@ -1064,6 +1065,7 @@ function Clique:ButtonOnClick(button)
         entry.arg2 = nil
 		self:DeleteAction(entry)
 		self:UpdateClicks()
+		self:PLAYER_REGEN_ENABLED()
     elseif this == CliqueButtonCustom then
         if CliqueCustomFrame:IsVisible() then
             CliqueCustomFrame:Hide()
@@ -1234,6 +1236,7 @@ function Clique:ButtonOnClick(button)
 		local key = entry.modifier..entry.button
 		self.editSet[key] = entry
 		self:UpdateClicks()
+		self:PLAYER_REGEN_ENABLED()
 		self:ButtonOnClick(CliqueCustomButtonCancel)
 	end
     

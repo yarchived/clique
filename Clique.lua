@@ -143,6 +143,9 @@ function Clique:SpellBookButtonPressed()
     
     self.editSet[key] = t
     self:ListScrollUpdate()
+	self:UpdateClicks()
+	-- We can only make changes when out of combat
+	self:PLAYER_REGEN_ENABLED()
 end
 
 function Clique:PLAYER_REGEN_ENABLED()
