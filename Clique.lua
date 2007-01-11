@@ -6,7 +6,7 @@ Clique = {Locals = {}}
 
 assert(DongleStub, string.format("Clique requires DongleStub."))
 assert(DongleStub:GetVersion() == "DongleStub-Beta0", 
-	string.format("Clique requires DongelStub-Beta0.  You are using an older version."))
+	string.format("Clique requires DongleStub-Beta0.  You are using an older version."))
 assert(DongleStub("Dongle-Beta0"), 
 	string.format("Clique requires Dongle-Beta0.  You are using an older version."))
 
