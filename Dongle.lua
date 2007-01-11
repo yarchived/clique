@@ -119,7 +119,7 @@ end
 ---------------------------------------------------------------------------]]
 
 local major = "Dongle-Beta0"
-local minor = tonumber(string.match("$Revision: 224 $", "(%d+)") or 1)
+local minor = tonumber(string.match("$Revision: 228 $", "(%d+)") or 1)
 
 assert(DongleStub, string.format("Dongle requires DongleStub.", major))
 assert(DongleStub and DongleStub:GetVersion() == "DongleStub-Beta0", 
@@ -859,7 +859,11 @@ local function Activate(self, old)
 		messages = self.messages
 
 		frame = old.frame
-		self.registry[major].obj = self
+
+		local reg = self.registry[major]
+		reg.obj = self
+		lookup[self] = reg
+		lookup[major] = reg
 	else
 		self.registry = registry
 		self.lookup = lookup
@@ -911,8 +915,8 @@ local function Activate(self, old)
 end
 
 local function Deactivate(self, new)
-	lookup[self] = nil
 	self:UnregisterAllEvents()
+	lookup[self] = nil
 end
 
 DongleStub:Register(Dongle, Activate, Deactivate)
