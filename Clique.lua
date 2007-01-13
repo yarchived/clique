@@ -152,7 +152,7 @@ function Clique:PLAYER_REGEN_ENABLED()
 	self:ApplyClickSet(L.CLICKSET_DEFAULT)
 	self:RemoveClickSet(L.CLICKSET_HARMFUL)
 	self:RemoveClickSet(L.CLICKSET_HELPFUL)
-	self:ApplyClickSet(self.ooc, frame)
+	self:ApplyClickSet(self.ooc)
 end
 
 function Clique:PLAYER_REGEN_DISABLED()
@@ -238,9 +238,6 @@ function Clique:RegisterFrame(frame)
 end
 
 function Clique:ApplyClickSet(name, frame)
-	if not self.clicksets then
-		Clique:Print(name, frame, debugstack())
-	end
 	local set = self.clicksets[name] or name
 
 	if frame then
@@ -282,10 +279,9 @@ function Clique:DONGLE_PROFILE_CHANGED(event, db, parent, svname, profileKey)
 		self:PrintF(L.PROFILE_CHANGED, profileKey)
 
 		for name,set in pairs(self.clicksets) do
-			for modifier,entry in pairs(set) do
-				self:DeleteAction(entry)
-			end
+			self:RemoveClickSet(set)
 		end
+		self:RemoveClickSet(self.ooc)
 
 		self.profile = self.db.profile
 		self.clicksets = self.profile.clicksets
@@ -296,10 +292,9 @@ function Clique:DONGLE_PROFILE_CHANGED(event, db, parent, svname, profileKey)
 		self.textlistSelected = nil
 		self:TextListScrollUpdate()
 		self:ListScrollUpdate()
+		self:UpdateClicks()
 
-		for frame in pairs(self.ccframes) do
-			self:RegisterFrame(frame)
-		end
+		self:PLAYER_REGEN_ENABLED()
 	end
 end
 
@@ -315,6 +310,7 @@ end
 
 function Clique:SetAttribute(entry, frame)
 	local name = frame:GetName()
+
 	if	self.profile.blacklist and self.profile.blacklist[name] then
 		return
 	end
