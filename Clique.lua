@@ -171,7 +171,7 @@ function Clique:UpdateClicks()
 
 	for modifier,entry in pairs(harm) do
 		local button = string.gsub(entry.button, "harmbutton", "")
-		button = tonumber(button)c
+		button = tonumber(button)
 		local mask = false
 
 		for k,v in pairs(ooc) do
