@@ -171,12 +171,11 @@ function Clique:UpdateClicks()
 
 	for modifier,entry in pairs(harm) do
 		local button = string.gsub(entry.button, "harmbutton", "")
-		button = string.gsub(button, "helpbutton", "")
-		button = tonumber(button)
+		button = tonumber(button)c
 		local mask = false
 
 		for k,v in pairs(ooc) do
-			if button == v.button then
+ 			if button == v.button and v.modifier == entry.modifier then
 				mask = true
 			end
 		end
@@ -187,13 +186,12 @@ function Clique:UpdateClicks()
 	end
 
 	for modifier,entry in pairs(help) do
-		local button = string.gsub(entry.button, "harmbutton", "")
-		button = string.gsub(button, "helpbutton", "")
+		local button = string.gsub(entry.button, "helpbutton", "")
 		button = tonumber(button)
 		local mask = false
 
 		for k,v in pairs(ooc) do
-			if button == v.button then
+ 			if button == v.button and v.modifier == entry.modifier then
 				mask = true
 			end
 		end
