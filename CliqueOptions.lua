@@ -1282,9 +1282,17 @@ function Clique:CustomBinding_OnClick()
 	local mod = self:GetModifierText()
 	local button = arg1
 
+	if self.editSet == self.clicksets[L.CLICKSET_HARMFUL] then
+		button = string.format("%s%d", "harmbutton", self:GetButtonNumber(button))
+	elseif self.editSet == self.clicksets[L.CLICKSET_HELPFUL] then
+		button = string.format("%s%d", "helpbutton", self:GetButtonNumber(button))
+	else
+		button = self:GetButtonNumber(button)
+	end
+
 	self.customEntry.modifier = mod
-	self.customEntry.button = self:GetButtonNumber(button)
-	this:SetText(string.format("%s%s", mod, button))	
+	self.customEntry.button = button
+	this:SetText(string.format("%s%s", mod, arg1))	
 end
 
 local buttonSetup = {
