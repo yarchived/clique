@@ -77,6 +77,10 @@ function Clique:Enable()
 	end
 		 
     hooksecurefunc("CreateFrame", raidFunc)
+
+	-- Create our slash command
+	self.cmd = self:InitializeSlashCommand("Clique commands", "CLIQUE", "clique")
+	self.cmd:RegisterSlashHandler("debug - Enables extra messages for debugging purposes", "debug", "ShowAttributes")
 end
 
 function Clique:EnableFrames()
@@ -486,3 +490,10 @@ end)
 -- min: 16095
 -- max: 20052
 -- cycle: 17857
+
+function Clique:ShowAttributes()
+	self:Print("Enabled enhanced debugging.")
+	PlayerFrame:SetScript("OnAttributeChanged", function(...) self:Print(...) end)
+	self:UnregisterFrame(PlayerFrame)
+	self:RegisterFrame(PlayerFrame)
+end
