@@ -46,6 +46,7 @@ local L = Clique.Locals
 	L.APPLY_QUEUE             = "Out of combat.  Applying all queued changes."
 	L.PROFILE_CHANGED         = "Profile has changed to '%s'."
 	L.PROFILE_DELETED         = "Profile '%s' has been deleted."
+	L.PROFILE_CHANGED         = "Your profile '%s' has been reset."
 
 	L.ACTION_ACTIONBAR = "Change ActionBar"
 	L.ACTION_ACTION = "Action Button"

@@ -57,6 +57,8 @@ function Clique:Enable()
 	-- Register for dongle events
 	self:RegisterMessage("DONGLE_PROFILE_CHANGED")
 	self:RegisterMessage("DONGLE_PROFILE_DELETED")
+	self:RegisterMessage("DONGLE_PROFILE_RESET")
+
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 
@@ -79,6 +81,7 @@ function Clique:Enable()
 	-- Create our slash command
 	self.cmd = self:InitializeSlashCommand("Clique commands", "CLIQUE", "clique")
 	self.cmd:RegisterSlashHandler("debug - Enables extra messages for debugging purposes", "debug", "ShowAttributes")
+	self.cmd:InjectDBCommands(self.db, "copy", "delete", "list", "reset", "set")
 end
 
 function Clique:EnableFrames()
@@ -297,6 +300,29 @@ function Clique:DONGLE_PROFILE_CHANGED(event, db, parent, svname, profileKey)
 		self:PLAYER_REGEN_ENABLED()
 	end
 end
+
+function Clique:DONGLE_PROFILE_RESET(event, db, parent, svname, profileKey)
+	if db == self.db then
+		for name,set in pairs(self.clicksets) do
+			self:RemoveClickSet(set)
+		end
+		self:RemoveClickSet(self.ooc)
+
+		self.profile = self.db.profile
+		self.clicksets = self.profile.clicksets
+		self.editSet = self.clicksets[L.CLICKSET_DEFAULT]
+		self.profileKey = profileKey
+	
+		-- Refresh the profile editor if it exists
+		self.textlistSelected = nil
+		self:TextListScrollUpdate()
+		self:ListScrollUpdate()
+		self:UpdateClicks()
+
+		self:PLAYER_REGEN_ENABLED()
+	end
+end
+
 
 function Clique:DONGLE_PROFILE_DELETED(event, db, parent, svname, profileKey)
 	if db == self.db then
