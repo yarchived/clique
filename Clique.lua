@@ -5,12 +5,10 @@
 Clique = {Locals = {}}
 
 assert(DongleStub, string.format("Clique requires DongleStub."))
-assert(DongleStub:GetVersion() == "DongleStub-Beta0", 
-	string.format("Clique requires DongleStub-Beta0.  You are using an older version."))
-assert(DongleStub("Dongle-Beta0"), 
-	string.format("Clique requires Dongle-Beta0.  You are using an older version."))
+assert(DongleStub("Dongle-Beta1"), 
+	string.format("Clique requires Dongle-Beta1.  You are using an older version."))
 
-DongleStub("Dongle-Beta0"):New("Clique", Clique)
+DongleStub("Dongle-Beta1"):New("Clique", Clique)
 
 local L = Clique.Locals
 

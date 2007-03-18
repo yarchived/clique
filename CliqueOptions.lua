@@ -1598,7 +1598,7 @@ function Clique:TextListScrollUpdate()
 	if self.textlist == "PROFILES" then
 		for k,v in pairs(self.db.profiles) do table.insert(work, k) end
 		table.sort(work)
-		CliqueTextListFrame.title:SetText("Profile: " .. self.db.profileKey)
+		CliqueTextListFrame.title:SetText("Profile: " .. self.db.keys.profile)
 
 	elseif self.textlist == "FRAMES" then
 		for k,v in pairs(self.ccframes) do 
@@ -1637,7 +1637,7 @@ function Clique:TextListScrollUpdate()
 			end
 
 			if self.textlistSelected == nil and self.textlist == "PROFILES" then
-				if work[idx] == self.db.profileKey then
+				if work[idx] == self.db.keys.profile then
 					button:SetChecked(true)
 					CliqueButtonSetProfile:Disable()
 					CliqueButtonDeleteProfile:Disable()
@@ -1645,7 +1645,7 @@ function Clique:TextListScrollUpdate()
 					button:SetChecked(nil)
 				end
 			elseif idx == self.textlistSelected and self.textlist == "PROFILES" then
-				if work[idx] == self.db.profileKey then
+				if work[idx] == self.db.keys.profile then
 					CliqueButtonSetProfile:Disable()
 					CliqueButtonDeleteProfile:Disable()
 				else
