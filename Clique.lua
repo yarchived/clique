@@ -62,6 +62,8 @@ function Clique:Enable()
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 
+	self:RegisterEvent("LEARNED_SPELL_IN_TAB")
+
 	self:UpdateClicks()
 
     -- Register all frames that snuck in before we did =)

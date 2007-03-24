@@ -57,9 +57,7 @@ function Clique:OptionsOnLoad()
 
     CliquePulloutTab:Show()
 
-    local num = GetNumSpellTabs()
-    CliquePulloutTab:ClearAllPoints()
-    CliquePulloutTab:SetPoint("TOPLEFT","SpellBookSkillLineTab"..(num),"BOTTOMLEFT",0,-17)			
+	self:LEARNED_SPELL_IN_TAB()
 
 	-- Hook the container buttons
 	local containerFunc = function(button)
@@ -116,6 +114,12 @@ function Clique:OptionsOnLoad()
 		end
 	end
 	hooksecurefunc("PaperDollItemSlotButton_OnModifiedClick", dollFunc)		
+end
+
+function Clique:LEARNED_SPELL_IN_TAB()
+    local num = GetNumSpellTabs()
+    CliquePulloutTab:ClearAllPoints()
+    CliquePulloutTab:SetPoint("TOPLEFT","SpellBookSkillLineTab"..(num),"BOTTOMLEFT",0,-17)
 end
 
 function Clique:ToggleSpellBookButtons()
