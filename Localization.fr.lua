@@ -4,7 +4,7 @@
 
 local L = Clique.Locals
 
-if GetLocale() == "deDE" then
+if GetLocale() == "frFR" then
 	L.RANK                    = "Rang"
 	L.RANK_PATTERN            = "Rang (%d+)"
 	L.CAST_FORMAT             = "%s(Rang %d)"
