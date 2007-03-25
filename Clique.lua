@@ -27,6 +27,7 @@ function Clique:Enable()
 			},
 			blacklist = {
 			},
+			tooltips = true,
 		}
 	}
 	
@@ -96,6 +97,7 @@ function Clique:Enable()
 	self.cmd = self:InitializeSlashCommand("Clique commands", "CLIQUE", "clique")
 	self.cmd:RegisterSlashHandler("debug - Enables extra messages for debugging purposes", "debug", "ShowAttributes")
 	self.cmd:InjectDBCommands(self.db, "copy", "delete", "list", "reset", "set")
+	self.cmd:RegisterSlashHandler("tooltip - Enables binding lists in tooltips.", "tooltip", "ToggleTooltip")
 end
 
 function Clique:EnableFrames()
@@ -399,8 +401,18 @@ function Clique:SetAttribute(entry, frame)
 		frame:SetAttribute(entry.modifier.."unit"..button, entry.arg4)
 	elseif entry.type == "macro" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
-		frame:SetAttribute(entry.modifier.."macro"..button, entry.arg1)
-		frame:SetAttribute(entry.modifier.."macrotext"..button, entry.arg2)
+		if entry.arg1 and #strlen(entry.arg1) > 0 then
+			frame:SetAttribute(entry.modifier.."macro"..button, entry.arg1)
+		else
+			local unit = SecureButton_GetModifiedUnit(frame, entry.modifier.."unit"..button)
+			local macro = entry.arg2
+			if unit then
+				macro = macro:gsub("target%s*=%s*clique", "target="..unit)
+			end
+
+			frame:SetAttribute(entry.modifier.."macro"..button, nil)
+			frame:SetAttribute(entry.modifier.."macrotext"..button, macro)
+		end
 	elseif entry.type == "stop" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
 	elseif entry.type == "target" then
@@ -585,6 +597,12 @@ function Clique:UpdateTooltip()
 end
 	
 function Clique:AddTooltipLines()
+	if not self.profile.tooltips then return end
+
+	local frame = GetMouseFocus()
+	if not frame then return end
+	if not self.ccframes[frame] then return end
+
 	if UnitAffectingCombat("player") then
 		if #tt_default ~= 0 then
 			GameTooltip:AddLine("Default bindings:")
@@ -615,3 +633,10 @@ function Clique:AddTooltipLines()
 		end
 	end
 end
+
+function Clique:ToggleTooltip()
+	self.profile.tooltips = not self.profile.tooltips
+	self:PrintF("Listing of bindings in tooltips has been %s", 
+		self.profile.tooltips and "Enabled" or "Disabled")
+end
+ 
