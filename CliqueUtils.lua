@@ -34,6 +34,10 @@ end
 
 function Clique:GetButtonText(num)
     if not num then return "" end
+	if type(num) == "string" then
+		num = num:gsub("helpbutton", "")
+		num = num:gsub("harmbutton", "")
+	end
 	num = tonumber(num) and tonumber(num) or num
     return buttonMap[num] or ""
 end

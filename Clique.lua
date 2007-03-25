@@ -77,7 +77,19 @@ function Clique:Enable()
 			ClickCastFrames[getglobal(name.."ClearButton")] = true
 		end
 	end
-		 
+
+	local oldotsu = GameTooltip:GetScript("OnTooltipSetUnit")
+	if oldotsu then
+		GameTooltip:SetScript("OnTooltipSetUnit", function(...)
+			Clique:AddTooltipLines()
+			return oldotsu(...)
+		end)
+	else
+		GameTooltip:SetScript("OnTooltipSetUnit", function(...)
+			Clique:AddTooltipLines()
+		end)
+	end
+		
     hooksecurefunc("CreateFrame", raidFunc)
 
 	-- Create our slash command
@@ -174,7 +186,8 @@ function Clique:UpdateClicks()
 	local harm = self.clicksets[L.CLICKSET_HARMFUL]
 	local help = self.clicksets[L.CLICKSET_HELPFUL]
 
-	self.ooc = {}
+	self.ooc = self.ooc or {}
+	for k,v in pairs(self.ooc) do self.ooc[k] = nil end
 
 	for modifier,entry in pairs(harm) do
 		local button = string.gsub(entry.button, "harmbutton", "")
@@ -211,6 +224,8 @@ function Clique:UpdateClicks()
 	for modifier,entry in pairs(ooc) do
 		table.insert(self.ooc, entry)
 	end
+	
+	self:UpdateTooltip()
 end
 
 function Clique:RegisterFrame(frame)
@@ -522,4 +537,81 @@ function Clique:ShowAttributes()
 	PlayerFrame:SetScript("OnAttributeChanged", function(...) self:Print(...) end)
 	self:UnregisterFrame(PlayerFrame)
 	self:RegisterFrame(PlayerFrame)
+end
+
+local tt_ooc = {}
+local tt_help = {}
+local tt_harm = {}
+local tt_default = {}
+
+function Clique:UpdateTooltip()
+	local ooc = self.ooc
+	local default = self.clicksets[L.CLICKSET_DEFAULT]
+	local harm = self.clicksets[L.CLICKSET_HARMFUL]
+	local help = self.clicksets[L.CLICKSET_HELPFUL]
+
+	-- Build the ooc lines, which includes both helpful and harmful
+	for k,v in pairs(ooc) do
+		local button = self:GetButtonText(v.button)
+		local line = string.format("%s%s - %s (%s)", v.modifier or "", button, v.arg1 or "", v.type)
+		table.insert(tt_ooc, line)
+	end
+
+	-- Build the default lines
+	for k,v in pairs(default) do
+		local button = self:GetButtonText(v.button)
+		local line = string.format("%s%s - %s (%s)", v.modifier or "", button, v.arg1 or "", v.type)
+		table.insert(tt_default, line)
+	end
+
+	-- Build the harm lines
+	for k,v in pairs(harm) do
+		local button = self:GetButtonText(v.button)
+		local line = string.format("%s%s - %s (%s)", v.modifier or "", button, v.arg1 or "", v.type)
+		table.insert(tt_harm, line)
+	end
+
+	-- Build the help lines
+	for k,v in pairs(help) do
+		local button = self:GetButtonText(v.button)
+		local line = string.format("%s%s - %s (%s)", v.modifier or "", button, v.arg1 or "", v.type)
+		table.insert(tt_help, line)
+	end
+
+	table.sort(tt_ooc)
+	table.sort(tt_default)
+	table.sort(tt_harm)
+	table.sort(tt_help)
+end
+	
+function Clique:AddTooltipLines()
+	if UnitAffectingCombat("player") then
+		if #tt_default ~= 0 then
+			GameTooltip:AddLine("Default bindings:")
+			for k,v in ipairs(tt_default) do
+				GameTooltip:AddLine(v)
+			end
+		end
+
+		if #tt_help ~= 0 and not UnitCanAttack("player", "mouseover") then
+			GameTooltip:AddLine("Helpful bindings:")
+			for k,v in ipairs(tt_help) do
+				GameTooltip:AddLine(v)
+			end
+		end
+
+		if #tt_harm ~= 0 and UnitCanAttack("player", "mouseover") then
+			GameTooltip:AddLine("Hostile bindings:")
+			for k,v in ipairs(tt_harm) do
+				GameTooltip:AddLine(v)
+			end
+		end
+	else
+		if #tt_ooc ~= 0 then
+			GameTooltip:AddLine("Out of combat bindings:")
+			for k,v in ipairs(tt_ooc) do
+				GameTooltip:AddLine(v)
+			end
+		end
+	end
 end
