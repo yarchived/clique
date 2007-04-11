@@ -5,12 +5,48 @@
 Clique = {Locals = {}}
 
 assert(DongleStub, string.format("Clique requires DongleStub."))
-assert(DongleStub("Dongle-Beta1"), 
-	string.format("Clique requires Dongle-Beta1.  You are using an older version."))
-
-DongleStub("Dongle-Beta1"):New("Clique", Clique)
+DongleStub("Dongle-1.0"):New("Clique", Clique)
 
 local L = Clique.Locals
+
+function Clique:Initialize()
+	-- This is a small procedure to update the saved variables
+	local sv = CliqueDB
+
+	if sv and not sv.global.sv_converted then
+		if sv.char then
+			local converted = {}
+			for key,entry in pairs(sv.char) do
+				local char,server = key:match("^(.+) of (.+)$")
+				if char then
+					local new_key = ("%s - %s"):format(char, server)
+					converted[new_key] = entry
+				else
+					converted[key] = entry
+				end
+			end
+			sv.char = converted
+		end
+
+		if sv.profileKeys then
+			local converted = {}
+			for ukey,pkey in pairs(sv.profileKeys) do
+				-- Update each user key
+				local char,server = ukey:match("^(.+) of (.+)$")
+				if char then
+					local new_key = ("%s - %s"):format(char, server)
+					converted[new_key] = pkey
+				else
+					converted[key] = entry
+				end
+			end
+			sv.profileKeys = converted
+		end
+
+		if not sv.global then sv.global = {} end
+		sv.global.sv_converted = true
+	end
+end
 
 function Clique:Enable()
 	-- Grab the localisation header
@@ -98,6 +134,9 @@ function Clique:Enable()
 	self.cmd:RegisterSlashHandler("debug - Enables extra messages for debugging purposes", "debug", "ShowAttributes")
 	self.cmd:InjectDBCommands(self.db, "copy", "delete", "list", "reset", "set")
 	self.cmd:RegisterSlashHandler("tooltip - Enables binding lists in tooltips.", "tooltip", "ToggleTooltip")
+
+	-- Place the Clique tab
+	self:LEARNED_SPELL_IN_TAB()
 end
 
 function Clique:EnableFrames()
@@ -637,6 +676,6 @@ end
 function Clique:ToggleTooltip()
 	self.profile.tooltips = not self.profile.tooltips
 	self:PrintF("Listing of bindings in tooltips has been %s", 
-		self.profile.tooltips and "Enabled" or "Disabled")
+	self.profile.tooltips and "Enabled" or "Disabled")
 end
  

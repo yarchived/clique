@@ -57,8 +57,6 @@ function Clique:OptionsOnLoad()
 
     CliquePulloutTab:Show()
 
-	self:LEARNED_SPELL_IN_TAB()
-
 	-- Hook the container buttons
 	local containerFunc = function(button)
 		if IsShiftKeyDown() and CliqueCustomArg1 then
