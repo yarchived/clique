@@ -66,7 +66,7 @@ function Clique:Enable()
 			},
 			blacklist = {
 			},
-			tooltips = true,
+			tooltips = false,
 		}
 	}
 	
@@ -448,7 +448,7 @@ function Clique:SetAttribute(entry, frame)
 		else
 			local unit = SecureButton_GetModifiedUnit(frame, entry.modifier.."unit"..button)
 			local macro = entry.arg2
-			if unit then
+			if unit and macro then
 				macro = macro:gsub("target%s*=%s*clique", "target="..unit)
 			end
 
