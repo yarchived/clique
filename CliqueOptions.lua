@@ -1204,6 +1204,9 @@ function Clique:ButtonOnClick(button)
 		end
 
 		local issue
+		local arg1 = entry.arg1 and tostring(entry.arg1)
+		local arg2 = entry.arg2 and tostring(entry.arg2)
+
 		if not entry.type then
 			issue = "You must select an action type."
 		elseif not entry.button then
@@ -1216,8 +1219,12 @@ function Clique:ButtonOnClick(button)
 			issue = "You must supply either a spell name and optionally an item slot/bag or name to consume when creating a \"spell\" action."
 		elseif entry.type == "item" and not ((entry.arg1 and entry.arg2) or entry.arg3) then
 			issue = "You must supply either a bag/slot, or an item name to use."
-		elseif entry.type == "menu" and not arg1 then
+		elseif entry.type == "menu" and not entry.arg1 then
 			issue = "You must supply a menu function for action type \"menu\"."
+		elseif entry.type == "macro" and arg1 and arg2 then
+			issue = "You must specify EITHER a macro index, or macro text, not both."
+		elseif entry.type == "macro" and not arg1 and not arg2 then
+			issue = "You must supply either a macro index, or macro text"
 		end
 
 		if issue then
