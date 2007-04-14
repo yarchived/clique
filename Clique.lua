@@ -11,7 +11,10 @@ local L = Clique.Locals
 
 function Clique:Initialize()
 	-- This is a small procedure to update the saved variables
+	CliqueDB = CliqueDB or {}
 	local sv = CliqueDB
+
+	if not sv.global then sv.global = {} end
 
 	if sv and not sv.global.sv_converted then
 		if sv.char then
