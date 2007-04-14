@@ -443,7 +443,7 @@ function Clique:SetAttribute(entry, frame)
 		frame:SetAttribute(entry.modifier.."unit"..button, entry.arg4)
 	elseif entry.type == "macro" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
-		if entry.arg1 and #strlen(entry.arg1) > 0 then
+		if entry.arg1 and type(entry.arg1) == "string" and entry.arg1:match("[^%s]") then
 			frame:SetAttribute(entry.modifier.."macro"..button, entry.arg1)
 		else
 			local unit = SecureButton_GetModifiedUnit(frame, entry.modifier.."unit"..button)
