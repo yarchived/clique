@@ -447,7 +447,7 @@ function Clique:SetAttribute(entry, frame)
 			frame:SetAttribute(entry.modifier.."macro"..button, entry.arg1)
 		else
 			local unit = SecureButton_GetModifiedUnit(frame, entry.modifier.."unit"..button)
-			local macro = entry.arg2
+			local macro = tostring(entry.arg2)
 			if unit and macro then
 				macro = macro:gsub("target%s*=%s*clique", "target="..unit)
 			end
