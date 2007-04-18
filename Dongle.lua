@@ -29,7 +29,7 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------]]
 local major = "DongleStub"
-local minor = tonumber(string.match("$Revision: 291 $", "(%d+)") or 1)
+local minor = tonumber(string.match("$Revision: 313 $", "(%d+)") or 1)
 
 local g = getfenv(0)
 
@@ -118,6 +118,7 @@ if not g.DongleStub or g.DongleStub:IsNewerVersion(major, minor) then
 
 		-- Deactivate the old libary if necessary
 		if type(oldDeactivate) == "function" then
+			local major, minor = oldInstance:GetVersion()
 			table.insert(self.log, string.format("Deactivate: %s, %s", major, minor))
 			oldDeactivate(oldInstance, newInstance)
 		end
@@ -154,7 +155,7 @@ end
 ---------------------------------------------------------------------------]]
 
 local major = "Dongle-1.0"
-local minor = tonumber(string.match("$Revision: 303 $", "(%d+)") or 1)
+local minor = tonumber(string.match("$Revision: 315 $", "(%d+)") or 1)
 
 assert(DongleStub, string.format("Dongle requires DongleStub.", major))
 
@@ -225,8 +226,9 @@ local function assert(level,condition,message)
 end
 
 local function argcheck(value, num, ...)
-	assert(1, type(num) == "number",
-		string.format(L["BAD_ARGUMENT"], 2, "argcheck", "number", type(level)))
+	if type(num) ~= "number" then
+		error(L["BAD_ARGUMENT"]:format(2, "argcheck", "number", type(num)), 1)
+	end
 
 	for i=1,select("#", ...) do
 		if type(value) == select(i, ...) then return end
@@ -234,7 +236,7 @@ local function argcheck(value, num, ...)
 
 	local types = strjoin(", ", ...)
 	local name = string.match(debugstack(2,2,0), ": in function [`<](.-)['>]")
-	error(string.format(L["BAD_ARGUMENT"], num, name, types, type(value)), 3)
+	error(L["BAD_ARGUMENT"]:format(num, name, types, type(value)), 3)
 end
 
 local function safecall(func,...)
@@ -708,6 +710,10 @@ local dbmt = {
 				if new then
 					Dongle:TriggerMessage("DONGLE_PROFILE_CREATED", t, rawget(t, "parent"), rawget(t, "sv_name"), key)
 				end
+			elseif section == "profiles" then
+				local sv = rawget(t, "sv")
+				if not sv.profiles then sv.profiles = {} end
+				rawset(t, "profiles", sv.profiles)
 			elseif section == "global" then
 				local sv = rawget(t, "sv")
 				if not sv.global then sv.global = {} end
@@ -761,6 +767,7 @@ local function initdb(parent, name, defaults, defaultProfile, olddb)
 		["factionrealm"] = factionrealm,
 		["global"] = true,
 		["profile"] = profileKey,
+		["profiles"] = true, -- Don't create until we need
 	}
 
 	-- If we've been passed an old database, clear it out
@@ -829,7 +836,13 @@ function Dongle:ClearDBDefaults()
 			for section,key in pairs(db.keys) do
 				local tbl = rawget(db, section)
 				if tbl and not next(tbl) then
-					sv[section][key] = nil
+					if sv[section] then
+						if type(key) == "string" then
+							sv[section][key] = nil
+						else
+							sv[section] = nil
+						end
+					end
 				end
 			end
 		end
