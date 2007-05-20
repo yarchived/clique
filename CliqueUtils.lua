@@ -28,7 +28,6 @@ function Clique:GetModifierText()
 end
 
 function Clique:GetButtonNumber(button)
-	Clique:Print("GetButtonNumber", button)
     if not button then return "" end
     return buttonMap[arg1] or ""
 end

@@ -15,56 +15,20 @@ function Clique:Initialize()
 	CliqueDB = CliqueDB or {}
 	local sv = CliqueDB
 
-	if CliqueDB.global then
-		if CliqueDB.global.sv_converted then
-			CliqueDB.global.sv_converted = nil
-			CliqueDB.global.sv_version = self.rev
-		elseif CliqueDB.global.sv_version > self.rev then
-			-- Got the bad rev number, revert
-			CliqueDB.global.sv_version = self.rev
-		elseif CliqueDB.global.sv_version < 73 then
-			-- We do this once, to make sure we catch everyone from
-			-- the last version of CliqueDB
-			self:Print("You're upgrading from an old version of Clique")
-			CliqueDB = {}
-			self:Print("All settings have been set to default")
-		end
-	end
-	
-	if not sv.global then sv.global = {} end
+	CliqueDB.global = CliqueDB.global or {}
 
-	if sv and not sv.global.sv_converted then
-		if sv.char then
-			local converted = {}
-			for key,entry in pairs(sv.char) do
-				local char,server = key:match("^(.+) of (.+)$")
-				if char then
-					local new_key = ("%s - %s"):format(char, server)
-					converted[new_key] = entry
-				else
-					converted[key] = entry
-				end
-			end
-			sv.char = converted
-		end
-
-		if sv.profileKeys then
-			local converted = {}
-			for ukey,pkey in pairs(sv.profileKeys) do
-				-- Update each user key
-				local char,server = ukey:match("^(.+) of (.+)$")
-				if char then
-					local new_key = ("%s - %s"):format(char, server)
-					converted[new_key] = pkey
-				else
-					converted[key] = entry
-				end
-			end
-			sv.profileKeys = converted
-		end
-
-		if not sv.global then sv.global = {} end
-		sv.global.sv_converted = true
+	if CliqueDB.global.sv_converted then
+		CliqueDB.global.sv_converted = nil
+		CliqueDB.global.sv_version = self.rev
+	elseif CliqueDB.global.sv_version > self.rev then
+		-- Got the bad rev number, revert
+		CliqueDB.global.sv_version = self.rev
+	elseif CliqueDB.global.sv_version < 73 then
+		-- We do this once, to make sure we catch everyone from
+		-- the last version of CliqueDB
+		self:Print("You're upgrading from an old version of Clique")
+		CliqueDB = {}
+		self:Print("All settings have been set to default")
 	end
 end
 
