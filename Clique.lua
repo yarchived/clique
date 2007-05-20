@@ -6,6 +6,7 @@ Clique = {Locals = {}}
 
 assert(DongleStub, string.format("Clique requires DongleStub."))
 DongleStub("Dongle-1.0"):New("Clique", Clique)
+Clique.rev = tonumber(string.match("$Revision$", "(%d+)") or 1)
 
 local L = Clique.Locals
 
@@ -14,6 +15,22 @@ function Clique:Initialize()
 	CliqueDB = CliqueDB or {}
 	local sv = CliqueDB
 
+	if CliqueDB.global then
+		if CliqueDB.global.sv_converted then
+			CliqueDB.global.sv_converted = nil
+			CliqueDB.global.sv_version = self.rev
+		elseif CliqueDB.global.sv_version > self.rev then
+			-- Got the bad rev number, revert
+			CliqueDB.global.sv_version = self.rev
+		elseif CliqueDB.global.sv_version < 73 then
+			-- We do this once, to make sure we catch everyone from
+			-- the last version of CliqueDB
+			self:Print("You're upgrading from an old version of Clique")
+			CliqueDB = {}
+			self:Print("All settings have been set to default")
+		end
+	end
+	
 	if not sv.global then sv.global = {} end
 
 	if sv and not sv.global.sv_converted then
