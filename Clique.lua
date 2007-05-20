@@ -163,7 +163,7 @@ function Clique:EnableFrames()
     end
 end	   
 
-function Clique:SpellBookButtonPressed()
+function Clique:SpellBookButtonPressed(frame, button)
     local id = SpellBook_GetSpellID(this:GetParent():GetID());
     local texture = GetSpellTexture(id, SpellBookFrame.bookType)
     local name, rank = GetSpellName(id, SpellBookFrame.bookType)
@@ -177,14 +177,13 @@ function Clique:SpellBookButtonPressed()
     end
     
     local type = "spell"
-	local button
 
 	if self.editSet == self.clicksets[L.CLICKSET_HARMFUL] then
-		button = string.format("%s%d", "harmbutton", self:GetButtonNumber())
+		button = string.format("%s%d", "harmbutton", self:GetButtonNumber(button))
 	elseif self.editSet == self.clicksets[L.CLICKSET_HELPFUL] then
-		button = string.format("%s%d", "helpbutton", self:GetButtonNumber())
+		button = string.format("%s%d", "helpbutton", self:GetButtonNumber(button))
 	else
-		button = self:GetButtonNumber()
+		button = self:GetButtonNumber(button)
 	end
     
     -- Build the structure

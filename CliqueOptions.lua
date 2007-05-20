@@ -7,7 +7,7 @@ local work = {}
 function Clique:OptionsOnLoad()
     -- Create a set of buttons to hook the SpellbookFrame
     self.spellbuttons = {}
-    local onclick = function() Clique:SpellBookButtonPressed() end
+    local onclick = function(frame, button) Clique:SpellBookButtonPressed(frame, button) end
     local onleave = function()
         this.updateTooltip = nil
         GameTooltip:Hide()
