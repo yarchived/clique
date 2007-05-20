@@ -172,8 +172,8 @@ function Clique:SpellBookButtonPressed(frame, button)
 		StaticPopup_Show("CLIQUE_PASSIVE_SKILL")
 		return
     else
-		rank = select(3, string.find(rank, L.RANK_PATTERN))
-		if rank then rank = tonumber(rank) end
+		local num = rank:match("(%d+)") or ""
+		rank = tonumber(num)
     end
     
     local type = "spell"
