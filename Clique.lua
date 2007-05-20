@@ -380,6 +380,7 @@ function Clique:DONGLE_PROFILE_RESET(event, db, parent, svname, profileKey)
 		self:UpdateClicks()
 
 		self:PLAYER_REGEN_ENABLED()
+		self:Print(L.PROFILE_RESET, profileKey)
 	end
 end
 
