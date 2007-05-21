@@ -20,10 +20,10 @@ function Clique:Initialize()
 	if CliqueDB.global.sv_converted then
 		CliqueDB.global.sv_converted = nil
 		CliqueDB.global.sv_version = self.rev
-	elseif CliqueDB.global.sv_version > self.rev then
+	elseif CliqueDB.global.sv_version and (CliqueDB.global.sv_version > self.rev) then
 		-- Got the bad rev number, revert
 		CliqueDB.global.sv_version = self.rev
-	elseif CliqueDB.global.sv_version < 73 then
+	elseif CliqueDB.global.sv_version and (CliqueDB.global.sv_version < 73) then
 		-- We do this once, to make sure we catch everyone from
 		-- the last version of CliqueDB
 		self:Print("You're upgrading from an old version of Clique")
