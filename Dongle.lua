@@ -155,7 +155,7 @@ end
 ---------------------------------------------------------------------------]]
 
 local major = "Dongle-1.0"
-local minor = tonumber(string.match("$Revision: 363 $", "(%d+)") or 1) + 500
+local minor = tonumber(string.match("$Revision: 371 $", "(%d+)") or 1) + 500
 -- ** IMPORTANT NOTE **
 -- Due to some issues we had previously with Dongle revision numbers
 -- we need to artificially inflate the minor revision number, to ensure
@@ -879,6 +879,7 @@ function Dongle.SetProfile(db, name)
 
 	db.profile = nil
 	db.keys["profile"] = name
+	db.sv.profileKeys[db.keys.char] = name
 
 	Dongle:TriggerMessage("DONGLE_PROFILE_CHANGED", db, db.parent, db.sv_name, db.keys.profile)
 end
