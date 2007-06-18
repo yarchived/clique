@@ -6,13 +6,13 @@
 ## OptionalDeps: Dongle
 
 Dongle.lua
-LockdownLine.lua
 Clique.xml
 Clique.lua
-Localization.en.lua
-Localization.fr.lua
-Localization.de.lua
-Localization.zh.lua
-Localization.kr.lua
+Localization.enUS.lua
+Localization.frFR.lua
+Localization.deDE.lua
+Localization.koKR.lua
+Localization.zhCN.lua
+Localization.zhTW.lua
 CliqueOptions.lua
 CliqueUtils.lua
