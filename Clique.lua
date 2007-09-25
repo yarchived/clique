@@ -415,7 +415,7 @@ function Clique:SetAttribute(entry, frame)
 		frame:SetAttribute(entry.modifier.."bag"..button, entry.arg2)
 		frame:SetAttribute(entry.modifier.."slot"..button, entry.arg3)
 		frame:SetAttribute(entry.modifier.."item"..button, entry.arg4)
-		frame:SetAttribute(entry.modifier.."unit"..button, entry.arg5)
+		frame:SetAttribute(entry.modifier.."unit"..button, entry.arg5 or "mouseover")
 	elseif entry.type == "item" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
 		frame:SetAttribute(entry.modifier.."bag"..button, entry.arg1)
