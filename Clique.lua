@@ -401,11 +401,15 @@ function Clique:SetAttribute(entry, frame)
 	elseif entry.type == "action" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
 		frame:SetAttribute(entry.modifier.."action"..button, entry.arg1)
-		frame:SetAttribute(entry.modifier.."unit"..button, entry.arg2 or "mouseover")
+		if entry.arg2 then
+			frame:SetAttribute(entry.modifier.."unit"..button, entry.arg2)
+		end
 	elseif entry.type == "pet" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
 		frame:SetAttribute(entry.modifier.."action"..button, entry.arg1)
-		frame:SetAttribute(entry.modifier.."unit"..button, entry.arg2 or "mouseover")
+		if entry.arg2 then
+			frame:SetAttribute(entry.modifier.."unit"..button, entry.arg2)
+		end
 	elseif entry.type == "spell" then
 		local rank = tonumber(entry.arg2)
 		local cast = string.format(rank and L.CAST_FORMAT or "%s", entry.arg1, rank)
@@ -415,13 +419,17 @@ function Clique:SetAttribute(entry, frame)
 		frame:SetAttribute(entry.modifier.."bag"..button, entry.arg2)
 		frame:SetAttribute(entry.modifier.."slot"..button, entry.arg3)
 		frame:SetAttribute(entry.modifier.."item"..button, entry.arg4)
-		frame:SetAttribute(entry.modifier.."unit"..button, entry.arg5 or "mouseover")
+		if entry.arg5 then
+			frame:SetAttribute(entry.modifier.."unit"..button, entry.arg5)
+		end
 	elseif entry.type == "item" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
 		frame:SetAttribute(entry.modifier.."bag"..button, entry.arg1)
 		frame:SetAttribute(entry.modifier.."slot"..button, entry.arg2)
 		frame:SetAttribute(entry.modifier.."item"..button, entry.arg3)
-		frame:SetAttribute(entry.modifier.."unit"..button, entry.arg4 or "mouseover")
+		if entry.arg4 then
+			frame:SetAttribute(entry.modifier.."unit"..button, entry.arg4)
+		end
 	elseif entry.type == "macro" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
 		if entry.arg1 then
@@ -440,13 +448,19 @@ function Clique:SetAttribute(entry, frame)
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
 	elseif entry.type == "target" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
-		frame:SetAttribute(entry.modifier.."unit"..button, entry.arg1 or "mouseover")
+		if entry.arg1 then
+			frame:SetAttribute(entry.modifier.."unit"..button, entry.arg1)
+		end
 	elseif entry.type == "focus" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
-		frame:SetAttribute(entry.modifier.."unit"..button, entry.arg1 or "mouseover")
+		if entry.arg1 then
+			frame:SetAttribute(entry.modifier.."unit"..button, entry.arg1)
+		end
 	elseif entry.type == "assist" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
-		frame:SetAttribute(entry.modifier.."unit"..button, entry.arg1 or "mouseover")
+		if entry.arg1 then
+			frame:SetAttribute(entry.modifier.."unit"..button, entry.arg1)
+		end
 	elseif entry.type == "click" then
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
 		frame:SetAttribute(entry.modifier.."clickbutton"..button, getglobal(entry.arg1))
