@@ -5,7 +5,7 @@
 Clique = {Locals = {}}
 
 assert(DongleStub, string.format("Clique requires DongleStub."))
-DongleStub("Dongle-1.0"):New("Clique", Clique)
+DongleStub("Dongle-1.1"):New("Clique", Clique)
 Clique.rev = tonumber(string.match("$Revision$", "(%d+)") or 1)
 
 local L = Clique.Locals
