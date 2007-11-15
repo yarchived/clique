@@ -148,13 +148,10 @@ function Clique:SpellBookButtonPressed(frame, button)
     local id = SpellBook_GetSpellID(this:GetParent():GetID());
     local texture = GetSpellTexture(id, SpellBookFrame.bookType)
     local name, rank = GetSpellName(id, SpellBookFrame.bookType)
-	    
+
     if rank == L.RACIAL_PASSIVE or rank == L.PASSIVE then
 		StaticPopup_Show("CLIQUE_PASSIVE_SKILL")
 		return
-    else
-		local num = rank:match("(%d+)") or ""
-		rank = tonumber(num)
     end
     
     local type = "spell"
@@ -411,8 +408,20 @@ function Clique:SetAttribute(entry, frame)
 			frame:SetAttribute(entry.modifier.."unit"..button, entry.arg2)
 		end
 	elseif entry.type == "spell" then
-		local rank = tonumber(entry.arg2)
-		local cast = string.format(rank and L.CAST_FORMAT or "%s", entry.arg1, rank)
+		local rank = entry.arg2
+		local cast
+		if rank then
+			if tonumber(rank) then
+				-- The rank is a number (pre-2.3) so fill in the format
+				cast = L.CAST_FORMAT:format(entry.arg1, rank)
+			else
+				-- The whole rank string is saved (post-2.3) so use it
+				cast = string.format("%s(%s)", entry.arg1, rank)
+			end
+		else
+			cast = entry.arg1
+		end
+
 		frame:SetAttribute(entry.modifier.."type"..button, entry.type)
 		frame:SetAttribute(entry.modifier.."spell"..button, cast)
 

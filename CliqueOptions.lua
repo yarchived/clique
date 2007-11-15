@@ -458,7 +458,7 @@ function Clique:CreateOptionsFrame()
     local button = CreateFrame("Button", "CliqueButtonOptions", CliqueFrame, "UIPanelButtonGrayTemplate")
     button:SetHeight(24)
     button:SetWidth(60)
-    button:SetText("Options")
+    button:SetText("Frames")
     button:SetPoint("LEFT", CliqueButtonCustom, "RIGHT", 3, 0)
     button:SetScript("OnClick", buttonFunc)
 
@@ -992,7 +992,12 @@ end
 
 function Clique:FillListEntry(frame, idx)
     local entry = self.sortList[idx]
-    local rank = string.format(" (Rank %d)", entry.rank or 0)
+	if tonumber(entry.arg2) then
+		rank = string.format("Rank %d", entry.arg2)
+	elseif entry.arg2 then
+		rank = entry.arg2
+	end
+
     local type = string.format("%s%s", string.upper(string.sub(entry.type, 1, 1)), string.sub(entry.type, 2))
 	local button = tonumber(string.sub(entry.button, -1, -1))
     
@@ -1008,7 +1013,7 @@ function Clique:FillListEntry(frame, idx)
 		frame.name:SetText(string.format("Pet Action %d%s", entry.arg1, entry.arg2 and " on "..entry.arg2 or ""))
 	elseif entry.type == "spell" then
 		if entry.arg2 then
-			frame.name:SetText(string.format("%s (%s %d)%s", entry.arg1, L.RANK, entry.arg2,
+			frame.name:SetText(string.format("%s (%s)%s", entry.arg1, rank,
 				entry.arg5 and " on "..entry.arg5 or ""))
 		else
 			frame.name:SetText(string.format("%s%s", entry.arg1, entry.arg5 and " on "..entry.arg5 or ""))
