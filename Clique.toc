@@ -1,6 +1,7 @@
 ## Interface: 20400
 ## Title: Clique
 ## Author: Cladhaire
+## Version: wowi:revision
 ## Notes: Simply powerful click-casting interface
 ## SavedVariables: CliqueDB
 ## OptionalDeps: Dongle

@@ -224,7 +224,7 @@ function Clique:CreateOptionsFrame()
     frame:SetWidth(400)
     frame:SetPoint("LEFT", SpellBookFrame, "RIGHT", 15, 30)
 	self:SkinFrame(frame)
-	frame.title:SetText("Clique Rev. " .. Clique.rev);
+	frame.title:SetText("Clique v. " .. Clique.version);
 	frame:SetScript("OnShow", function()
 		if Clique.inuse then
 			CliqueHelpText:Hide()
