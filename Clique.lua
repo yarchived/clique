@@ -100,6 +100,7 @@ function Clique:Enable()
 	self.cmd:RegisterSlashHandler("debug - Enables extra messages for debugging purposes", "debug", "ShowAttributes")
 	self.cmd:InjectDBCommands(self.db, "copy", "delete", "list", "reset", "set")
 	self.cmd:RegisterSlashHandler("tooltip - Enables binding lists in tooltips.", "tooltip", "ToggleTooltip")
+	self.cmd:RegisterSlashHandler("showbindings - Shows a window that contains the current bindings", "showbindings", "ShowBindings")
 
 	-- Place the Clique tab
 	self:LEARNED_SPELL_IN_TAB()
@@ -510,68 +511,6 @@ for k,v in pairs(buttonsraw) do
 	table.insert(buttons, v)
 end
 
---collectgarbage("setpause", 100)
---collectgarbage("setstepmul", 2000)
-
---[[
-local tbl = {}
-
-local min 
-local max
-local elapsed = 0
-local frame = CreateFrame("Frame", "gctest")
-frame:SetScript("OnUpdate", function(f, t)
-	elapsed = elapsed + t
-	if elapsed >= 0.3 then
-		local count = collectgarbage("count")
-		if not min then
-			min = count
-			max = count
-		end
-	
-		if count > max then max = count end
-		if count < min then min = count end
-		Clique:Print(string.format("%2.f (min %2.f, max %2.f)", count, min, max), count < max and "Cycle" or "")
-		elapsed = 0
-		for i=1,500 do
-			table.insert(tbl, {1,2,3,4,5})
-		end
-		tbl = {}
-	end
-end)
---]]
-
--- pause, mul
--- 100,200
--- min: 16096
--- max: 20993
--- cycle: 19794
-
--- 100,500
--- min: 16096
--- max: 18292
--- cycle: 16500
-
--- 100,1000
--- min: 16095
--- max: 17225
--- cycle: 16500
-
--- 100,2000
--- min: 16095
--- max: 16722
--- cycle: 16300
-
--- Default Settings
--- min: 16095
--- max: 36114
--- cycle: 18600
-
--- 100 pause, default mult
--- min: 16095
--- max: 20052
--- cycle: 17857
-
 function Clique:ShowAttributes()
 	self:Print("Enabled enhanced debugging.")
 	PlayerFrame:SetScript("OnAttributeChanged", function(...) self:Print(...) end)
@@ -590,38 +529,51 @@ function Clique:UpdateTooltip()
 	local harm = self.clicksets[L.CLICKSET_HARMFUL]
 	local help = self.clicksets[L.CLICKSET_HELPFUL]
 
+	for k,v in pairs(tt_ooc) do tt_ooc[k] = nil end
+	for k,v in pairs(tt_help) do tt_help[k] = nil end
+	for k,v in pairs(tt_harm) do tt_harm[k] = nil end
+	for k,v in pairs(tt_default) do tt_default[k] = nil end
+
 	-- Build the ooc lines, which includes both helpful and harmful
 	for k,v in pairs(ooc) do
 		local button = self:GetButtonText(v.button)
-		local line = string.format("%s%s - %s (%s)", v.modifier or "", button, v.arg1 or "", v.type)
-		table.insert(tt_ooc, line)
+		local mod = string.format("%s%s", v.modifier or "", button)
+		local action = string.format("%s (%s)", v.arg1 or "", v.type)
+		table.insert(tt_ooc, {mod = mod, action = action})
 	end
 
 	-- Build the default lines
 	for k,v in pairs(default) do
 		local button = self:GetButtonText(v.button)
-		local line = string.format("%s%s - %s (%s)", v.modifier or "", button, v.arg1 or "", v.type)
-		table.insert(tt_default, line)
+		local mod = string.format("%s%s", v.modifier or "", button)
+		local action = string.format("%s (%s)", v.arg1 or "", v.type)
+		table.insert(tt_default, {mod = mod, action = action})
 	end
 
 	-- Build the harm lines
 	for k,v in pairs(harm) do
 		local button = self:GetButtonText(v.button)
-		local line = string.format("%s%s - %s (%s)", v.modifier or "", button, v.arg1 or "", v.type)
-		table.insert(tt_harm, line)
+		local mod = string.format("%s%s", v.modifier or "", button)
+		local action = string.format("%s (%s)", v.arg1 or "", v.type)
+		table.insert(tt_harm, {mod = mod, action = action})
 	end
 
 	-- Build the help lines
 	for k,v in pairs(help) do
 		local button = self:GetButtonText(v.button)
-		local line = string.format("%s%s - %s (%s)", v.modifier or "", button, v.arg1 or "", v.type)
-		table.insert(tt_help, line)
+		local mod = string.format("%s%s", v.modifier or "", button)
+		local action = string.format("%s (%s)", v.arg1 or "", v.type)
+		table.insert(tt_help, {mod = mod, action = action})
 	end
 
-	table.sort(tt_ooc)
-	table.sort(tt_default)
-	table.sort(tt_harm)
-	table.sort(tt_help)
+	local function sort(a,b) 
+		return a.mod < b.mod
+	end
+
+	table.sort(tt_ooc, sort)
+	table.sort(tt_default, sort)
+	table.sort(tt_harm, sort)
+	table.sort(tt_help, sort)
 end
 	
 function Clique:AddTooltipLines()
@@ -631,32 +583,34 @@ function Clique:AddTooltipLines()
 	if not frame then return end
 	if not self.ccframes[frame] then return end
 
+	-- Add a buffer line
+	GameTooltip:AddLine(" ")
 	if UnitAffectingCombat("player") then
 		if #tt_default ~= 0 then
 			GameTooltip:AddLine("Default bindings:")
 			for k,v in ipairs(tt_default) do
-				GameTooltip:AddLine(v)
+				GameTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
 			end
 		end
 
 		if #tt_help ~= 0 and not UnitCanAttack("player", "mouseover") then
 			GameTooltip:AddLine("Helpful bindings:")
 			for k,v in ipairs(tt_help) do
-				GameTooltip:AddLine(v)
+				GameTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
 			end
 		end
 
 		if #tt_harm ~= 0 and UnitCanAttack("player", "mouseover") then
 			GameTooltip:AddLine("Hostile bindings:")
 			for k,v in ipairs(tt_harm) do
-				GameTooltip:AddLine(v)
+				GameTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
 			end
 		end
 	else
 		if #tt_ooc ~= 0 then
 			GameTooltip:AddLine("Out of combat bindings:")
 			for k,v in ipairs(tt_ooc) do
-				GameTooltip:AddLine(v)
+				GameTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
 			end
 		end
 	end
@@ -667,4 +621,78 @@ function Clique:ToggleTooltip()
 	self:PrintF("Listing of bindings in tooltips has been %s", 
 	self.profile.tooltips and "Enabled" or "Disabled")
 end
- 
+
+function Clique:ShowBindings()
+	if not CliqueTooltip then
+		CliqueTooltip = CreateFrame("GameTooltip", "CliqueTooltip", UIParent, "GameTooltipTemplate")
+		CliqueTooltip:SetPoint("CENTER", 0, 0)
+		CliqueTooltip.close = CreateFrame("Button", nil, CliqueTooltip)
+		CliqueTooltip.close:SetHeight(32)
+		CliqueTooltip.close:SetWidth(32)
+		CliqueTooltip.close:SetPoint("TOPRIGHT", 1, 0)
+		CliqueTooltip.close:SetScript("OnClick", function() 
+			CliqueTooltip:Hide()
+		end)
+		CliqueTooltip.close:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
+		CliqueTooltip.close:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
+		CliqueTooltip.close:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight")
+
+		CliqueTooltip:EnableMouse()
+		CliqueTooltip:SetMovable()
+		CliqueTooltip:SetPadding(16)
+		CliqueTooltip:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
+		CliqueTooltip:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
+
+		CliqueTooltip:RegisterForDrag("LeftButton")
+		CliqueTooltip:SetScript("OnDragStart", function(self)
+			self:StartMoving()
+		end)
+		CliqueTooltip:SetScript("OnDragStop", function(self)
+			self:StopMovingOrSizing()
+			ValidateFramePosition(self)
+		end)		
+		CliqueTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
+	end
+
+	if not CliqueTooltip:IsShown() then
+		CliqueTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
+	end
+	
+	-- Actually fill it with the bindings
+	CliqueTooltip:SetText("Clique Bindings")
+
+	if #tt_default > 0 then
+		CliqueTooltip:AddLine(" ")
+		CliqueTooltip:AddLine("Default bindings:")
+		for k,v in ipairs(tt_default) do
+			CliqueTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
+		end
+	end
+
+	if #tt_help > 0 then
+		CliqueTooltip:AddLine(" ")
+		CliqueTooltip:AddLine("Helpful bindings:")
+		for k,v in ipairs(tt_help) do
+			CliqueTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
+		end
+	end
+
+	if #tt_harm > 0 then
+		CliqueTooltip:AddLine(" ")
+		CliqueTooltip:AddLine("Hostile bindings:")
+		for k,v in ipairs(tt_harm) do
+			CliqueTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
+		end
+	end
+		
+	if #tt_ooc > 0 then
+		CliqueTooltip:AddLine(" ")
+		CliqueTooltip:AddLine("Out of combat bindings:")
+		for k,v in ipairs(tt_ooc) do
+			CliqueTooltip:AddDoubleLine(v.mod, v.action, 1, 1, 1, 1, 1, 1)
+		end
+	end
+
+	CliqueTooltip:Show()
+end
+
