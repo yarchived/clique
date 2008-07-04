@@ -663,6 +663,7 @@ function Clique:CreateOptionsFrame()
 			CliqueCustomArg2:SetFocus()
 		end
 	end)
+	edit:SetScript("OnEnterPressed", function() end)
 
 	edit.label = edit:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	edit.label:SetText("Spell Name:")
@@ -682,6 +683,7 @@ function Clique:CreateOptionsFrame()
 			CliqueCustomArg3:SetFocus()
 		end
 	end)
+	edit:SetScript("OnEnterPressed", function() end)
 
 	edit.label = edit:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	edit.label:SetText("Spell Name:")
@@ -716,6 +718,7 @@ function Clique:CreateOptionsFrame()
 			CliqueCustomArg4:SetFocus()
 		end
 	end)
+	edit:SetScript("OnEnterPressed", function() end)
 
 	edit.label = edit:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	edit.label:SetText("Spell Name:")
@@ -735,6 +738,7 @@ function Clique:CreateOptionsFrame()
 			CliqueCustomArg5:SetFocus()
 		end
 	end)
+	edit:SetScript("OnEnterPressed", function() end)
 
 	edit.label = edit:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	edit.label:SetText("Spell Name:")
@@ -754,6 +758,7 @@ function Clique:CreateOptionsFrame()
 			CliqueCustomArg1:SetFocus()
 		end
 	end)
+	edit:SetScript("OnEnterPressed", function() end)
 
 	edit.label = edit:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 	edit.label:SetText("Spell Name:")
