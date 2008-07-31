@@ -521,7 +521,7 @@ function Clique:CreateOptionsFrame()
 
 	self.customEntry = {}    
     local frame = CreateFrame("Frame", "CliqueCustomFrame", CliqueFrame)
-    frame:SetHeight(375)
+    frame:SetHeight(400)
 	frame:SetWidth(450)
 	frame:SetPoint("CENTER", 70, -50)
 	self:SkinFrame(frame)
@@ -1008,38 +1008,43 @@ function Clique:FillListEntry(frame, idx)
     frame.icon:SetTexture(entry.texture or "Interface\\Icons\\INV_Misc_QuestionMark")
 	frame.binding:SetText(entry.modifier..self:GetButtonText(button))
 
+	local arg1 = tostring(entry.arg1)
+	local arg2 = tostring(entry.arg2)
+	local arg3 = tostring(entry.arg3)
+	local arg4 = tostring(entry.arg4)
+	local arg5 = tostring(entry.arg5)
 
 	if entry.type == "action" then
-		frame.name:SetText(string.format("Action Button %d%s", entry.arg1, entry.arg2 and " on "..entry.arg2 or ""))
+		frame.name:SetText(string.format("Action Button %d%s", arg1, entry.arg2 and (" on " .. arg2) or ""))
 	elseif entry.type == "actionbar" then
-		frame.name:SetText(string.format("Action Bar: %s", entry.arg1))
+		frame.name:SetText(string.format("Action Bar: %s", arg1))
 	elseif entry.type == "pet" then
-		frame.name:SetText(string.format("Pet Action %d%s", entry.arg1, entry.arg2 and " on "..entry.arg2 or ""))
+		frame.name:SetText(string.format("Pet Action %d%s", arg1, arg2 and " on ".. entry.arg2 or ""))
 	elseif entry.type == "spell" then
 		if entry.arg2 then
-			frame.name:SetText(string.format("%s (%s)%s", entry.arg1, rank,
-				entry.arg5 and " on "..entry.arg5 or ""))
+			frame.name:SetText(string.format("%s (%s)%s", arg1, rank,
+				entry.arg5 and (" on " .. arg5) or ""))
 		else
-			frame.name:SetText(string.format("%s%s", entry.arg1, entry.arg5 and " on "..entry.arg5 or ""))
+			frame.name:SetText(string.format("%s%s", arg1, entry.arg5 and " on " .. arg5 or ""))
 		end
 	elseif entry.type == "menu" then
 		frame.name:SetText("Show Menu")
 	elseif entry.type == "stop" then
 		frame.name:SetText("Stop Casting")
 	elseif entry.type == "target" then
-		frame.name:SetText(string.format("Target Unit: %s", entry.arg1 and entry.arg1 or ""))
+		frame.name:SetText(string.format("Target Unit: %s", arg1 and entry.arg1 or ""))
 	elseif entry.type == "focus" then
-		frame.name:SetText(string.format("Set Focus Unit: %s", entry.arg1 and entry.arg1 or ""))
+		frame.name:SetText(string.format("Set Focus Unit: %s", arg1 and entry.arg1 or ""))
 	elseif entry.type == "assist" then
-		frame.name:SetText(string.format("Assist Unit: %s", entry.arg1 and entry.arg1 or ""))
+		frame.name:SetText(string.format("Assist Unit: %s", arg1 and entry.arg1 or ""))
 	elseif entry.type == "item" then
 		if entry.arg1 then
-			frame.name:SetText(string.format("Item: %d,%d", entry.arg1, entry.arg2))
+			frame.name:SetText(string.format("Item: %d,%d", arg1, arg2))
 		elseif entry.arg3 then
-			frame.name:SetText(string.format("Item: %s", entry.arg3))
+			frame.name:SetText(string.format("Item: %s", arg3))
 		end
 	elseif entry.type == "macro" then
-		frame.name:SetText(string.format("Macro: %s", entry.arg1 and entry.arg1 or string.sub(entry.arg2, 1, 20)))
+		frame.name:SetText(string.format("Macro: %s", arg1 and entry.arg1 or string.sub(arg2, 1, 20)))
 	end
 
     frame:Show()
@@ -1232,6 +1237,8 @@ function Clique:ButtonOnClick(button)
 			issue = "You must specify EITHER a macro index, or macro text, not both."
 		elseif entry.type == "macro" and not arg1 and not arg2 then
 			issue = "You must supply either a macro index, or macro text"
+		elseif entry.type == "actionbar" and not arg1 then
+			issue = "You must supply an action bar to change to."
 		end
 
 		if issue then
