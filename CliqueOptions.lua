@@ -15,7 +15,7 @@ function Clique:OptionsOnLoad()
 
     for i=1,12 do
         local parent = getglobal("SpellButton"..i)
-        local button = CreateFrame("Button", nil, parent)
+        local button = CreateFrame("Button", "SpellButtonCliqueCover"..i, parent)
         button:SetID(parent:GetID())
         button:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
         button:RegisterForClicks("LeftButtonUp","RightButtonUp", "MiddleButtonUp", "Button4Up", "Button5Up")
