@@ -2,6 +2,10 @@
   Clique by Cladhaire <cladhaire@gmail.com>
 ----------------------------------------------------------------------------------]]
 
+function IsWrathBuild()
+	return select(4, GetBuildInfo()) >= 30000
+end
+
 Clique = {Locals = {}}
 
 assert(DongleStub, string.format("Clique requires DongleStub."))
