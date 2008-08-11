@@ -315,7 +315,14 @@ function Clique:CreateOptionsFrame()
     
     local update = function() Clique:ListScrollUpdate() end
 
-    CliqueListScroll:SetScript("OnVerticalScroll", function() FauxScrollFrame_OnVerticalScroll(ENTRY_SIZE, update) end)
+	CliqueListScroll:SetScript("OnVerticalScroll", update, function(self, offset)
+		if IsWrathBuild() then
+			FauxScrollFrame_OnVerticalScroll(self, offset, ENTRY_SIZE, update)
+		else
+			FauxScrollFrame_OnVerticalScroll(ENTRY_SIZE, update)
+		end
+	end)
+
     CliqueListScroll:SetScript("OnShow", update)
 
     local frame = CreateFrame("Frame", "CliqueTextListFrame", CliqueFrame)
@@ -426,7 +433,13 @@ function Clique:CreateOptionsFrame()
 		Clique:TextListScrollUpdate()
 	end
 
-    CliqueTextListScroll:SetScript("OnVerticalScroll", function() FauxScrollFrame_OnVerticalScroll(22, update) end)
+    CliqueTextListScroll:SetScript("OnVerticalScroll", function(self, offset)
+		if IsWrathBuild() then
+			FauxScrollFrame_OnVerticalScroll(self, offset, 22, update) 
+		else
+			FauxScrollFrame_OnVerticalScroll(22, update) 
+		end
+	end)
     CliqueTextListFrame:SetScript("OnShow", update)
 	CliqueTextListFrame:Hide()
 
@@ -888,12 +901,20 @@ function Clique:CreateOptionsFrame()
 	texture:SetPoint("BOTTOMRIGHT", 14,0)
 	texture:SetVertexColor(0.3, 0.3, 0.3)
 
-	CliqueIconScrollFrame:SetScript("OnVerticalScroll", function()
-															local MACRO_ICON_ROW_HEIGHT = 36
-															FauxScrollFrame_OnVerticalScroll(MACRO_ICON_ROW_HEIGHT, function() Clique:UpdateIconFrame() end)
-														end)
+	local function updateicons()
+		Clique:UpdateIconFrame()
+	end
 
-	CliqueIconSelectFrame:SetScript("OnShow", function() Clique:UpdateIconFrame() end)
+	CliqueIconScrollFrame:SetScript("OnVerticalScroll", function(self)
+		local MACRO_ICON_ROW_HEIGHT = 36
+		if IsWrathBuild() then
+			FauxScrollFrame_OnVerticalScroll(self, MACRO_ICON_ROW_HEIGHT, updateicons)
+		else
+			FauxScrollFrame_OnVerticalScroll(self, MACRO_ICON_ROW_HEIGHT, updateicons) 
+		end
+	end)
+
+	CliqueIconSelectFrame:SetScript("OnShow", updateicons)
 
 	-- Create the CliqueHelpText
 	CliqueFrame:CreateFontString("CliqueHelpText", "OVERLAY", "GameFontHighlight")
@@ -915,7 +936,11 @@ function Clique:ListScrollUpdate()
     Clique:SortList()
     local clickCasts = self.sortList
     local offset = FauxScrollFrame_GetOffset(CliqueListScroll)
-    FauxScrollFrame_Update(CliqueListScroll, table.getn(clickCasts), NUM_ENTRIES, ENTRY_SIZE)
+	if IsWrathBuild() then
+		FauxScrollFrame_Update(CliqueListScroll, table.getn(clickCasts), NUM_ENTRIES, ENTRY_SIZE)
+	else
+		FauxScrollFrame_Update(CliqueListScroll, table.getn(clickCasts), NUM_ENTRIES, ENTRY_SIZE)
+	end
 
     if not CliqueListScroll:IsShown() then 
         CliqueFrame:SetWidth(400)
