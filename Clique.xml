@@ -36,7 +36,7 @@
                 <CheckedTexture alphaMode="ADD" file="Interface\Buttons\CheckButtonHilight"/>
         <Scripts>
             <OnClick>
-                Clique:SetSpellIcon()
+                Clique:SetSpellIcon(self)
             </OnClick>
         </Scripts>
         </CheckButton>

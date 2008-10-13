@@ -1,4 +1,11 @@
+local genv = getfenv(0)
+local Clique = genv.Clique
 local L = Clique.Locals
+local StaticPopupDialogs = genv.StaticPopupDialogs
+local TEXT = genv.TEXT
+local OKAY = genv.OKAY
+local CANCEL = genv.CANCEL
+local GameTooltip = genv.GameTooltip
 
 local NUM_ENTRIES = 10
 local ENTRY_SIZE = 35
@@ -8,8 +15,8 @@ function Clique:OptionsOnLoad()
     -- Create a set of buttons to hook the SpellbookFrame
     self.spellbuttons = {}
     local onclick = function(frame, button) Clique:SpellBookButtonPressed(frame, button) end
-    local onleave = function()
-        this.updateTooltip = nil
+    local onleave = function(button)
+        button.updateTooltip = nil
         GameTooltip:Hide()
     end
 
@@ -43,6 +50,11 @@ function Clique:OptionsOnLoad()
             UIFrameFlash(CliqueFlashFrame, 0.5, 0.5, 30, nil)
         end
     end)
+	CliquePulloutTab:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+		GameTooltip:SetText("Clique configuration")
+		GameTooltip:Show()
+	end)
    
     local frame = CreateFrame("Frame", "CliqueFlashFrame", CliquePulloutTab)
     frame:SetWidth(10) frame:SetHeight(10)
@@ -61,15 +73,15 @@ function Clique:OptionsOnLoad()
 	local containerFunc = function(button)
 		if IsShiftKeyDown() and CliqueCustomArg1 then
 			if CliqueCustomArg1:HasFocus() then
-				CliqueCustomArg1:Insert(GetContainerItemLink(this:GetParent():GetID(), this:GetID()))
+				CliqueCustomArg1:Insert(GetContainerItemLink(button:GetParent():GetID(), button:GetID()))
 			elseif CliqueCustomArg2:HasFocus() then
-				CliqueCustomArg2:Insert(GetContainerItemLink(this:GetParent():GetID(), this:GetID()))
+				CliqueCustomArg2:Insert(GetContainerItemLink(button:GetParent():GetID(), button:GetID()))
 			elseif CliqueCustomArg3:HasFocus() then
-				CliqueCustomArg3:Insert(GetContainerItemLink(this:GetParent():GetID(), this:GetID()))
+				CliqueCustomArg3:Insert(GetContainerItemLink(button:GetParent():GetID(), button:GetID()))
 			elseif CliqueCustomArg4:HasFocus() then
-				CliqueCustomArg4:Insert(GetContainerItemLink(this:GetParent():GetID(), this:GetID()))
+				CliqueCustomArg4:Insert(GetContainerItemLink(button:GetParent():GetID(), button:GetID()))
 			elseif CliqueCustomArg5:HasFocus() then
-				CliqueCustomArg5:Insert(GetContainerItemLink(this:GetParent():GetID(), this:GetID()))
+				CliqueCustomArg5:Insert(GetContainerItemLink(button:GetParent():GetID(), button:GetID()))
 			end
 		end
 	end
@@ -80,15 +92,15 @@ function Clique:OptionsOnLoad()
 	local bankFunc = function(button)
 		if IsShiftKeyDown() and CliqueCustomArg1 then
 			if CliqueCustomArg1:HasFocus() then
-				CliqueCustomArg1:Insert(GetContainerItemLink(BANK_CONTAINER, this:GetID()))
+				CliqueCustomArg1:Insert(GetContainerItemLink(BANK_CONTAINER, button:GetID()))
 			elseif CliqueCustomArg2:HasFocus() then
-				CliqueCustomArg2:Insert(GetContainerItemLink(BANK_CONTAINER, this:GetID()))
+				CliqueCustomArg2:Insert(GetContainerItemLink(BANK_CONTAINER, button:GetID()))
 			elseif CliqueCustomArg3:HasFocus() then
-				CliqueCustomArg3:Insert(GetContainerItemLink(BANK_CONTAINER, this:GetID()))
+				CliqueCustomArg3:Insert(GetContainerItemLink(BANK_CONTAINER, button:GetID()))
 			elseif CliqueCustomArg4:HasFocus() then
-				CliqueCustomArg4:Insert(GetContainerItemLink(BANK_CONTAINER, this:GetID()))
+				CliqueCustomArg4:Insert(GetContainerItemLink(BANK_CONTAINER, button:GetID()))
 			elseif CliqueCustomArg5:HasFocus() then
-				CliqueCustomArg5:Insert(GetContainerItemLink(BANK_CONTAINER, this:GetID()))
+				CliqueCustomArg5:Insert(GetContainerItemLink(BANK_CONTAINER, button:GetID()))
 			end
 		end
 	end
@@ -99,15 +111,15 @@ function Clique:OptionsOnLoad()
 	local dollFunc = function(button)
 		if IsShiftKeyDown() and CliqueCustomArg1 then
 			if CliqueCustomArg1:HasFocus() then
-				CliqueCustomArg1:Insert(GetInventoryItemLink("player", this:GetID()))
+				CliqueCustomArg1:Insert(GetInventoryItemLink("player", button:GetID()))
 			elseif CliqueCustomArg2:HasFocus() then
-				CliqueCustomArg2:Insert(GetInventoryItemLink("player", this:GetID()))
+				CliqueCustomArg2:Insert(GetInventoryItemLink("player", button:GetID()))
 			elseif CliqueCustomArg3:HasFocus() then
-				CliqueCustomArg3:Insert(GetInventoryItemLink("player", this:GetID()))
+				CliqueCustomArg3:Insert(GetInventoryItemLink("player", button:GetID()))
 			elseif CliqueCustomArg4:HasFocus() then
-				CliqueCustomArg4:Insert(GetInventoryItemLink("player", this:GetID()))
+				CliqueCustomArg4:Insert(GetInventoryItemLink("player", button:GetID()))
 			elseif CliqueCustomArg5:HasFocus() then
-				CliqueCustomArg5:Insert(GetInventoryItemLink("player", this:GetID()))
+				CliqueCustomArg5:Insert(GetInventoryItemLink("player", button:GetID()))
 			end
 		end
 	end
@@ -148,13 +160,13 @@ function Clique:Toggle()
 end
 
 -- This code is contributed with permission from Beladona
-local ondragstart = function()
-	this:GetParent():StartMoving()
+local ondragstart = function(self)
+	self:GetParent():StartMoving()
 end
 
-local ondragstop = function()
-	this:GetParent():StopMovingOrSizing()
-	this:GetParent():SetUserPlaced()
+local ondragstop = function(self)
+	self:GetParent():StopMovingOrSizing()
+	self:GetParent():SetUserPlaced()
 end
 
 function Clique:SkinFrame(frame)
@@ -219,7 +231,7 @@ function Clique:CreateOptionsFrame()
     local frames = {}
     self.frames = frames
     
-    local frame = CreateFrame("Frame", "CliqueFrame", SpellBookFrame)
+    local frame = CreateFrame("Frame", "CliqueFrame", CliquePulloutTab)
     frame:SetHeight(415)
     frame:SetWidth(400)
     frame:SetPoint("LEFT", SpellBookFrame, "RIGHT", 15, 30)
@@ -233,31 +245,45 @@ function Clique:CreateOptionsFrame()
 		end
 	end)
 
-	CliqueFrame:SetScript("OnShow", function() 
+	CliqueFrame:SetScript("OnShow", function(self) 
 		if InCombatLockdown() then
-			CliqueFrame:Hide()
+			Clique:Toggle()
+			return
 		end
+		local parent = self:GetParent()
+		self:SetFrameLevel(parent:GetFrameLevel() + 5)
 		Clique:ToggleSpellBookButtons()
 	end)
 
 	CliqueFrame:SetScript("OnHide", function() Clique:ToggleSpellBookButtons() end)
+	CliqueFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+	CliqueFrame:SetScript("OnEvent", function(self, event, ...)
+		if self:IsVisible() then
+			Clique:Toggle()
+		end
+	end)
     
     local frame = CreateFrame("Frame", "CliqueListFrame", CliqueFrame)
     frame:SetAllPoints()
     
-    local onclick = function()
-    local offset = FauxScrollFrame_GetOffset(CliqueListScroll)
-        self.listSelected = offset + this.id
-        Clique:ListScrollUpdate()
+    local onclick = function(button)
+		local offset = FauxScrollFrame_GetOffset(CliqueListScroll)
+		self.listSelected = offset + button.id
+		Clique:ListScrollUpdate()
     end
+
+	local ondoubleclick = function(button)
+		onclick(button)
+		CliqueButtonEdit:Click()
+	end
     
-    local onenter = function() this:SetBackdropBorderColor(1, 1, 1) end
-    local onleave = function()
-        local selected = FauxScrollFrame_GetOffset(CliqueListScroll) + this.id
+    local onenter = function(button) button:SetBackdropBorderColor(1, 1, 1) end
+    local onleave = function(button)
+        local selected = FauxScrollFrame_GetOffset(CliqueListScroll) + button.id
         if selected == self.listSelected then
-            this:SetBackdropBorderColor(1, 1, 0)
+            button:SetBackdropBorderColor(1, 1, 0)
         else
-            this:SetBackdropBorderColor(0.3, 0.3, 0.3)
+            button:SetBackdropBorderColor(0.3, 0.3, 0.3)
         end
     end
 
@@ -277,6 +303,7 @@ function Clique:CreateOptionsFrame()
         entry:SetScript("OnClick", onclick)
         entry:SetScript("OnEnter", onenter)
         entry:SetScript("OnLeave", onleave)
+		entry:SetScript("OnDoubleClick", ondoubleclick)
 
         entry.icon = entry:CreateTexture(nil, "ARTWORK")
         entry.icon:SetHeight(24)
@@ -332,17 +359,22 @@ function Clique:CreateOptionsFrame()
 	self:SkinFrame(frame)
 	frame:SetFrameStrata("HIGH")
 
-    local onclick = function()
+	frame:SetScript("OnShow", function(self)
+		local parent = self:GetParent()
+		self:SetFrameLevel(parent:GetFrameLevel() + 5)
+	end)
+
+    local onclick = function(button)
 	    local offset = FauxScrollFrame_GetOffset(CliqueTextListScroll)
-		if self.textlistSelected == offset + this.id then
+		if self.textlistSelected == offset + button.id then
 			self.textlistSelected = nil
 		else
-			self.textlistSelected = offset + this.id
+			self.textlistSelected = offset + button.id
 		end
 		if self.textlist == "FRAMES" then
-			local name = this.name:GetText()
+			local name = button.name:GetText()
 			local frame = getglobal(name)
-			if this:GetChecked() then
+			if button:GetChecked() then
 				self.profile.blacklist[name] = nil
 				self:RegisterFrame(getglobal(name))
 			else
@@ -353,10 +385,10 @@ function Clique:CreateOptionsFrame()
         Clique:TextListScrollUpdate()
     end
     
-    local onenter = function() this:SetBackdropBorderColor(1, 1, 1) end
-    local onleave = function()
-        local selected = FauxScrollFrame_GetOffset(CliqueTextListScroll) + this.id
-		this:SetBackdropBorderColor(0.3, 0.3, 0.3)
+    local onenter = function(button) button:SetBackdropBorderColor(1, 1, 1) end
+    local onleave = function(button)
+        local selected = FauxScrollFrame_GetOffset(CliqueTextListScroll) + button.id
+		button:SetBackdropBorderColor(0.3, 0.3, 0.3)
     end
 
 	local frames = {}
@@ -447,13 +479,22 @@ function Clique:CreateOptionsFrame()
 	CreateFrame("Frame", "CliqueDropDown", CliqueFrame, "UIDropDownMenuTemplate")
 	CliqueDropDown:SetID(1)
 	CliqueDropDown:SetPoint("TOPRIGHT", -115, -25)
-	CliqueDropDown:SetScript("OnShow", function() Clique:DropDown_OnShow() end)
+	CliqueDropDown:SetScript("OnShow", function(self) Clique:DropDown_OnShow(self) end)
+
+	CliqueDropDownButton:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+		GameTooltip:SetText("Select a click-set to edit")
+		GameTooltip:Show()
+	end)
+	CliqueDropDownButton:SetScript("OnLeave", function(self)
+		GameTooltip:Hide()
+	end)
 
 	local font = CliqueDropDown:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	font:SetText("Click Set:")
 	font:SetPoint("RIGHT", CliqueDropDown, "LEFT", 5, 3)
 	-- Button Creations
-    local buttonFunc = function() Clique:ButtonOnClick() end
+    local buttonFunc = function(self) Clique:ButtonOnClick(self) end
 
 	local button = CreateFrame("Button", "CliqueButtonClose", CliqueFrame.titleBar, "UIPanelCloseButton")
 	button:SetHeight(25)
@@ -541,6 +582,11 @@ function Clique:CreateOptionsFrame()
 	frame:SetFrameStrata("DIALOG")
 	frame.title:SetText("Clique Custom Editor");
     frame:Hide()
+
+	frame:SetScript("OnShow", function(self)
+		local parent = self:GetParent()
+		self:SetFrameLevel(parent:GetFrameLevel() + 5)
+	end)
 
 	-- Help text for Custom screen
 
@@ -638,7 +684,7 @@ function Clique:CreateOptionsFrame()
     button:SetWidth(175)
     button:SetText("Set Click Binding")
     button:SetPoint("TOP", CliqueCustomHelpText, "BOTTOM", 40, -10)
-    button:SetScript("OnClick", function() Clique:CustomBinding_OnClick() end )
+    button:SetScript("OnClick", function(self) Clique:CustomBinding_OnClick(self) end )
 	button:RegisterForClicks("LeftButtonUp", "RightButtonUp", "MiddleButtonUp", "Button4Up", "Button5Up")
 
 	-- Button for icon selection
@@ -654,9 +700,9 @@ function Clique:CreateOptionsFrame()
 	button:SetPoint("RIGHT", CliqueCustomButtonBinding, "LEFT", -15, 0)
 
     local func = function()
-        GameTooltip:SetOwner(button, "ANCHOR_TOPLEFT")
+		GameTooltip:SetOwner(button, "ANCHOR_TOPLEFT")
 		GameTooltip:SetText("Click here to set icon")
-        GameTooltip:Show()
+		GameTooltip:Show()
     end
     
     button:SetScript("OnEnter", func)
@@ -905,16 +951,20 @@ function Clique:CreateOptionsFrame()
 		Clique:UpdateIconFrame()
 	end
 
-	CliqueIconScrollFrame:SetScript("OnVerticalScroll", function(self)
+	CliqueIconScrollFrame:SetScript("OnVerticalScroll", function(self, offset)
 		local MACRO_ICON_ROW_HEIGHT = 36
 		if IsWrathBuild() then
-			FauxScrollFrame_OnVerticalScroll(self, MACRO_ICON_ROW_HEIGHT, updateicons)
+			FauxScrollFrame_OnVerticalScroll(self, offset, MACRO_ICON_ROW_HEIGHT, updateicons)
 		else
 			FauxScrollFrame_OnVerticalScroll(self, MACRO_ICON_ROW_HEIGHT, updateicons) 
 		end
 	end)
 
-	CliqueIconSelectFrame:SetScript("OnShow", updateicons)
+	CliqueIconSelectFrame:SetScript("OnShow", function(self)
+		local parent = self:GetParent()
+		self:SetFrameLevel(parent:GetFrameLevel() + 5)
+		Clique:UpdateIconFrame()
+	end)
 
 	-- Create the CliqueHelpText
 	CliqueFrame:CreateFontString("CliqueHelpText", "OVERLAY", "GameFontHighlight")
@@ -1055,7 +1105,7 @@ function Clique:FillListEntry(frame, idx)
 	elseif entry.type == "menu" then
 		frame.name:SetText("Show Menu")
 	elseif entry.type == "stop" then
-		frame.name:SetText("Stop Casting")
+		frame.name:SetText("Cancel Pending Spell")
 	elseif entry.type == "target" then
 		frame.name:SetText(string.format("Target Unit: %s", arg1 and entry.arg1 or ""))
 	elseif entry.type == "focus" then
@@ -1077,9 +1127,8 @@ end
 
 function Clique:ButtonOnClick(button)
     local entry = self.sortList[self.listSelected]
-	local this = button or this
 
-    if this == CliqueButtonDelete then
+    if button == CliqueButtonDelete then
         if InCombatLockdown() then
             StaticPopup_Show("CLIQUE_COMBAT_LOCKDOWN")
             return
@@ -1098,22 +1147,22 @@ function Clique:ButtonOnClick(button)
 		entry = nil
         
         self:ListScrollUpdate()
-	elseif this == CliqueButtonClose then
+	elseif button == CliqueButtonClose then
 		self:Toggle()
-	elseif this == CliqueTextButtonClose then
+	elseif button == CliqueTextButtonClose then
 		CliqueTextListFrame:Hide()
-    elseif this == CliqueButtonMax then
+    elseif button == CliqueButtonMax then
         entry.arg2 = nil
 		self:DeleteAction(entry)
 		self:UpdateClicks()
 		self:PLAYER_REGEN_ENABLED()
-    elseif this == CliqueButtonCustom then
+    elseif button == CliqueButtonCustom then
         if CliqueCustomFrame:IsVisible() then
             CliqueCustomFrame:Hide()
         else
             CliqueCustomFrame:Show()
 		end
-	elseif this == CliqueButtonOptions then
+	elseif button == CliqueButtonOptions then
 		if CliqueTextListFrame:IsVisible() and self.textlist == "FRAMES" then
 			CliqueTextListFrame:Hide()
 		else
@@ -1128,7 +1177,7 @@ function Clique:ButtonOnClick(button)
 		self:TextListScrollUpdate()
 		CliqueTextListFrame.title:SetText("Clique Frame Editor")
 		self.textlistSelected = nil
-	elseif this == CliqueButtonProfiles then
+	elseif button == CliqueButtonProfiles then
 		if CliqueTextListFrame:IsVisible() and self.textlist == "PROFILES" then
 			CliqueTextListFrame:Hide()
 		else
@@ -1142,19 +1191,19 @@ function Clique:ButtonOnClick(button)
 
 		--CliqueTextListFrame.title:SetText("Profile: " .. self.db.char.profileKey)
 		self.textlistSelected = nil
-	elseif this == CliqueButtonSetProfile then
+	elseif button == CliqueButtonSetProfile then
 	    local offset = FauxScrollFrame_GetOffset(CliqueTextListScroll)
 		local selected = self.textlistSelected - offset
 		local button = getglobal("CliqueTextList"..selected)
 		self.db:SetProfile(button.name:GetText())
-	elseif this == CliqueButtonNewProfile then
+	elseif button == CliqueButtonNewProfile then
 		StaticPopup_Show("CLIQUE_NEW_PROFILE")
-	elseif this == CliqueButtonDeleteProfile then
+	elseif button == CliqueButtonDeleteProfile then
 	    local offset = FauxScrollFrame_GetOffset(CliqueTextListScroll)
 		local selected = self.textlistSelected - offset
 		local button = getglobal("CliqueTextList"..selected)
 		self.db:DeleteProfile(button.name:GetText())
-	elseif this == CliqueButtonEdit then
+	elseif button == CliqueButtonEdit then
 		-- Make a copy of the entry
 		self.customEntry = {}
 		for k,v in pairs(entry) do
@@ -1188,7 +1237,7 @@ function Clique:ButtonOnClick(button)
 
 		self.editEntry = entry
 
-    elseif this == CliqueCustomButtonCancel then
+    elseif button == CliqueCustomButtonCancel then
 		CliqueCustomFrame:Hide()
 		CliqueCustomButtonIcon.icon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
 		CliqueCustomButtonBinding:SetText("Set Click Binding")
@@ -1196,7 +1245,7 @@ function Clique:ButtonOnClick(button)
 		self.editEntry = nil
 		self:CustomRadio()
 
-	elseif this == CliqueCustomButtonSave then
+	elseif button == CliqueCustomButtonSave then
 		-- Add custom save logic in here
 		local entry = self.customEntry
 
@@ -1292,7 +1341,7 @@ function Clique:ButtonOnClick(button)
     Clique:ListScrollUpdate()
 end
 
-local click_func = function() Clique:DropDown_OnClick() end
+local click_func = function(self) Clique:DropDown_OnClick(self) end
 
 function Clique:DropDown_Initialize()
     local info = {}
@@ -1306,26 +1355,26 @@ function Clique:DropDown_Initialize()
 	end
 end
 
-function Clique:DropDown_OnClick()
-	UIDropDownMenu_SetSelectedValue(CliqueDropDown, this.value)
-	Clique.editSet = this.value
+function Clique:DropDown_OnClick(frame)
+	UIDropDownMenu_SetSelectedValue(CliqueDropDown, frame.value)
+	Clique.editSet = frame.value
 	self.listSelected = 0
 	Clique:ListScrollUpdate()
 end
 
-function Clique:DropDown_OnShow()
+function Clique:DropDown_OnShow(frame)
 	work = {}
 	for k,v in pairs(self.clicksets) do
 		table.insert(work, k)
 	end
 	table.sort(work)
 
-	UIDropDownMenu_Initialize(this, function() Clique:DropDown_Initialize() end);
+	UIDropDownMenu_Initialize(frame, function() Clique:DropDown_Initialize() end);
 	UIDropDownMenu_SetSelectedValue(CliqueDropDown, self.editSet)
 	Clique:ListScrollUpdate()
 end
 
-function Clique:CustomBinding_OnClick()
+function Clique:CustomBinding_OnClick(frame)
 	-- This handles the binding click
 	local mod = self:GetModifierText()
 	local button = arg1
@@ -1340,7 +1389,7 @@ function Clique:CustomBinding_OnClick()
 
 	self.customEntry.modifier = mod
 	self.customEntry.button = button
-	this:SetText(string.format("%s%s", mod, arg1))	
+	frame:SetText(string.format("%s%s", mod, arg1))	
 end
 
 local buttonSetup = {
@@ -1403,16 +1452,14 @@ local buttonSetup = {
 }
 
 function Clique:CustomRadio(button)
-	local this = button
-
 	local anySelected
 	for k,v in pairs(self.radio) do
-		if k ~= this then
+		if k ~= button then
 			k:SetChecked(nil)
 		end
 	end
 
-	if not this or not buttonSetup[this.type] then
+	if not button or not buttonSetup[button.type] then
 		CliqueCustomHelpText:SetText(L.CUSTOM_HELP)
 		CliqueCustomArg1:Hide()
 		CliqueCustomArg2:Hide()
@@ -1423,11 +1470,11 @@ function Clique:CustomRadio(button)
 		return
 	end
 
-	local entry = buttonSetup[this.type]
-	self.customEntry.type = this.type
+	local entry = buttonSetup[button.type]
+	self.customEntry.type = button.type
 
-	if this and this.type then
-		if not this:GetChecked() then
+	if button and button.type then
+		if not button:GetChecked() then
 			self.customEntry.type = nil
 		end
 	end
@@ -1453,7 +1500,7 @@ function Clique:CustomRadio(button)
 	if entry.arg5 then CliqueCustomArg5:Show() else CliqueCustomArg5:Hide() end
 
 	-- Handle MacroText
-	if this.type == "macro" then
+	if button.type == "macro" then
 		CliqueCustomArg2:Hide()
 		CliqueMulti:Show()
 		CliqueMultiScrollFrameEditBox:SetText("")
@@ -1495,8 +1542,8 @@ function Clique:UpdateIconFrame()
     FauxScrollFrame_Update(CliqueIconScrollFrame, ceil(numMacroIcons / NUM_ICONS_PER_ROW) , NUM_ICON_ROWS, MACRO_ICON_ROW_HEIGHT );
 end
 
-function Clique:SetSpellIcon()
-	local texture = this.icon:GetTexture()
+function Clique:SetSpellIcon(button)
+	local texture = button.icon:GetTexture()
 	self.customEntry.texture = texture
 	CliqueCustomButtonIcon.icon:SetTexture(texture)
 	CliqueIconSelectFrame:Hide()
@@ -1542,8 +1589,8 @@ StaticPopupDialogs["CLIQUE_NEW_PROFILE"] = {
 	text = TEXT("Enter the name of a new profile you'd like to create"),
 	button1 = TEXT(OKAY),
 	button2 = TEXT(CANCEL),
-	OnAccept = function()		
-		local name = this:GetParent():GetName().."EditBox"
+	OnAccept = function(self)		
+		local name = self:GetParent():GetName().."EditBox"
 		local button = getglobal(name)
 		local text = button:GetText()
 		Clique.db:SetProfile(text)
@@ -1555,33 +1602,33 @@ StaticPopupDialogs["CLIQUE_NEW_PROFILE"] = {
 	hideOnEscape = 1,
 	hasEditBox = 1,
 	maxLetters = 32,
-	OnShow = function()
-		getglobal(this:GetName().."Button1"):Disable();
-		getglobal(this:GetName().."EditBox"):SetFocus();
+	OnShow = function(self)
+		getglobal(self:GetName().."Button1"):Disable();
+		getglobal(self:GetName().."EditBox"):SetFocus();
 	end,
-	OnHide = function()
+	OnHide = function(self)
 		if ( ChatFrameEditBox:IsVisible() ) then
 			ChatFrameEditBox:SetFocus();
 		end
-		getglobal(this:GetName().."EditBox"):SetText("");
+		getglobal(self:GetName().."EditBox"):SetText("");
 	end,
-	EditBoxOnEnterPressed = function()
-		if ( getglobal(this:GetParent():GetName().."Button1"):IsEnabled() == 1 ) then
-			Clique.db:SetProfile(this:GetText())
-			this:GetParent():Hide();
+	EditBoxOnEnterPressed = function(self)
+		if ( getglobal(self:GetParent():GetName().."Button1"):IsEnabled() == 1 ) then
+			Clique.db:SetProfile(self:GetText())
+			self:GetParent():Hide();
 		end
 	end,
-	EditBoxOnTextChanged = function ()
-		local editBox = getglobal(this:GetParent():GetName().."EditBox");
+	EditBoxOnTextChanged = function (self)
+		local editBox = getglobal(self:GetParent():GetName().."EditBox");
 		local txt = editBox:GetText()
 		if #txt > 0 then
-			getglobal(this:GetParent():GetName().."Button1"):Enable();
+			getglobal(self:GetParent():GetName().."Button1"):Enable();
 		else
-			getglobal(this:GetParent():GetName().."Button1"):Disable();
+			getglobal(self:GetParent():GetName().."Button1"):Disable();
 		end
 	end,
-	EditBoxOnEscapePressed = function()
-		this:GetParent():Hide();
+	EditBoxOnEscapePressed = function(self)
+		self:GetParent():Hide();
 		ClearCursor();
 	end
 }
@@ -1590,8 +1637,8 @@ StaticPopupDialogs["CLIQUE_DELETE_PROFILE"] = {
 	text = TEXT("Enter the name of a profile you'd like to delete"),
 	button1 = TEXT(OKAY),
 	button2 = TEXT(CANCEL),
-	OnAccept = function()
-		Clique.db:DeleteProfile(getglobal(this:GetName().."EditBox"):GetText())
+	OnAccept = function(self)
+		Clique.db:DeleteProfile(getglobal(self:GetName().."EditBox"):GetText())
 		Clique:DropDownProfile_OnShow()
 	end,
 	timeout = 0,
@@ -1601,34 +1648,34 @@ StaticPopupDialogs["CLIQUE_DELETE_PROFILE"] = {
 	hideOnEscape = 1,
 	hasEditBox = 1,
 	maxLetters = 32,
-	OnShow = function()
-		getglobal(this:GetName().."Button1"):Disable();
-		getglobal(this:GetName().."EditBox"):SetFocus();
+	OnShow = function(self)
+		getglobal(self:GetName().."Button1"):Disable();
+		getglobal(self:GetName().."EditBox"):SetFocus();
 	end,
-	OnHide = function()
+	OnHide = function(self)
 		if ( ChatFrameEditBox:IsVisible() ) then
 			ChatFrameEditBox:SetFocus();
 		end
-		getglobal(this:GetName().."EditBox"):SetText("");
+		getglobal(self:GetName().."EditBox"):SetText("");
 	end,
-	EditBoxOnEnterPressed = function()
-		if ( getglobal(this:GetParent():GetName().."Button1"):IsEnabled() == 1 ) then
-			Clique.db:DeleteProfile(this:GetText())
+	EditBoxOnEnterPressed = function(self)
+		if ( getglobal(self:GetParent():GetName().."Button1"):IsEnabled() == 1 ) then
+			Clique.db:DeleteProfile(self:GetText())
 			Clique:DropDownProfile_OnShow()
-			this:GetParent():Hide();
+			self:GetParent():Hide();
 		end
 	end,
-	EditBoxOnTextChanged = function ()
-		local editBox = getglobal(this:GetParent():GetName().."EditBox");
+	EditBoxOnTextChanged = function (self)
+		local editBox = getglobal(self:GetParent():GetName().."EditBox");
 		local txt = editBox:GetText()
 		if Clique.db.profiles[txt] then
-			getglobal(this:GetParent():GetName().."Button1"):Enable();
+			getglobal(self:GetParent():GetName().."Button1"):Enable();
 		else
-			getglobal(this:GetParent():GetName().."Button1"):Disable();
+			getglobal(self:GetParent():GetName().."Button1"):Disable();
 		end
 	end,
-	EditBoxOnEscapePressed = function()
-		this:GetParent():Hide();
+	EditBoxOnEscapePressed = function(self)
+		self:GetParent():Hide();
 		ClearCursor();
 	end
 }
