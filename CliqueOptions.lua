@@ -343,11 +343,7 @@ function Clique:CreateOptionsFrame()
     local update = function() Clique:ListScrollUpdate() end
 
 	CliqueListScroll:SetScript("OnVerticalScroll", update, function(self, offset)
-		if IsWrathBuild() then
-			FauxScrollFrame_OnVerticalScroll(self, offset, ENTRY_SIZE, update)
-		else
-			FauxScrollFrame_OnVerticalScroll(ENTRY_SIZE, update)
-		end
+		FauxScrollFrame_OnVerticalScroll(self, offset, ENTRY_SIZE, update)
 	end)
 
     CliqueListScroll:SetScript("OnShow", update)
@@ -466,11 +462,7 @@ function Clique:CreateOptionsFrame()
 	end
 
     CliqueTextListScroll:SetScript("OnVerticalScroll", function(self, offset)
-		if IsWrathBuild() then
-			FauxScrollFrame_OnVerticalScroll(self, offset, 22, update) 
-		else
-			FauxScrollFrame_OnVerticalScroll(22, update) 
-		end
+		FauxScrollFrame_OnVerticalScroll(self, offset, 22, update) 
 	end)
     CliqueTextListFrame:SetScript("OnShow", update)
 	CliqueTextListFrame:Hide()
@@ -953,11 +945,7 @@ function Clique:CreateOptionsFrame()
 
 	CliqueIconScrollFrame:SetScript("OnVerticalScroll", function(self, offset)
 		local MACRO_ICON_ROW_HEIGHT = 36
-		if IsWrathBuild() then
-			FauxScrollFrame_OnVerticalScroll(self, offset, MACRO_ICON_ROW_HEIGHT, updateicons)
-		else
-			FauxScrollFrame_OnVerticalScroll(self, MACRO_ICON_ROW_HEIGHT, updateicons) 
-		end
+		FauxScrollFrame_OnVerticalScroll(self, offset, MACRO_ICON_ROW_HEIGHT, updateicons)
 	end)
 
 	CliqueIconSelectFrame:SetScript("OnShow", function(self)
@@ -986,11 +974,7 @@ function Clique:ListScrollUpdate()
     Clique:SortList()
     local clickCasts = self.sortList
     local offset = FauxScrollFrame_GetOffset(CliqueListScroll)
-	if IsWrathBuild() then
-		FauxScrollFrame_Update(CliqueListScroll, table.getn(clickCasts), NUM_ENTRIES, ENTRY_SIZE)
-	else
-		FauxScrollFrame_Update(CliqueListScroll, table.getn(clickCasts), NUM_ENTRIES, ENTRY_SIZE)
-	end
+	FauxScrollFrame_Update(CliqueListScroll, table.getn(clickCasts), NUM_ENTRIES, ENTRY_SIZE)
 
     if not CliqueListScroll:IsShown() then 
         CliqueFrame:SetWidth(400)
