@@ -1,4 +1,4 @@
-## Interface: 20400
+## Interface: 30000 
 ## Title: Clique
 ## Author: Cladhaire
 ## Version: wowi:revision
