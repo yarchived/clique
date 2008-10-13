@@ -124,6 +124,7 @@ function Clique:EnableFrames()
 		PartyMemberFrame4PetFrame,
 		TargetFrame,
 		TargetofTargetFrame,
+		FocusFrame,
     }
     
     for i,frame in pairs(tbl) do
@@ -150,7 +151,12 @@ function Clique:SpellBookButtonPressed(frame, button)
 	else
 		button = self:GetButtonNumber(button)
 	end
-    
+   
+	-- Clear the rank if "Show all spell ranks" is selected
+	if not GetCVarBool("ShowAllSpellRanks") then
+		rank = nil
+	end
+
     -- Build the structure
     local t = {
 		["button"] = button,
