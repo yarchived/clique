@@ -1576,11 +1576,10 @@ StaticPopupDialogs["CLIQUE_NEW_PROFILE"] = {
 	text = TEXT("Enter the name of a new profile you'd like to create"),
 	button1 = TEXT(OKAY),
 	button2 = TEXT(CANCEL),
-	OnAccept = function(self)		
-		local name = self:GetParent():GetName().."EditBox"
-		local button = getglobal(name)
-		local text = button:GetText()
-		Clique.db:SetProfile(text)
+	OnAccept = function(self)
+		local base = self:GetName()
+		local editbox = getglobal(base .. "EditBox")
+		Clique.db:SetProfile(editbox:GetText())
 	end,
 	timeout = 0,
 	whileDead = 1,
