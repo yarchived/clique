@@ -10,6 +10,8 @@ Dongle.lua
 Clique.xml
 Clique.lua
 Localization.enUS.lua
+Localization.esES.lua
+Localization.esMX.lua
 Localization.frFR.lua
 Localization.deDE.lua
 Localization.koKR.lua
