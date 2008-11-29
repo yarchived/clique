@@ -6,7 +6,7 @@
 local L = Clique.Locals
 
 -- This is the default locale.
-if GetLocale() then
+if GetLocale() == "ruRU" then
 	L.RANK                    = "Уровень"
 	L.RANK_PATTERN            = "Уровень (%d+)"
 	L.CAST_FORMAT             = "%s(Уровень %s)"
