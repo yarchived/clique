@@ -37,7 +37,7 @@ function Clique:OptionsOnLoad()
         self.spellbuttons[i] = button
     end
 
-    CreateFrame("CheckButton", "CliquePulloutTab", SpellBookSkillLineTab1, "SpellBookSkillLineTabTemplate")
+    CreateFrame("CheckButton", "CliquePulloutTab", SpellButton1, "SpellBookSkillLineTabTemplate")
     CliquePulloutTab:SetNormalTexture("Interface\\AddOns\\Clique\\Images\\CliqueIcon")
     CliquePulloutTab:SetScript("OnClick", function() Clique:Toggle() end)
     CliquePulloutTab:SetScript("OnEnter", function() local i = 1 end)
@@ -239,6 +239,7 @@ function Clique:CreateOptionsFrame()
     frame:SetWidth(400)
     frame:SetPoint("LEFT", SpellBookFrame, "RIGHT", 15, 30)
 	self:SkinFrame(frame)
+	frame:SetToplevel(true)
 	frame.title:SetText("Clique v. " .. Clique.version);
 	frame:SetScript("OnShow", function()
 		if Clique.inuse then
@@ -1081,7 +1082,11 @@ function Clique:FillListEntry(frame, idx)
 	elseif entry.type == "actionbar" then
 		frame.name:SetText(string.format("Action Bar: %s", arg1))
 	elseif entry.type == "pet" then
-		frame.name:SetText(string.format("Pet Action %d%s", arg1, arg2 and " on ".. entry.arg2 or ""))
+		local target = ""
+		if entry.arg2 then
+			target = " on " .. arg2
+		end
+		frame.name:SetText(string.format("Pet Action %d%s", arg1, target))
 	elseif entry.type == "spell" then
 		if entry.arg2 then
 			frame.name:SetText(string.format("%s (%s)%s", arg1, rank,
