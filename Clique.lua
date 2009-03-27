@@ -5,7 +5,7 @@
 Clique = {Locals = {}}
 
 assert(DongleStub, string.format("Clique requires DongleStub."))
-DongleStub("Dongle-1.1"):New("Clique", Clique)
+DongleStub("Dongle-1.2"):New("Clique", Clique)
 Clique.version = GetAddOnMetadata("Clique", "Version")
 if Clique.version == "wowi:revision" then Clique.version = "SVN" end
 
@@ -30,6 +30,7 @@ function Clique:Enable()
 			blacklist = {
 			},
 			tooltips = false,
+            switchSpec = false,
 		}
 	}
 	
@@ -66,6 +67,19 @@ function Clique:Enable()
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 
 	self:RegisterEvent("LEARNED_SPELL_IN_TAB")
+    self:RegisterEvent("PLAYER_TALENT_UPDATE")
+
+    -- Change to correct profile based on talent spec
+    if self.db.profile.switchSpec then
+        self.silentProfile = true
+        self.talentGroup = GetActiveTalentGroup()
+        if self.talentGroup == 1 and self.db.profile.primaryProfile then
+            self.db:SetProfile(self.db.profile.primaryProfile)
+        elseif self.talentGroup == 2 and self.db.profile.secondaryProfile then
+            self.db:SetProfile(self.db.profile.secondaryProfile)
+        end
+        self.silentProfile = false
+    end
 
 	self:UpdateClicks()
 
@@ -306,7 +320,9 @@ end
 
 function Clique:DONGLE_PROFILE_CHANGED(event, db, parent, svname, profileKey)
 	if db == self.db then
-		self:PrintF(L.PROFILE_CHANGED, profileKey)
+        if not self.silentProfile then
+            self:PrintF(L.PROFILE_CHANGED, profileKey)
+        end
 
 		for name,set in pairs(self.clicksets) do
 			self:RemoveClickSet(set)
@@ -700,5 +716,24 @@ function Clique:ShowBindings()
 	end
 
 	CliqueTooltip:Show()
+end
+
+function Clique:PLAYER_TALENT_UPDATE()
+    local newGroup = GetActiveTalentGroup()
+
+    if self.db.profile.switchSpec and newGroup ~= self.talentGroup then
+        self.talentGroup = newGroup
+        self:Print("Detected a talent spec change, changing profile")
+        if self.talentGroup == 1 and self.db.profile.primaryProfile then
+            self.db:SetProfile(self.db.profile.primaryProfile)
+        elseif self.talentGroup == 2 and self.db.profile.secondaryProfile then
+            self.db:SetProfile(self.db.profile.secondaryProfile)
+        end
+        if CliqueFrame then
+            CliqueFrame.title:SetText("Clique v. " .. Clique.version .. " - " .. tostring(Clique.db.keys.profile));
+        end
+    else
+        self.talentGroup = newGroup
+    end
 end
 

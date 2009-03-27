@@ -108,4 +108,14 @@ if GetLocale() then
 	L.BS_CLICK_ARG1_LABEL = "Button Name:"
 
 	L.BS_MENU_HELP = "Shows the unit pop up menu"
+
+    L.CUSTOM = "Custom"
+    L.FRAMES = "Frames"
+    L.PROFILES = "Profiles"
+    L.DELETE = "Delete"
+    L.EDIT = "Edit"
+    L["Clique Options"] = "Clique Options"
+    L["Primary:"] = "Primary:"
+    L["Secondary:"] = "Secondary:"
 end
+

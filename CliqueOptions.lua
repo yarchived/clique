@@ -50,7 +50,30 @@ function Clique:OptionsOnLoad()
         end
         if not Clique.inuse then
             CliqueFlashFrame.texture:Show()
-            UIFrameFlash(CliqueFlashFrame, 0.5, 0.5, 30, nil)
+            CliqueFlashFrame.texture:SetAlpha(1.0)
+
+            local counter, loops, fading = 0, 0, true
+            CliqueFlashFrame:SetScript("OnUpdate", function(self, elapsed)
+                counter = counter + elapsed
+                if counter > 0.5 then
+                    loops = loops + 0.5
+                    fading = not fading
+                    counter = counter - 0.5
+                end
+
+                if loops > 30 then
+                    self.texture:Hide()
+                    self:SetScript("OnUpdate", nil)
+                    return
+                end
+
+                local texture = self.texture
+                if fading then 
+                    texture:SetAlpha(1.0 - (counter / 0.5))
+                else
+                    texture:SetAlpha(counter / 0.5)
+                end
+            end)
         end
     end)
 	CliquePulloutTab:SetScript("OnEnter", function(self)
@@ -240,8 +263,9 @@ function Clique:CreateOptionsFrame()
     frame:SetPoint("LEFT", SpellBookFrame, "RIGHT", 15, 30)
 	self:SkinFrame(frame)
 	frame:SetToplevel(true)
-	frame.title:SetText("Clique v. " .. Clique.version);
+	frame.title:SetText("Clique v. " .. Clique.version .. " - " .. tostring(Clique.db.keys.profile));
 	frame:SetScript("OnShow", function()
+        frame.title:SetText("Clique v. " .. Clique.version .. " - " .. tostring(Clique.db.keys.profile));
 		if Clique.inuse then
 			CliqueHelpText:Hide()
 		else
@@ -505,7 +529,7 @@ function Clique:CreateOptionsFrame()
     button:SetPoint("BOTTOMLEFT", CliqueFrame, "BOTTOMLEFT", 10, 5)
     button:SetScript("OnClick", buttonFunc)
 
-    local button = CreateFrame("Button", "CliqueButtonOptions", CliqueFrame, "UIPanelButtonGrayTemplate")
+    local button = CreateFrame("Button", "CliqueButtonFrames", CliqueFrame, "UIPanelButtonGrayTemplate")
     button:SetHeight(24)
     button:SetWidth(60)
     button:SetText("Frames")
@@ -516,14 +540,21 @@ function Clique:CreateOptionsFrame()
     button:SetHeight(24)
     button:SetWidth(60)
     button:SetText("Profiles")
-    button:SetPoint("LEFT", CliqueButtonOptions, "RIGHT", 3, 0)
+    button:SetPoint("LEFT", CliqueButtonFrames, "RIGHT", 3, 0)
+    button:SetScript("OnClick", buttonFunc)
+
+    local button = CreateFrame("Button", "CliqueButtonOptions", CliqueFrame, "UIPanelButtonGrayTemplate")
+    button:SetHeight(24)
+    button:SetWidth(60)
+    button:SetText("Options")
+    button:SetPoint("LEFT", CliqueButtonProfiles, "RIGHT", 3, 0)
     button:SetScript("OnClick", buttonFunc)
 
     local button = CreateFrame("Button", "CliqueButtonDelete", CliqueFrame, "UIPanelButtonGrayTemplate")
     button:SetHeight(24)
     button:SetWidth(60)
     button:SetText("Delete")
-    button:SetPoint("LEFT", CliqueButtonProfiles, "RIGHT", 3, 0)
+    button:SetPoint("LEFT", CliqueButtonOptions, "RIGHT", 3, 0)
     button:SetScript("OnClick", buttonFunc)
 
     local button = CreateFrame("Button", "CliqueButtonEdit", CliqueFrame, "UIPanelButtonGrayTemplate")
@@ -533,14 +564,7 @@ function Clique:CreateOptionsFrame()
     button:SetPoint("LEFT", CliqueButtonDelete, "RIGHT", 3, 0)
     button:SetScript("OnClick", buttonFunc)
 
-    local button = CreateFrame("Button", "CliqueButtonMax", CliqueFrame, "UIPanelButtonGrayTemplate")
-    button:SetHeight(24)
-    button:SetWidth(60)
-    button:SetText("Max")
-    button:SetPoint("LEFT", CliqueButtonEdit, "RIGHT", 3, 0)
-    button:SetScript("OnClick", buttonFunc)
-
-	-- Buttons for text list scroll frame
+ 	-- Buttons for text list scroll frame
 
 	local button = CreateFrame("Button", "CliqueTextButtonClose", CliqueTextListFrame.titleBar, "UIPanelCloseButton")
 	button:SetHeight(25)
@@ -568,6 +592,16 @@ function Clique:CreateOptionsFrame()
     button:SetText("New")
     button:SetPoint("LEFT", CliqueButtonSetProfile, "RIGHT", 3, 0)
     button:SetScript("OnClick", buttonFunc)
+
+    local frame = CreateFrame("FramE", "CliqueOptionsFrame", CliqueFrame)
+    frame:SetHeight(200)
+    frame:SetWidth(300)
+    frame:SetPoint("CENTER", 0, 0)
+    self:SkinFrame(frame)
+    frame:SetFrameStrata("DIALOG")
+    frame.title:SetText(L["Clique Options"])
+    frame:Hide()
+    self:CreateOptionsWidgets(frame)
 
 	self.customEntry = {}    
     local frame = CreateFrame("Frame", "CliqueCustomFrame", CliqueFrame)
@@ -1029,19 +1063,14 @@ function Clique:ValidateButtons()
     if entry then
         CliqueButtonDelete:Enable()
         CliqueButtonEdit:Enable()
-        if entry.type == "spell" and entry.arg2 then
-            CliqueButtonMax:Enable()
-        else
-            CliqueButtonMax:Disable()
-        end
     else
         CliqueButtonDelete:Disable()
         CliqueButtonEdit:Disable()
-        CliqueButtonMax:Disable()
     end
     
     -- This should always be enabled
     CliqueButtonCustom:Enable()
+    CliqueButtonOptions:Enable()
 
 	-- Disable the help text
 	Clique.inuse = nil
@@ -1143,18 +1172,21 @@ function Clique:ButtonOnClick(button)
 		self:Toggle()
 	elseif button == CliqueTextButtonClose then
 		CliqueTextListFrame:Hide()
-    elseif button == CliqueButtonMax then
-        entry.arg2 = nil
-		self:DeleteAction(entry)
-		self:UpdateClicks()
-		self:PLAYER_REGEN_ENABLED()
+    elseif button == CliqueOptionsButtonClose then
+        CliqueOptionsFrame:Hide()
+    elseif button == CliqueButtonOptions then
+        if CliqueOptionsFrame:IsVisible() then
+            CliqueOptionsFrame:Hide()
+        else
+            CliqueOptionsFrame:Show()
+        end
     elseif button == CliqueButtonCustom then
         if CliqueCustomFrame:IsVisible() then
             CliqueCustomFrame:Hide()
         else
             CliqueCustomFrame:Show()
 		end
-	elseif button == CliqueButtonOptions then
+	elseif button == CliqueButtonFrames then
 		if CliqueTextListFrame:IsVisible() and self.textlist == "FRAMES" then
 			CliqueTextListFrame:Hide()
 		else
@@ -1761,4 +1793,173 @@ function Clique:TextListScrollUpdate()
             button:Hide()
         end
     end
+end
+
+local function makeCheckbox(parent, name, text, width)
+    local entry = CreateFrame("CheckButton", name, parent)
+    entry:SetHeight(22)
+    entry:SetWidth(width)
+    entry:SetBackdrop({insets = {left = 2, right = 2, top = 2, bottom = 2}})
+
+    entry:SetBackdropBorderColor(0.3, 0.3, 0.3)
+    entry:SetBackdropColor(0.1, 0.1, 0.1, 0.3)
+    entry:SetScript("OnEnter", function(self)
+        if self.tooltip then
+            GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+            GameTooltip:SetText(self.tooltip)
+        end
+    end)
+    entry:SetScript("OnLeave", function(self)
+        GameTooltip:Hide()
+    end)
+
+    local texture = entry:CreateTexture("ARTWORK")
+    texture:SetTexture("Interface\\Buttons\\UI-CheckBox-Up")
+    texture:SetPoint("LEFT", 0, 0)
+    texture:SetHeight(26)
+    texture:SetWidth(26)
+    entry:SetNormalTexture(texture)
+
+    local texture = entry:CreateTexture("ARTWORK")
+    texture:SetTexture("Interface\\Buttons\\UI-CheckBox-Highlight")
+    texture:SetPoint("LEFT", 0, 0)
+    texture:SetHeight(26)
+    texture:SetWidth(26)
+    texture:SetBlendMode("ADD")
+    entry:SetHighlightTexture(texture)
+
+    local texture = entry:CreateTexture("ARTWORK")
+    texture:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
+    texture:SetPoint("LEFT", 0, 0)
+    texture:SetHeight(26)
+    texture:SetWidth(26)
+    entry:SetCheckedTexture(texture)
+
+    entry.name = entry:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    entry.name:SetPoint("LEFT", 25, 0)
+    entry.name:SetJustifyH("LEFT")
+    entry.name:SetText(text)
+    return entry
+end
+
+function Clique:CreateOptionsWidgets(parent)
+    local button = CreateFrame("Button", "CliqueOptionsButtonClose", parent.titleBar, "UIPanelCloseButton")
+    button:SetHeight(25)
+    button:SetWidth(25)
+    button:SetPoint("TOPRIGHT", -5, 3)
+    button:SetScript("OnClick", function(self) Clique:ButtonOnClick(self) end)
+
+    local switchSpec = makeCheckbox(parent, "CliqueOptionsSpecSwitch", "Change profile when switching talent specs", 300)
+    switchSpec:SetPoint("TOPLEFT", 5, -25)
+
+    local priDropdown = CreateFrame("Frame", "CliquePriSpecDropDown", parent, "UIDropDownMenuTemplate")
+    priDropdown:ClearAllPoints()
+    priDropdown:SetPoint("TOPLEFT", switchSpec, "BOTTOMLEFT", 65, 0)
+    priDropdown:Show()
+    priDropdown.label = priDropdown:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    priDropdown.label:SetText(L["Primary:"])
+    priDropdown.label:SetPoint("RIGHT", priDropdown, "LEFT", 0, 0)
+    priDropdown.label:SetHeight(16)
+
+    local function initialize(self, level)
+        local function OnClick(self)
+            UIDropDownMenu_SetSelectedID(priDropdown, self:GetID())
+            Clique.db.profile.primaryProfile = self.value
+            Clique:UpdateClicks()
+        end
+
+        local work = {}
+        for k,v in pairs(Clique.db.profiles) do 
+            table.insert(work, k)
+        end
+		table.sort(work) 
+
+        for idx,profile in ipairs(work) do
+            local info = UIDropDownMenu_CreateInfo()
+            info.text = profile
+            info.func = OnClick
+            info.value = profile
+            UIDropDownMenu_AddButton(info, level)
+        end
+    end
+
+    UIDropDownMenu_Initialize(priDropdown, initialize)
+    UIDropDownMenu_SetWidth(priDropdown, 175);
+    UIDropDownMenu_SetButtonWidth(priDropdown, 199)
+    UIDropDownMenu_JustifyText(priDropdown, "LEFT")
+    if Clique.db.profile.primaryProfile then
+        UIDropDownMenu_SetSelectedValue(priDropdown, Clique.db.profile.primaryProfile)
+    else
+        UIDropDownMenu_SetSelectedValue(priDropdown, Clique.db.keys.profile)
+    end
+
+    local secDropdown = CreateFrame("Frame", "CliqueSecSpecDropDown", parent, "UIDropDownMenuTemplate")
+    secDropdown:ClearAllPoints()
+    secDropdown:SetPoint("TOPLEFT", priDropdown, "BOTTOMLEFT", 0, 0)
+    secDropdown:Show()
+    secDropdown.label = secDropdown:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    secDropdown.label:SetText(L["Secondary:"])
+    secDropdown.label:SetPoint("RIGHT", secDropdown, "LEFT", 0, 0)
+    secDropdown.label:SetHeight(16)
+
+    local function initialize(self, level)
+        local function OnClick(self)
+            UIDropDownMenu_SetSelectedID(secDropdown, self:GetID())
+            Clique.db.profile.secondaryProfile = self.value
+            Clique:UpdateClicks()
+        end
+
+        local work = {}
+        for k,v in pairs(Clique.db.profiles) do 
+            table.insert(work, k)
+        end
+		table.sort(work) 
+
+        for idx,profile in ipairs(work) do
+            local info = UIDropDownMenu_CreateInfo()
+            info.text = profile
+            info.func = OnClick
+            info.value = profile
+            UIDropDownMenu_AddButton(info, level)
+        end
+    end
+
+    UIDropDownMenu_Initialize(secDropdown, initialize)
+    UIDropDownMenu_SetWidth(secDropdown, 175);
+    UIDropDownMenu_SetButtonWidth(secDropdown, 199)
+    UIDropDownMenu_JustifyText(secDropdown, "LEFT")
+    if Clique.db.profile.secondaryProfile then
+        UIDropDownMenu_SetSelectedValue(secDropdown, Clique.db.profile.secondaryProfile)
+    else
+        UIDropDownMenu_SetSelectedValue(secDropdown, Clique.db.keys.profile)
+    end
+
+    local function refreshOptions(self)
+        -- Hide the dropdowns if the spec switch option isn't selected
+        local switchSpec = Clique.db.profile.switchSpec
+        CliqueOptionsSpecSwitch:SetChecked(switchSpec)
+        if switchSpec then
+            CliquePriSpecDropDown:Show()
+            CliqueSecSpecDropDown:Show()
+            if not Clique.db.profile.primaryProfile then
+                Clique.db.profile.primaryProfile = Clique.db.keys.profile
+            end
+            if not Clique.db.profile.secondaryProfile then
+                Clique.db.profile.secondaryProfile = Clique.db.keys.profile
+            end
+        else
+            CliquePriSpecDropDown:Hide()
+            CliqueSecSpecDropDown:Hide()
+        end
+    end
+    parent:SetScript("OnShow", refreshOptions)
+    switchSpec:SetScript("OnClick", function(self)
+        if Clique.db.profile.switchSpec then
+            Clique.db.profile.switchSpec = false
+        else
+            Clique.db.profile.switchSpec = true
+        end
+        refreshOptions(parent)
+        Clique:UpdateClicks()
+    end)
 end
