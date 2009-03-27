@@ -30,8 +30,10 @@ function Clique:Enable()
 			blacklist = {
 			},
 			tooltips = false,
+		},
+        char = {
             switchSpec = false,
-		}
+        },
 	}
 	
 	self.db = self:InitializeDB("CliqueDB", self.defaults)
@@ -70,13 +72,13 @@ function Clique:Enable()
     self:RegisterEvent("PLAYER_TALENT_UPDATE")
 
     -- Change to correct profile based on talent spec
-    if self.db.profile.switchSpec then
+    if self.db.char.switchSpec then
         self.silentProfile = true
         self.talentGroup = GetActiveTalentGroup()
-        if self.talentGroup == 1 and self.db.profile.primaryProfile then
-            self.db:SetProfile(self.db.profile.primaryProfile)
-        elseif self.talentGroup == 2 and self.db.profile.secondaryProfile then
-            self.db:SetProfile(self.db.profile.secondaryProfile)
+        if self.talentGroup == 1 and self.db.char.primaryProfile then
+            self.db:SetProfile(self.db.char.primaryProfile)
+        elseif self.talentGroup == 2 and self.db.char.secondaryProfile then
+            self.db:SetProfile(self.db.char.secondaryProfile)
         end
         self.silentProfile = false
     end
@@ -721,13 +723,13 @@ end
 function Clique:PLAYER_TALENT_UPDATE()
     local newGroup = GetActiveTalentGroup()
 
-    if self.db.profile.switchSpec and newGroup ~= self.talentGroup then
+    if self.db.char.switchSpec and newGroup ~= self.talentGroup then
         self.talentGroup = newGroup
         self:Print("Detected a talent spec change, changing profile")
-        if self.talentGroup == 1 and self.db.profile.primaryProfile then
-            self.db:SetProfile(self.db.profile.primaryProfile)
-        elseif self.talentGroup == 2 and self.db.profile.secondaryProfile then
-            self.db:SetProfile(self.db.profile.secondaryProfile)
+        if self.talentGroup == 1 and self.db.char.primaryProfile then
+            self.db:SetProfile(self.db.char.primaryProfile)
+        elseif self.talentGroup == 2 and self.db.char.secondaryProfile then
+            self.db:SetProfile(self.db.char.secondaryProfile)
         end
         if CliqueFrame then
             CliqueFrame.title:SetText("Clique v. " .. Clique.version .. " - " .. tostring(Clique.db.keys.profile));

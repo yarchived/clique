@@ -1864,7 +1864,7 @@ function Clique:CreateOptionsWidgets(parent)
     local function initialize(self, level)
         local function OnClick(self)
             UIDropDownMenu_SetSelectedID(priDropdown, self:GetID())
-            Clique.db.profile.primaryProfile = self.value
+            Clique.db.char.primaryProfile = self.value
             Clique:UpdateClicks()
         end
 
@@ -1887,8 +1887,8 @@ function Clique:CreateOptionsWidgets(parent)
     UIDropDownMenu_SetWidth(priDropdown, 175);
     UIDropDownMenu_SetButtonWidth(priDropdown, 199)
     UIDropDownMenu_JustifyText(priDropdown, "LEFT")
-    if Clique.db.profile.primaryProfile then
-        UIDropDownMenu_SetSelectedValue(priDropdown, Clique.db.profile.primaryProfile)
+    if Clique.db.char.primaryProfile then
+        UIDropDownMenu_SetSelectedValue(priDropdown, Clique.db.char.primaryProfile)
     else
         UIDropDownMenu_SetSelectedValue(priDropdown, Clique.db.keys.profile)
     end
@@ -1905,7 +1905,7 @@ function Clique:CreateOptionsWidgets(parent)
     local function initialize(self, level)
         local function OnClick(self)
             UIDropDownMenu_SetSelectedID(secDropdown, self:GetID())
-            Clique.db.profile.secondaryProfile = self.value
+            Clique.db.char.secondaryProfile = self.value
             Clique:UpdateClicks()
         end
 
@@ -1928,24 +1928,24 @@ function Clique:CreateOptionsWidgets(parent)
     UIDropDownMenu_SetWidth(secDropdown, 175);
     UIDropDownMenu_SetButtonWidth(secDropdown, 199)
     UIDropDownMenu_JustifyText(secDropdown, "LEFT")
-    if Clique.db.profile.secondaryProfile then
-        UIDropDownMenu_SetSelectedValue(secDropdown, Clique.db.profile.secondaryProfile)
+    if Clique.db.char.secondaryProfile then
+        UIDropDownMenu_SetSelectedValue(secDropdown, Clique.db.char.secondaryProfile)
     else
         UIDropDownMenu_SetSelectedValue(secDropdown, Clique.db.keys.profile)
     end
 
     local function refreshOptions(self)
         -- Hide the dropdowns if the spec switch option isn't selected
-        local switchSpec = Clique.db.profile.switchSpec
+        local switchSpec = Clique.db.char.switchSpec
         CliqueOptionsSpecSwitch:SetChecked(switchSpec)
         if switchSpec then
             CliquePriSpecDropDown:Show()
             CliqueSecSpecDropDown:Show()
-            if not Clique.db.profile.primaryProfile then
-                Clique.db.profile.primaryProfile = Clique.db.keys.profile
+            if not Clique.db.char.primaryProfile then
+                Clique.db.char.primaryProfile = Clique.db.keys.profile
             end
-            if not Clique.db.profile.secondaryProfile then
-                Clique.db.profile.secondaryProfile = Clique.db.keys.profile
+            if not Clique.db.char.secondaryProfile then
+                Clique.db.char.secondaryProfile = Clique.db.keys.profile
             end
         else
             CliquePriSpecDropDown:Hide()
@@ -1954,10 +1954,10 @@ function Clique:CreateOptionsWidgets(parent)
     end
     parent:SetScript("OnShow", refreshOptions)
     switchSpec:SetScript("OnClick", function(self)
-        if Clique.db.profile.switchSpec then
-            Clique.db.profile.switchSpec = false
+        if Clique.db.char.switchSpec then
+            Clique.db.char.switchSpec = false
         else
-            Clique.db.profile.switchSpec = true
+            Clique.db.char.switchSpec = true
         end
         refreshOptions(parent)
         Clique:UpdateClicks()
