@@ -20,7 +20,7 @@ if GetLocale() == "ruRU" then
 	L.CLICKSET_OOC            = "Вне боя"
 	L.CLICKSET_BEARFORM       = "Облик медведя"
 	L.CLICKSET_CATFORM        = "Облик кошки"
-    	L.CLICKSET_AQUATICFORM    = "Водный облик"
+	L.CLICKSET_AQUATICFORM    = "Водный облик"
 	L.CLICKSET_TRAVELFORM     = "Походный облик"
 	L.CLICKSET_MOONKINFORM    = "Облик лунного совуха"
 	L.CLICKSET_TREEOFLIFE     = "Древо Жизни"

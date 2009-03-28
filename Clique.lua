@@ -69,7 +69,7 @@ function Clique:Enable()
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 
 	self:RegisterEvent("LEARNED_SPELL_IN_TAB")
-    self:RegisterEvent("PLAYER_TALENT_UPDATE")
+    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 
     -- Change to correct profile based on talent spec
     if self.db.char.switchSpec then
@@ -720,22 +720,17 @@ function Clique:ShowBindings()
 	CliqueTooltip:Show()
 end
 
-function Clique:PLAYER_TALENT_UPDATE()
-    local newGroup = GetActiveTalentGroup()
-
-    if self.db.char.switchSpec and newGroup ~= self.talentGroup then
-        self.talentGroup = newGroup
+function Clique:PLAYER_TALENT_UPDATE(event, newGroup, prevGroup)
+    if self.db.char.switchSpec then
         self:Print("Detected a talent spec change, changing profile")
-        if self.talentGroup == 1 and self.db.char.primaryProfile then
+        if newGroup == 1 and self.db.char.primaryProfile then
             self.db:SetProfile(self.db.char.primaryProfile)
-        elseif self.talentGroup == 2 and self.db.char.secondaryProfile then
+        elseif newGroup == 2 and self.db.char.secondaryProfile then
             self.db:SetProfile(self.db.char.secondaryProfile)
         end
         if CliqueFrame then
             CliqueFrame.title:SetText("Clique v. " .. Clique.version .. " - " .. tostring(Clique.db.keys.profile));
         end
-    else
-        self.talentGroup = newGroup
     end
 end
 
