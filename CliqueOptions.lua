@@ -30,9 +30,14 @@ function Clique:OptionsOnLoad()
         button:SetScript("OnClick", onclick)
         button:SetScript("OnEnter", function(self)
 			local parent = self:GetParent()
-			SpellButton_OnEnter(parent)
+            if parent:IsEnabled() == 1 then
+                SpellButton_OnEnter(parent)
+            else
+                button:GetHighlightTexture():Hide()
+            end
 		end)
         button:SetScript("OnLeave", onleave)
+
 		button:Hide()
         self.spellbuttons[i] = button
     end
