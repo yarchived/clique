@@ -720,7 +720,7 @@ function Clique:ShowBindings()
 	CliqueTooltip:Show()
 end
 
-function Clique:PLAYER_TALENT_UPDATE(event, newGroup, prevGroup)
+function Clique:ACTIVE_TALENT_GROUP_CHANGED(event, newGroup, prevGroup)
     if self.db.char.switchSpec then
         self:Print("Detected a talent spec change, changing profile")
         if newGroup == 1 and self.db.char.primaryProfile then
