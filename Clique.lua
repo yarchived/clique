@@ -70,6 +70,7 @@ function Clique:Enable()
 
 	self:RegisterEvent("LEARNED_SPELL_IN_TAB")
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+    self:RegisterEvent("ADDON_LOADED")
 
     -- Change to correct profile based on talent spec
     if self.db.char.switchSpec then
@@ -120,6 +121,11 @@ function Clique:Enable()
 
 	-- Place the Clique tab
 	self:LEARNED_SPELL_IN_TAB()
+
+    -- Register the arena frames, if they're already loaded
+    if IsAddOnLoaded("Blizzard_ArenaUI") then
+        self:EnableArenaFrames()
+    end
 end
 
 function Clique:EnableFrames()
@@ -734,3 +740,23 @@ function Clique:ACTIVE_TALENT_GROUP_CHANGED(event, newGroup, prevGroup)
     end
 end
 
+function Clique:EnableArenaFrames()
+    local arenaFrames = {
+        ArenaEnemyFrame1,
+        ArenaEnemyFrame2,
+        ArenaEnemyFrame3,
+        ArenaEnemyFrame4,
+        ArenaEnemyFrame5,
+    }
+
+    for idx,frame in ipairs(arenaFrames) do
+        rawset(self.ccframes, frame, true)
+    end
+end
+
+
+function Clique:ADDON_LOADED(event, addon)
+    if addon == "Blizzard_ArenaUI" then
+        self:EnableArenaFrames()
+    end
+end
