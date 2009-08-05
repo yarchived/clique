@@ -280,7 +280,7 @@ function Clique:RegisterFrame(frame)
 	if frame:CanChangeAttribute() or frame:CanChangeProtectedState() then
 		if InCombatLockdown() then
 			self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
-			self:ApplyClickSet(L.CLICKSET_HOSTILE, frame)
+			self:ApplyClickSet(L.CLICKSET_HELPFUL, frame)
 			self:ApplyClickSet(L.CLICKSET_HARMFUL, frame)
 		else
 			self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
