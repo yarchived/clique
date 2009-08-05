@@ -277,7 +277,7 @@ function Clique:RegisterFrame(frame)
 
 	frame:RegisterForClicks("AnyUp")
 
-	if frame:CanChangeProtectedState() then
+	if frame:CanChangeAttribute() or frame:CanChangeProtectedState() then
 		if InCombatLockdown() then
 			self:ApplyClickSet(L.CLICKSET_DEFAULT, frame)
 			self:ApplyClickSet(L.CLICKSET_HOSTILE, frame)
