@@ -527,20 +527,6 @@ function Clique:DeleteAction(entry)
 	end
 end
 
-local mods = {"Shift", "Ctrl", "Alt"}
-local buttonsraw = {1,2,3,4,5}
-local buttonmods = {"-help", "-harm"}
-
-local buttons = {}
-for idx,button in pairs(buttonsraw) do
-	for k,v in pairs(buttonmods) do
-		table.insert(buttons, v..button)
-	end
-end
-for k,v in pairs(buttonsraw) do
-	table.insert(buttons, v)
-end
-
 function Clique:ShowAttributes()
 	self:Print("Enabled enhanced debugging.")
 	PlayerFrame:SetScript("OnAttributeChanged", function(...) self:Print(...) end)
