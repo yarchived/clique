@@ -1044,13 +1044,13 @@ function Clique:ListScrollUpdate()
 end
 
 local sortFunc = function(a,b)
-    local numA = a.button
-    local numB = b.button 
+    local numA = tonumber(a.button) or 0
+    local numB = tonumber(b.button) or 0  
 
     if numA == numB then
         return a.modifier < b.modifier
     else
-        return tostring(numA) < tostring(numB)
+        return numA < numB
     end
 end
 
