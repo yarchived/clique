@@ -25,7 +25,7 @@ function Clique:OptionsOnLoad()
         local button = CreateFrame("Button", "SpellButtonCliqueCover"..i, parent)
         button:SetID(parent:GetID())
         button:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
-        button:RegisterForClicks("LeftButtonUp","RightButtonUp", "MiddleButtonUp", "Button4Up", "Button5Up")
+        button:RegisterForClicks("AnyUp")
         button:SetAllPoints(parent)
         button:SetScript("OnClick", onclick)
         button:SetScript("OnEnter", function(self)
@@ -720,7 +720,7 @@ function Clique:CreateOptionsFrame()
     button:SetText("Set Click Binding")
     button:SetPoint("TOP", CliqueCustomHelpText, "BOTTOM", 40, -10)
     button:SetScript("OnClick", function(self) Clique:CustomBinding_OnClick(self) end )
-	button:RegisterForClicks("LeftButtonUp", "RightButtonUp", "MiddleButtonUp", "Button4Up", "Button5Up")
+	button:RegisterForClicks("AnyUp")
 
 	-- Button for icon selection
 	
