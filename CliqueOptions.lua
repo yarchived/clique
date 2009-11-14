@@ -1100,7 +1100,7 @@ function Clique:FillListEntry(frame, idx)
 	end
 
     local type = string.format("%s%s", string.upper(string.sub(entry.type, 1, 1)), string.sub(entry.type, 2))
-	local button = tonumber(string.sub(entry.button, -1, -1))
+	local button = tonumber(entry.button)
     
     frame.icon:SetTexture(entry.texture or "Interface\\Icons\\INV_Misc_QuestionMark")
 	frame.binding:SetText(entry.modifier..self:GetButtonText(button))
