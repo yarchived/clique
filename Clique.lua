@@ -199,6 +199,7 @@ function Clique:SpellBookButtonPressed(frame, button)
 	self:PLAYER_REGEN_ENABLED()
 end
 
+-- Player is LEAVING combat
 function Clique:PLAYER_REGEN_ENABLED()
 	self:ApplyClickSet(L.CLICKSET_DEFAULT)
 	self:RemoveClickSet(L.CLICKSET_HARMFUL)
@@ -206,6 +207,7 @@ function Clique:PLAYER_REGEN_ENABLED()
 	self:ApplyClickSet(self.ooc)
 end
 
+-- Player is ENTERING combat
 function Clique:PLAYER_REGEN_DISABLED()
 	self:RemoveClickSet(self.ooc)
 	self:ApplyClickSet(L.CLICKSET_DEFAULT)
@@ -218,46 +220,42 @@ function Clique:UpdateClicks()
 	local harm = self.clicksets[L.CLICKSET_HARMFUL]
 	local help = self.clicksets[L.CLICKSET_HELPFUL]
 
-	self.ooc = self.ooc or {}
-	for k,v in pairs(self.ooc) do self.ooc[k] = nil end
+    -- Since harm/help buttons take priority over any others, we can't
+    --
+    -- just apply the OOC set last.  Instead we use the self.ooc pseudo
+    -- set (which we build here) which contains only those help/harm
+    -- buttons that don't conflict with those defined in OOC.
 
-	for modifier,entry in pairs(harm) do
-		local button = string.gsub(entry.button, "harmbutton", "")
-		button = tonumber(button)
-		local mask = false
+    self.ooc = table.wipe(self.ooc or {})
 
-		for k,v in pairs(ooc) do
- 			if button == v.button and v.modifier == entry.modifier then
-				mask = true
-			end
-		end
+    -- Create a hash map of the "taken" combinations
+    local takenBinds = {}
 
-		if not mask then
-			table.insert(self.ooc, entry)
-		end
-	end
+    for name, entry in pairs(ooc) do
+        local key = string.format("%s:%s", entry.modifier, entry.button)
+        takenBinds[key] = true
+        table.insert(self.ooc, entry)
+    end
 
-	for modifier,entry in pairs(help) do
-		local button = string.gsub(entry.button, "helpbutton", "")
-		button = tonumber(button)
-		local mask = false
+    for name, entry in pairs(harm) do
+        local button = string.gsub(entry.button, "harmbutton", "")
+        local key = string.format("%s:%s", entry.modifier, button)
+        if not takenBinds[key] then
+            takenBinds[key] = true
+            table.insert(self.ooc, entry)
+        end
+    end
 
-		for k,v in pairs(ooc) do
- 			if button == v.button and v.modifier == entry.modifier then
-				mask = true
-			end
-		end
-
-		if not mask then
-			table.insert(self.ooc, entry)
-		end
-	end
-
-	for modifier,entry in pairs(ooc) do
-		table.insert(self.ooc, entry)
-	end
+    for name, entry in pairs(help) do
+        local button = string.gsub(entry.button, "helpbutton", "")
+        local key = string.format("%s:%s", entry.modifier, button)
+        if not takenBinds[key] then
+            takenBinds[key] = true
+            table.insert(self.ooc, entry)
+        end
+    end
 	
-	self:UpdateTooltip()
+    self:UpdateTooltip()
 end
 
 function Clique:RegisterFrame(frame)
