@@ -241,8 +241,10 @@ function Clique:UpdateClicks()
         local button = string.gsub(entry.button, "harmbutton", "")
         local key = string.format("%s:%s", entry.modifier, button)
         if not takenBinds[key] then
-            takenBinds[key] = true
             table.insert(self.ooc, entry)
+            print("Adding click " .. key .. " to ooc set")
+        else
+            print("Masking click " .. key)
         end
     end
 
@@ -250,8 +252,10 @@ function Clique:UpdateClicks()
         local button = string.gsub(entry.button, "helpbutton", "")
         local key = string.format("%s:%s", entry.modifier, button)
         if not takenBinds[key] then
-            takenBinds[key] = true
             table.insert(self.ooc, entry)
+            print("Adding click " .. key .. " to ooc set")
+        else
+            print("Masking click " .. key)
         end
     end
 	
