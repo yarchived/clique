@@ -242,9 +242,6 @@ function Clique:UpdateClicks()
         local key = string.format("%s:%s", entry.modifier, button)
         if not takenBinds[key] then
             table.insert(self.ooc, entry)
-            print("Adding click " .. key .. " to ooc set")
-        else
-            print("Masking click " .. key)
         end
     end
 
@@ -253,9 +250,6 @@ function Clique:UpdateClicks()
         local key = string.format("%s:%s", entry.modifier, button)
         if not takenBinds[key] then
             table.insert(self.ooc, entry)
-            print("Adding click " .. key .. " to ooc set")
-        else
-            print("Masking click " .. key)
         end
     end
 	
