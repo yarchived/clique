@@ -1854,8 +1854,11 @@ function Clique:CreateOptionsWidgets(parent)
     button:SetPoint("TOPRIGHT", -5, 3)
     button:SetScript("OnClick", function(self) Clique:ButtonOnClick(self) end)
 
-    local switchSpec = makeCheckbox(parent, "CliqueOptionsSpecSwitch", "Change profile when switching talent specs", 300)
-    switchSpec:SetPoint("TOPLEFT", 5, -25)
+    local downClick = makeCheckbox(parent, "CliqueOptionsAnyDown", L.DOWNCLICK_LABEL, 300)
+    downClick:SetPoint("TOPLEFT", 5, -25)
+
+    local switchSpec = makeCheckbox(parent, "CliqueOptionsSpecSwitch", L.SPECSWITCH_LABEL, 300)
+    switchSpec:SetPoint("TOPLEFT", 5, -45)
 
     local priDropdown = CreateFrame("Frame", "CliquePriSpecDropDown", parent, "UIDropDownMenuTemplate")
     priDropdown:ClearAllPoints()
@@ -1942,7 +1945,10 @@ function Clique:CreateOptionsWidgets(parent)
     local function refreshOptions(self)
         -- Hide the dropdowns if the spec switch option isn't selected
         local switchSpec = Clique.db.char.switchSpec
+        local downClick = Clique.db.char.downClick
         CliqueOptionsSpecSwitch:SetChecked(switchSpec)
+        CliqueOptionsAnyDown:SetChecked(downClick)
+
         if switchSpec then
             CliquePriSpecDropDown:Show()
             CliqueSecSpecDropDown:Show()
@@ -1957,6 +1963,7 @@ function Clique:CreateOptionsWidgets(parent)
             CliqueSecSpecDropDown:Hide()
         end
     end
+
     parent:SetScript("OnShow", refreshOptions)
     switchSpec:SetScript("OnClick", function(self)
         if Clique.db.char.switchSpec then
@@ -1966,5 +1973,14 @@ function Clique:CreateOptionsWidgets(parent)
         end
         refreshOptions(parent)
         Clique:UpdateClicks()
+    end)
+    downClick:SetScript("OnClick", function(self)
+        if Clique.db.char.downClick then
+            Clique.db.char.downClick = false
+        else
+            Clique.db.char.downClick = true
+        end
+        refreshOptions(parent)
+        Clique:SetClickType()
     end)
 end
