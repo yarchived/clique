@@ -17,6 +17,50 @@ local addonName, addon = ...
 local L = addon.L 
 
 function addon:Initialize()
+    -- Compatability with old Clique 1.x registrations
+    if not ClickCastFrames then
+        ClickCastFrames = {}
+    else
+        local oldClickCastFrames = ClickCastFrames
+        ClickCastFrames = setmetatable({}, {__newindex = function(t, k, v)
+            if v == nil then
+                self:UnregisterFrame(k)
+            else
+                self:RegisterFrame(k, v)
+            end
+        end})
+
+        -- Iterate over the frames that were set before we arrived
+        for frame, options in pairs(oldClickCastFrames) do
+            self:RegisterFrame(frame, options)
+        end
+    end
+
+    -- Registration for group headers (in-combat safe)
+    addon.header = CreateFrame("Frame", addonName .. "HeaderFrame", UIParent, "SecureHandlerAttributeTemplate")
+    ClickCastHeader = addon.header
+
+    addon.header:SetAttribute("clickcast_onenter", [===[
+        local header = self:GetParent():GetFrameRef("clickcast_header")
+        header:RunAttribute("setup_onenter", self:GetName())
+    ]===])
+
+    addon.header:SetAttribute("clickcast_onleave", [===[
+        local header = self:GetParent():GetFrameRef("clickcast_header")
+        header:RunAttribute("setup_onleave", self:GetName())
+    ]===])
+
+    local _onattributechanged = [===[
+        if name == "clickcast_register" then
+            local button = self:GetFrameRef("clickcast_button")
+            button:SetAttribute("clickcast_onenter", self:GetAttribute("clickcast_onenter"))
+            button:SetAttribute("clickcast_onleave", self:GetAttribute("clickcast_onleave"))
+        elseif name == "clickcast_unregister" then
+            local button = value
+        end
+    ]===]
+
+    addon.header:SetAttribute("_onattributechanged", _onattributechanged)
 end
 
 function addon:Enable()
