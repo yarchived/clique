@@ -1,22 +1,17 @@
-## Interface: 30300 
+## Interface: 40000 
 ## Title: Clique
 ## Author: Cladhaire
-## Version: wowi:revision
+## Version: @project-version@
 ## Notes: Simply powerful click-casting interface
 ## SavedVariables: CliqueDB
 ## OptionalDeps: Dongle
 
-Dongle.lua
-Clique.xml
-Clique.lua
+AddonCore.lua
+Localization.core.lua
 Localization.enUS.lua
-Localization.esES.lua
-Localization.esMX.lua
-Localization.frFR.lua
-Localization.deDE.lua
-Localization.koKR.lua
-Localization.ruRU.lua
-Localization.zhCN.lua
-Localization.zhTW.lua
-CliqueOptions.lua
+
+Clique.xml
+
 CliqueUtils.lua
+Clique.lua
+CliqueOptions.lua

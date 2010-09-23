@@ -1,47 +1,129 @@
-local buttonMap = setmetatable({
-    [1] = "LeftButton",
-    [2] = "RightButton",
-    [3] = "MiddleButton",
-}, {
-    __index = function(t, k)
-        return "Button" .. k
+local addonName, addon = ...
+local L = addon.L
+
+-- Returns the prefix string for the current keyboard state. 
+-- 
+-- Arguments:
+--   split - Whether or not to split the modifier keys into left and right components
+
+function addon:GetPrefixString(split)
+    shift, lshift, rshift = IsShiftKeyDown(), IsLeftShiftKeyDown(), IsRightShiftKeyDown()
+    ctrl, lctrl, rctrl = IsControlKeyDown(), IsLeftControlKeyDown(), IsRightControlKeyDown()
+    alt, lalt, ralt = IsAltKeyDown(), IsLeftAltKeyDown() IsRightAltKeyDown()
+
+    if not extended then
+        shift = shift or lshift or rshift
+        ctrl = ctrl or lctrl or rctrl
+        alt = alt or lalt or ralt
+
+        lshift, rshift = false, false
+        lctrl, rctrl = false, false
+        lalt, ralt = false, false
     end
-})
+        
+    local prefix = ""
+    if shift then
+        prefix = ((lshift and "LSHIFT-") or (rshift and "RSHIFT-") or "SHIFT-") .. prefix
+    end
+    if ctrl then
+        prefix = ((lctrl and "LCTRL-") or (rctrl and "RCTRL-") or "CTRL-") .. prefix
+    end
+    if alt then
+        prefix = ((lalt and "LALT-") or (ralt and "RALT-") or "ALT-") .. prefix
+    end
 
-function Clique:GetModifierText()
-    local modifier = ""
-    
-	if IsShiftKeyDown() then
-		modifier = "Shift-"..modifier
-	end
-	if IsControlKeyDown() then
-		modifier = "Ctrl-"..modifier
-	end
-	if IsAltKeyDown() then
-		modifier = "Alt-"..modifier
-	end
-    
-    return modifier
+    return prefix
 end
 
-function Clique:GetButtonNumber(button)
-    return SecureButton_GetButtonSuffix(button)
-end
+local convertMap = {
+    LSHIFT = L["LShift"],
+    RSHIFT = L["RShift"],
+    SHIFT = L["Shift"],
+    LCTRL = L["LCtrl"],
+    RCTRL = L["RCtrl"],
+    CTRL = L["Ctrl"],
+    LALT = L["LAlt"],
+    RALT = L["RAlt"],
+    ALT = L["Alt"],
+    BUTTON1 = L["LeftButton"],
+    BUTTON2 = L["RightButton"],
+    BUTTON3 = L["MiddleButton"],
+}
 
-function Clique:GetButtonText(num)
-    if not num then return "" end
-	if type(num) == "string" then
-		num = num:gsub("helpbutton", "")
-		num = num:gsub("harmbutton", "")
-	end
-	num = tonumber(num) and tonumber(num) or num
-    return buttonMap[num] or ""
-end
+local function convert(item, ...)
+    if not item then
+        return ""
+    else
+        local mapItem = convertMap[item]
+        item = mapItem and mapItem or item
 
-function Clique:CheckBinding(key)
-    for k,v in pairs(self.editSet) do
-        if k == key then 
-            return v
+        if select("#", ...) > 0 then
+            return item, "-", convert(...)
+        else
+            return item, convert(...)
         end
     end
+end
+
+function addon:GetBindingIcon(binding)
+    local btype = binding.type
+    if btype == "menu" then
+        --return "Interface\\Icons\\Trade_Engineering"
+        return nil
+    elseif btype == "target" then
+        --return "Interface\\Icons\\Ability_Mage_IncantersAbsorbtion"
+        return nil
+    else
+        return binding.icon or "Interface\\Icons\\INV_Misc_QuestionMark"
+    end
+end
+
+function addon:GetBindingKeyComboText(binding)
+    return strconcat(convert(strsplit("-", binding.binding))) 
+end
+
+function addon:GetBindingActionText(binding)
+    local btype = binding.type
+    if btype == "menu" then
+        return L["Show unit menu"]
+    elseif btype == "target" then
+        return L["Target '%s' unit"]:format(binding.unit)
+    elseif btype == "spell" then
+        if binding.rank then
+            return L["Cast %s (Rank %d)"]:format(binding.spell, binding.rank)
+        end
+        return L["Cast %s"]:format(binding.spell)
+    else
+        for k,v in pairs(binding) do
+            print("binding", k, v)
+        end
+
+        return L["Unknown binding type '%s'"]:format(tostring(btype))
+    end
+end
+
+local binMap = {
+    ALT = 1,
+    LALT = 2,
+    RALT = 3,
+    CTRL = 4,
+    LCTRL = 5,
+    LCTRL = 6,
+    SHIFT = 7,
+    LSHIFT = 8,
+    RSHIFT = 9,
+}
+
+function addon:GetBinaryBindingKey(binding)
+    ret = {"0", "0", "0", "0", "0", "0", "0", "0", "0"}
+    splits = {strsplit("-", binding.binding)}
+    for idx, modifier in ipairs(splits) do
+        local bit = binMap[modifier]
+        if bit then
+            ret[bit] = "1"
+        else
+            ret[10] = modifier
+        end
+    end
+    return table.concat(ret)
 end
