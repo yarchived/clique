@@ -7,7 +7,6 @@
 ## OptionalDeps: Dongle
 
 AddonCore.lua
-Localization.core.lua
 Localization.enUS.lua
 
 Clique.xml

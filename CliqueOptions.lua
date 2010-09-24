@@ -34,6 +34,9 @@ function CliqueConfig:SetupGUI()
     self.page1.column1:SetText(L["Action"])
     self.page1.column2:SetText(L["Binding"])
 
+    self.button_add:SetText(L["Add binding"])
+    self.button_edit:SetText(L["Edit"])
+
     self.page1:Show()
 end
 
@@ -129,12 +132,12 @@ function CliqueConfig:Spellbook_OnBinding(button, key)
     -- TODO: Support NOT splitting the modifier keys
     local prefix = addon:GetPrefixString(true)
 
-    local id = SpellBook_GetSpellID(button.spellbutton:GetID());
-    local texture = GetSpellTexture(id, SpellBookFrame.bookType)
-    local name = GetSpellName(id, SpellBookFrame.bookType)
+    local slot = SpellBook_GetSpellBookSlot(button:GetParent());
+    local name, subtype = GetSpellBookItemName(slot, SpellBookFrame.bookType)
+    local texture = GetSpellBookItemTexture(slot, SpellBookFrame.bookType)
 
     local succ, err = addon:AddBinding{
-        binding = prefix .. key,
+        key = prefix .. key,
         type = "spell",
         spell = name,
         icon = texture

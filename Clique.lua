@@ -78,8 +78,84 @@ end
 function addon:InitializeDatabase()
     -- Force a clean database everytime
     self.profile = {
-        binds = {},
+        binds = {
+        },
     }
+end
+
+-- This function adds a binding to the player's current profile. The
+-- following options can be included in the click-cast entry:
+--
+-- entry = {
+--     -- The full prefix and suffix of the key being bound
+--     key = "ALT-CTRL-SHIFT-BUTTON1",
+--     -- The icon to be used for displaying this entry
+--     icon = "Interface\\Icons\\Spell_Nature_HealingTouch",
+--
+--     -- Any restricted sets that this click should be applied to
+--     sets = {"ooc", "harm", "help", "frames_blizzard"},
+-- 
+--     -- The type of the click-binding
+--     type = "spell",
+--     type = "macro",
+--     type = "target",
+--     type = "menu",
+-- 
+--     -- Any arguments for given click type
+--     spell = "Healing Touch",
+--     macrotext = "/run Nature's Swiftness\n/cast [target=mouseover] Healing Touch",
+--     unit = "mouseover",
+-- }
+
+function addon:AddBinding(entry)
+    print("Adding new binding")
+    for k,v in pairs(entry) do
+        print(k, v)
+    end
+end
+
+function addon:RunTest()
+        -- Create a fake "group header" to test things properly
+    local groupheader = CreateFrame("Button", "MyGroupHeader", UIParent, "SecureGroupHeaderTemplate")
+    SecureHandler_OnLoad(groupheader)
+
+    -- Ensure the group header has a reference to the click-cast header
+    groupheader:SetFrameRef("clickcast_header", addon.header)
+
+    -- Set up the group header to display a solo/party/raid frame
+    groupheader.showRaid = true
+    groupheader.showParty = true
+    groupheader.showPlayer = true
+    groupheader.showSolo = true
+    groupheader.point = "TOP"
+    groupheader.template = "ClickCastUnitTemplate"
+    groupheader.templateType = "Button"
+    groupheader:SetAttribute("initialConfigFunction", [==[
+        self:SetSize(125, 25)
+        self:SetBackdrop(GameTooltip:GetBackdrop())
+        self:SetAttribute("shift-type1", "spell")
+        self:SetAttribute("shift-spell1", "Regrowth")
+        self:SetAttribute("shift-unit1", "player")
+
+        self:SetAttribute("type-cliquebutton1", "spell")
+        self:SetAttribute("spell-cliquebutton1", "Lifebloom")
+        self:SetAttribute("unit-cliquebutton1", "player") 
+    ]==])
+
+    groupheader:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    groupheader:Show()
+
+    -- TODO: Remove these bindings
+    addon.header:SetAttribute("setup_onenter", [[
+        local buttonName = ...
+        print("Setting up click-bindings for: " .. buttonName)
+        self:ClearBinding("F")
+        self:SetBindingClick(true, "F", buttonName, "cliquebutton1")
+    ]])
+    addon.header:SetAttribute("setup_onleave", [[
+        print("Removing click-bindings")
+        self:ClearBinding("F")
+    ]])
 end
 
 SLASH_CLIQUE1 = "/clique"

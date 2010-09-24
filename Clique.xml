@@ -303,6 +303,18 @@
                     </Button>
                 </Frames>
             </Frame> <!-- Page 2 - Edit Page -->
+			<Button name="$parentButton1" parentKey="button_add" inherits="MagicButtonTemplate">
+				<Size x="100" y="22"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" />
+				</Anchors>
+			</Button>
+			<Button name="$parentButton2" parentKey="button_edit" inherits="MagicButtonTemplate">
+				<Size x="80" y="22"/>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" />
+				</Anchors>
+			</Button>
         </Frames>
         <Scripts>
             <OnLoad>
