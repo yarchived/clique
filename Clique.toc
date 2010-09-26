@@ -9,8 +9,13 @@
 AddonCore.lua
 Localization.enUS.lua
 
+ClickCastTemplate.xml
+
 Clique.xml
 
 CliqueUtils.lua
 Clique.lua
 CliqueOptions.lua
+
+CliqueTest.xml
+CliqueTest.lua

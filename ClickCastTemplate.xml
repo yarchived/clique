@@ -9,5 +9,4 @@
           <Attribute name="_onleave" type="string" value="local snippet = self:GetAttribute('clickcast_onleave'); if snippet then self:Run(snippet) end"/>
       </Attributes>
   </Button>
-
 </Ui>

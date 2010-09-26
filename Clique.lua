@@ -37,7 +37,7 @@ function addon:Initialize()
     end
 
     -- Registration for group headers (in-combat safe)
-    addon.header = CreateFrame("Frame", addonName .. "HeaderFrame", UIParent, "SecureHandlerAttributeTemplate")
+    addon.header = CreateFrame("Frame", addonName .. "HeaderFrame", UIParent, "SecureHandlerBaseTemplate")
     ClickCastHeader = addon.header
 
     addon.header:SetAttribute("clickcast_onenter", [===[
@@ -50,17 +50,12 @@ function addon:Initialize()
         header:RunAttribute("setup_onleave", self:GetName())
     ]===])
 
-    local _onattributechanged = [===[
-        if name == "clickcast_register" then
-            local button = self:GetFrameRef("clickcast_button")
-            button:SetAttribute("clickcast_onenter", self:GetAttribute("clickcast_onenter"))
-            button:SetAttribute("clickcast_onleave", self:GetAttribute("clickcast_onleave"))
-        elseif name == "clickcast_unregister" then
-            local button = value
-        end
-    ]===]
-
-    addon.header:SetAttribute("_onattributechanged", _onattributechanged)
+    addon.header:SetAttribute("clickcast_register", [===[
+        local button = self:GetAttribute("clickcast_button")
+        print("Registering ", button, " for clickcasting")
+        button:SetAttribute("clickcast_onenter", self:GetAttribute("clickcast_onenter"))
+        button:SetAttribute("clickcast_onleave", self:GetAttribute("clickcast_onleave"))
+    ]===])
 end
 
 function addon:Enable()
@@ -112,50 +107,6 @@ function addon:AddBinding(entry)
     for k,v in pairs(entry) do
         print(k, v)
     end
-end
-
-function addon:RunTest()
-        -- Create a fake "group header" to test things properly
-    local groupheader = CreateFrame("Button", "MyGroupHeader", UIParent, "SecureGroupHeaderTemplate")
-    SecureHandler_OnLoad(groupheader)
-
-    -- Ensure the group header has a reference to the click-cast header
-    groupheader:SetFrameRef("clickcast_header", addon.header)
-
-    -- Set up the group header to display a solo/party/raid frame
-    groupheader.showRaid = true
-    groupheader.showParty = true
-    groupheader.showPlayer = true
-    groupheader.showSolo = true
-    groupheader.point = "TOP"
-    groupheader.template = "ClickCastUnitTemplate"
-    groupheader.templateType = "Button"
-    groupheader:SetAttribute("initialConfigFunction", [==[
-        self:SetSize(125, 25)
-        self:SetBackdrop(GameTooltip:GetBackdrop())
-        self:SetAttribute("shift-type1", "spell")
-        self:SetAttribute("shift-spell1", "Regrowth")
-        self:SetAttribute("shift-unit1", "player")
-
-        self:SetAttribute("type-cliquebutton1", "spell")
-        self:SetAttribute("spell-cliquebutton1", "Lifebloom")
-        self:SetAttribute("unit-cliquebutton1", "player") 
-    ]==])
-
-    groupheader:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-    groupheader:Show()
-
-    -- TODO: Remove these bindings
-    addon.header:SetAttribute("setup_onenter", [[
-        local buttonName = ...
-        print("Setting up click-bindings for: " .. buttonName)
-        self:ClearBinding("F")
-        self:SetBindingClick(true, "F", buttonName, "cliquebutton1")
-    ]])
-    addon.header:SetAttribute("setup_onleave", [[
-        print("Removing click-bindings")
-        self:ClearBinding("F")
-    ]])
 end
 
 SLASH_CLIQUE1 = "/clique"
