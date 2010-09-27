@@ -38,25 +38,16 @@ function addon:RunTest()
     -- Set up the group header to display a solo/party/raid frame
     groupheader:SetAttribute("initialConfigFunction", [==[
         self:SetAttribute("shift-type1", "spell")
-        self:SetAttribute("shift-spell1", "Flash Heal")
+        self:SetAttribute("shift-spell1", "Regrowth")
 
         self:SetAttribute("type-cliquebutton1", "spell")
-        self:SetAttribute("spell-cliquebutton1", "Flash Heal")
+        self:SetAttribute("spell-cliquebutton1", "Lifebloom")
 
         -- Register this frame with the global click-cast header
         local header = self:GetParent():GetFrameRef("clickcast_header")
         header:SetAttribute("clickcast_button", self)
         header:RunAttribute("clickcast_register")
     ]==])
-
-    addon.header:SetAttribute("setup_onenter", [[
-        local buttonName = ...
-        self:ClearBinding("F")
-        self:SetBindingClick(true, "F", buttonName, "cliquebutton1")
-    ]])
-    addon.header:SetAttribute("setup_onleave", [[
-        self:ClearBinding("F")
-    ]])
 
     groupheader:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     groupheader:Show()

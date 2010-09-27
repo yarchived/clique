@@ -44,6 +44,9 @@
           <OnShow>
               CliqueTest_Unit_OnShow(self)
           </OnShow>
+          <PostClick>
+              print("post-click:", self, button)
+          </PostClick>
       </Scripts>
       <HighlightTexture file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
   </Button>
