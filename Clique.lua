@@ -18,7 +18,8 @@ local L = addon.L
 
 function addon:Initialize()
     self:InitializeDatabase()
-    
+    self.ccframes = {}
+
     -- Compatability with old Clique 1.x registrations
     local oldClickCastFrames = ClickCastFrames
 
@@ -41,6 +42,12 @@ function addon:Initialize()
     self.header = CreateFrame("Frame", addonName .. "HeaderFrame", UIParent, "SecureHandlerBaseTemplate")
     ClickCastHeader = addon.header
 
+    -- Create a table within the addon header to store the frames
+    -- that are registered for click-casting
+    self.header:Execute([[
+        ccframes = table.new()
+    ]])
+
     -- OnEnter bootstrap script for group-header frames
     self.header:SetAttribute("clickcast_onenter", [===[
         local header = self:GetParent():GetFrameRef("clickcast_header")
@@ -58,6 +65,7 @@ function addon:Initialize()
         local button = self:GetAttribute("clickcast_button")
         button:SetAttribute("clickcast_onenter", self:GetAttribute("clickcast_onenter"))
         button:SetAttribute("clickcast_onleave", self:GetAttribute("clickcast_onleave"))
+        ccframes[button] = true
         self:RunFor(button, self:GetAttribute("setup_clicks"))
     ]===]):format(self.attr_setup_clicks))
 
@@ -67,6 +75,8 @@ function addon:Initialize()
 end
 
 function addon:RegisterFrame(button)
+    self.ccframes[button] = true
+
     button:RegisterForClicks("AnyDown")
 
     -- Wrap the OnEnter/OnLeave scripts in order to handle keybindings
@@ -74,8 +84,8 @@ function addon:RegisterFrame(button)
     addon.header:WrapScript(button, "OnLeave", addon.header:GetAttribute("setup_onleave"))
 
     -- Set the attributes on the frame
-    -- TODO: Fix this as it is broken
-    self.header:RunFor(button, self.header:GetAttribute("setup_clicks"))
+    self.header:SetFrameRef("cliquesetup_button", button)
+    self.header:Execute(self.header:GetAttribute("setup_clicks"), button)
 end
 
 function addon:Enable()
@@ -103,14 +113,17 @@ function addon:InitializeDatabase()
 end
 
 function ATTR(prefix, attr, suffix, value)
-    local fmt = [[self:SetAttribute("%s%s%s%s%s", "%s")]]
+    local fmt = [[button:SetAttribute("%s%s%s%s%s", "%s")]]
     return fmt:format(prefix, #prefix > 0 and "-" or "", attr, tonumber(suffix) and "" or "-", suffix, value)  
 end
 
 -- This function will create an attribute that when run for a given frame
 -- will set the correct set of SAB attributes.
 function addon:GetClickAttribute()
-    local bits = {}
+    local bits = {
+        "local setupbutton = self:GetFrameRef('cliquesetup_button')",
+        "local button = setupbutton or self",
+    }
 
     for idx, entry in ipairs(self.profile.binds) do
         local prefix, suffix = entry.key:match("^(.-)([^%-]+)$")
@@ -191,9 +204,42 @@ end
 -- }
 
 function addon:AddBinding(entry)
-    print("Adding new binding")
-    for k,v in pairs(entry) do
-        print(k, v)
+    -- Check to see if the new binding conflicts with an existing binding
+
+    -- Validate the entry to ensure it has the correct arguments, etc.
+    table.insert(self.profile.binds, entry)
+   
+    self:UpdateAttributes()
+    return true
+end
+
+function addon:UpdateAttributes()
+    if InCombatLockdown() then
+        error("panic: Clique:UpdateAttributes() called during combat")
+    end
+
+    self.header:SetAttribute("setup_clicks", self:GetClickAttribute())
+
+    local set, clr = self:GetBindingAttributes()
+    self.header:SetAttribute("setup_onenter", set)
+    self.header:SetAttribute("setup_onleave", clr)
+
+    self.header:Execute([[
+        for button, enabled in pairs(ccframes) do
+            self:RunFor(button, self:GetAttribute("setup_clicks")) 
+        end
+    ]])
+    
+    for button, enabled in pairs(self.ccframes) do
+        -- Unwrap any existing enter/leave scripts
+        addon.header:UnwrapScript(button, "OnEnter")
+        addon.header:UnwrapScript(button, "OnLeave")
+        addon.header:WrapScript(button, "OnEnter", addon.header:GetAttribute("setup_onenter"))
+        addon.header:WrapScript(button, "OnLeave", addon.header:GetAttribute("setup_onleave"))
+
+        -- Perform the setup of click bindings
+        self.header:SetFrameRef("cliquesetup_button", button)
+        self.header:Execute(self.header:GetAttribute("setup_clicks"), button)
     end
 end
 

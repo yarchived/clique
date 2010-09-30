@@ -1,7 +1,7 @@
 local addonName, addon = ...
 local L = addon.L
 
-local MAX_ROWS = 19
+local MAX_ROWS = 12
 
 function CliqueConfig:OnShow()
     if not self.initialized then
@@ -22,11 +22,13 @@ function CliqueConfig:SetupGUI()
     end
 
     self.rows[1]:ClearAllPoints()
-    self.rows[1]:SetPoint("TOPLEFT", "CliqueConfigPage1Column1", "BOTTOMLEFT", 0, -6)
+    self.rows[1]:SetPoint("TOPLEFT", "CliqueConfigPage1Column1", "BOTTOMLEFT", 0, -3)
+    self.rows[1]:SetPoint("RIGHT", CliqueConfigPage1Column2, "RIGHT", 0, 0)
 
     for i = 2, MAX_ROWS do
         self.rows[i]:ClearAllPoints()
         self.rows[i]:SetPoint("TOPLEFT", self.rows[i - 1], "BOTTOMLEFT")
+        self.rows[i]:SetPoint("RIGHT", CliqueConfigPage1Column2, "RIGHT", 0, 0)
     end
 
     -- Set text elements using localized values
@@ -150,6 +152,12 @@ function CliqueConfig:Spellbook_OnBinding(button, key)
     end
 end
 
+function CliqueConfig:Button_Add(button)
+    if SpellBookFrame and not SpellBookFrame:IsVisible() then
+        ShowUIPanel(SpellBookFrame)
+    end
+end
+
 function CliqueConfig:SetNotification(text)
 end
 
@@ -183,8 +191,6 @@ function CliqueConfig:UpdateList()
     end
 
     -- Sort the bindings
-    -- TODO: Use a custom sort function here
-
     local sort = {}
     for uid, entry in pairs(binds) do
         sort[#sort + 1] = entry
@@ -200,7 +206,7 @@ function CliqueConfig:UpdateList()
         if not page.slider:IsShown() then
             -- Adjust column positions
             for idx, row in ipairs(self.rows) do
-                row.bind:SetWidth(100)
+                row.bind:SetWidth(90)
             end
             page.slider:SetValue(0)
             page.slider:Show()
@@ -208,7 +214,7 @@ function CliqueConfig:UpdateList()
     elseif page.slider:IsShown() then
         -- Move column positions back and hide the slider
         for idx, row in ipairs(self.rows) do
-            row.bind:SetWidth(115)
+            row.bind:SetWidth(105)
         end
         page.slider:Hide()
     end

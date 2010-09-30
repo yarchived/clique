@@ -4,14 +4,14 @@
     http://wowprogramming.com/FrameXML/UI.xsd">
 
     <Button name="CliqueRowTemplate" enableMouse="true" virtual="true">
-        <Size x="298" y="17"/>
+        <Size x="298" y="30"/>
         <Layers>
             <Layer level="BORDER">
                 <Texture name="$parentIcon" parentKey="icon"
                     file="Interface\Icons\Ability_Druid_Nourish">
-                    <Size x="14" y="14"/>
+                    <Size x="25" y="25"/>
                     <Anchors>
-                        <Anchor point="TOPLEFT">
+                        <Anchor point="LEFT">
                             <Offset>
                                 <AbsDimension x="5" y="0"/>
                             </Offset>
@@ -19,40 +19,38 @@
                     </Anchors>
                 </Texture>
                 <FontString name="$parentName" parentKey="name"
-                    inherits="GameFontHighlightSmall" justifyH="LEFT" text="Healing Touch">
+                    inherits="GameFontHighlight" justifyH="LEFT" text="Healing Touch">
                     <Size>
-                        <AbsDimension x="175" y="14"/>
+                        <AbsDimension x="175" y="12"/>
                     </Size>
                     <Anchors>
-                        <Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT">
+                        <Anchor point="TOPLEFT" relativeTo="$parentIcon" relativePoint="TOPRIGHT">
                             <Offset>
                                 <AbsDimension x="3" y="0"/>
                             </Offset>
                         </Anchor>
                     </Anchors>
                 </FontString>
-                <!--
-                <FontString name="$parentType" parentKey="type"
-                    inherits="GameFontHighlightSmall" justifyH="CENTER" text="Spell">
+                <FontString name="$parentInfo" parentKey="type"
+                    inherits="GameFontDarkGraySmall" justifyH="LEFT" text="Spell">
                     <Size>
-                        <AbsDimension x="40" y="14"/>
+                        <AbsDimension x="40" y="12"/>
                     </Size>
                     <Anchors>
-                        <Anchor point="LEFT" relativeTo="$parentName" relativePoint="RIGHT">
+                        <Anchor point="TOPLEFT" relativeTo="$parentName" relativePoint="BOTTOMLEFT">
                             <Offset>
-                                <AbsDimension x="0" y="0"/>
+                                <AbsDimension x="0" y="-2"/>
                             </Offset>
                         </Anchor>
                     </Anchors>
                 </FontString>
-                -->
                 <FontString name="$parentBind" parentKey="bind"
                     inherits="GameFontHighlightSmall" justifyH="RIGHT" text="Alt-LeftClick">
                     <Size>
-                        <AbsDimension x="115" y="14"/>
+                        <AbsDimension x="106" y="12"/>
                     </Size>
                     <Anchors>
-                        <Anchor point="LEFT" relativeTo="$parentName" relativePoint="RIGHT">
+                        <Anchor point="TOPLEFT" relativeTo="$parentName" relativePoint="TOPRIGHT">
                             <Offset>
                                 <AbsDimension x="0" y="0"/>
                             </Offset>
@@ -68,10 +66,10 @@
             </OnMouseWheel>
         </Scripts>
         <HighlightTexture setAllPoints="true" file="Interface\QuestFrame\UI-QuestTitleHighlight" alphaMode="ADD">
-            <Size x="315" y="14"/>
+            <Size x="315" y="28"/>
             <Anchors>
                 <Anchor point="TOPLEFT">
-                    <Offset x="-1" y="0"/>
+                    <Offset x="1" y="0"/>
                 </Anchor>
             </Anchors>
         </HighlightTexture>
@@ -169,14 +167,10 @@
                         </ButtonText>
                     </Button>
                     <Slider name="$parent_VSlider" parentKey="slider" valueStep="1.0" hidden="true" orientation="VERTICAL">
-                        <Size x="18" y="200"/>
+                        <Size x="18" y="0"/>
                         <Anchors>
-                            <Anchor point="TOPRIGHT">
-                                <Offset x="-44" y="-90"/>
-                            </Anchor>
-                            <Anchor point="BOTTOMRIGHT">
-                                <Offset x="0" y="83"/>
-                            </Anchor>
+                            <Anchor point="TOPRIGHT" x="0" y="-20"/>
+                            <Anchor point="BOTTOMRIGHT"/>
                         </Anchors>
                         <Backdrop edgeFile="Interface\Buttons\UI-SliderBar-Border"
                             bgFile="Interface\Buttons\UI-SliderBar-Background"
@@ -308,6 +302,11 @@
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" />
 				</Anchors>
+                <Scripts>
+                    <OnClick>
+                        CliqueConfig:Button_Add(self)
+                    </OnClick>
+                </Scripts>
 			</Button>
 			<Button name="$parentButton2" parentKey="button_edit" inherits="MagicButtonTemplate">
 				<Size x="80" y="22"/>

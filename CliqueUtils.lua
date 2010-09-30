@@ -35,7 +35,7 @@ function addon:GetPrefixString(split)
     return prefix
 end
 
-local convertMap = {
+local convertMap = setmetatable({
     LSHIFT = L["LShift"],
     RSHIFT = L["RShift"],
     SHIFT = L["Shift"],
@@ -48,7 +48,15 @@ local convertMap = {
     BUTTON1 = L["LeftButton"],
     BUTTON2 = L["RightButton"],
     BUTTON3 = L["MiddleButton"],
-}
+}, {
+    __index = function(t, k, v)
+        if k:match("^BUTTON(%d+)$") then
+            return k:gsub("^BUTTON(%d+)$", "Button%1")
+        else
+            return k:sub(1,1) .. k:sub(2, -1):lower()
+        end
+    end,
+})
 
 local function convert(item, ...)
     if not item then
@@ -79,7 +87,7 @@ function addon:GetBindingIcon(binding)
 end
 
 function addon:GetBindingKeyComboText(binding)
-    return strconcat(convert(strsplit("-", binding.binding))) 
+    return strconcat(convert(strsplit("-", binding.key))) 
 end
 
 function addon:GetBindingActionText(binding)
@@ -116,7 +124,7 @@ local binMap = {
 
 function addon:GetBinaryBindingKey(binding)
     ret = {"0", "0", "0", "0", "0", "0", "0", "0", "0"}
-    splits = {strsplit("-", binding.binding)}
+    splits = {strsplit("-", binding.key)}
     for idx, modifier in ipairs(splits) do
         local bit = binMap[modifier]
         if bit then
