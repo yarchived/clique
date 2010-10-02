@@ -18,7 +18,7 @@ end
 function CliqueConfig:SetupGUI()
     self.rows = {}
     for i = 1, MAX_ROWS do
-        self.rows[i] = CreateFrame("Button", "CliqueRow" .. i, CliqueConfig, "CliqueRowTemplate")
+        self.rows[i] = CreateFrame("Button", "CliqueRow" .. i, self.page1, "CliqueRowTemplate")
     end
 
     self.rows[1]:ClearAllPoints()
@@ -41,8 +41,12 @@ function CliqueConfig:SetupGUI()
     self.page1.column2.sortType = "key"
     self.page1.sortType = self.page1.column2.sortType
 
-    self.button_add:SetText(L["Add binding"])
-    self.button_edit:SetText(L["Edit"])
+    self.page1.button_spell:SetText(L["Bind spell"])
+    self.page1.button_other:SetText(L["Bind other"])
+    self.page1.button_edit:SetText(L["Edit"])
+    
+    self.page2.button_save:SetText(L["Save"])
+    self.page2.button_cancel:SetText(L["Cancel"])
 
     self.page1:Show()
 end
@@ -162,9 +166,23 @@ function CliqueConfig:Spellbook_OnBinding(button, key)
     end
 end
 
-function CliqueConfig:Button_Add(button)
-    if SpellBookFrame and not SpellBookFrame:IsVisible() then
-        ShowUIPanel(SpellBookFrame)
+function CliqueConfig:Button_OnClick(button)
+    -- Click handler for "Bind spell" button
+    if button == self.page1.button_spell then
+        if SpellBookFrame and not SpellBookFrame:IsVisible() then
+            ShowUIPanel(SpellBookFrame)
+        end
+
+    -- Click handler for "Bind other" button
+    elseif button == self.page1.button_other then
+        self.page1:Hide()
+        self.page2:Show()
+
+    -- Click handler for "Edit" button
+    elseif button == self.page1.button_edit then
+    elseif button == self.page2.button_cancel then
+        self.page2:Hide()
+        self.page1:Show()
     end
 end
 
@@ -180,10 +198,14 @@ local memoizeBindings = setmetatable({}, {__index = function(t, k, v)
     return binbits
 end})
 
-local compareFunctions = {
+local compareFunctions;
+compareFunctions = {
     name = function(a, b)
         local texta = addon:GetBindingActionText(a)
         local textb = addon:GetBindingActionText(b)
+        if texta == textb then
+            return compareFunctions.key(a, b)
+        end
         return texta < textb
     end,
     key = function(a, b)
