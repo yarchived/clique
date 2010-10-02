@@ -1,12 +1,10 @@
-<Ui xmlns="http://www.blizzard.com/wow/ui/"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://www.blizzard.com/wow/ui/ http://wowprogramming.com/FrameXML/UI.xsd">
+<?xml version="1.0"?>
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ http://wowprogramming.com/FrameXML/UI.xsd">
     <Button name="CliqueRowTemplate" enableMouse="true" virtual="true">
         <Size x="298" y="30"/>
         <Layers>
             <Layer level="BORDER">
-                <Texture name="$parentIcon" parentKey="icon"
-                    file="Interface\Icons\Ability_Druid_Nourish">
+                <Texture name="$parentIcon" parentKey="icon" file="Interface\Icons\Ability_Druid_Nourish">
                     <Size x="25" y="25"/>
                     <Anchors>
                         <Anchor point="LEFT">
@@ -16,8 +14,7 @@
                         </Anchor>
                     </Anchors>
                 </Texture>
-                <FontString name="$parentName" parentKey="name"
-                    inherits="GameFontHighlight" justifyH="LEFT" text="Healing Touch">
+                <FontString name="$parentName" parentKey="name" inherits="GameFontHighlight" justifyH="LEFT" text="Healing Touch">
                     <Size>
                         <AbsDimension x="175" y="12"/>
                     </Size>
@@ -29,8 +26,7 @@
                         </Anchor>
                     </Anchors>
                 </FontString>
-                <FontString name="$parentInfo" parentKey="type"
-                    inherits="GameFontDarkGraySmall" justifyH="LEFT" text="Spell">
+                <FontString name="$parentInfo" parentKey="type" inherits="GameFontDarkGraySmall" justifyH="LEFT" text="Spell">
                     <Size>
                         <AbsDimension x="40" y="12"/>
                     </Size>
@@ -42,8 +38,7 @@
                         </Anchor>
                     </Anchors>
                 </FontString>
-                <FontString name="$parentBind" parentKey="bind"
-                    inherits="GameFontHighlightSmall" justifyH="RIGHT" text="Alt-LeftClick">
+                <FontString name="$parentBind" parentKey="bind" inherits="GameFontHighlightSmall" justifyH="RIGHT" text="Alt-LeftClick">
                     <Size>
                         <AbsDimension x="106" y="12"/>
                     </Size>
@@ -105,7 +100,7 @@
                 CliqueConfig:Spellbook_OnBinding(self, key)
             </OnKeyDown>
             <OnMouseWheel>
-                local button = (delta > 0) and "MOUSEWHEELUP" or "MOUSEWHEELDOWN"
+                local button = (delta &gt; 0) and "MOUSEWHEELUP" or "MOUSEWHEELDOWN"
                 CliqueConfig:Spellbook_OnBinding(self, button)
             </OnMouseWheel>
         </Scripts>
@@ -171,9 +166,7 @@
                             <Anchor point="TOPRIGHT" x="0" y="-20"/>
                             <Anchor point="BOTTOMRIGHT"/>
                         </Anchors>
-                        <Backdrop edgeFile="Interface\Buttons\UI-SliderBar-Border"
-                            bgFile="Interface\Buttons\UI-SliderBar-Background"
-                            tile="true">
+                        <Backdrop edgeFile="Interface\Buttons\UI-SliderBar-Border" bgFile="Interface\Buttons\UI-SliderBar-Background" tile="true">
                             <EdgeSize>
                                 <AbsValue val="8"/>
                             </EdgeSize>
@@ -189,15 +182,14 @@
                                 CliqueConfig:UpdateList()
                             </OnValueChanged>
                         </Scripts>
-                        <ThumbTexture name="$parentThumbTexture"
-                            file="Interface\Buttons\UI-ScrollBar-Knob">
+                        <ThumbTexture name="$parentThumbTexture" file="Interface\Buttons\UI-ScrollBar-Knob">
                             <Size x="24" y="24"/>
                         </ThumbTexture>
                     </Slider>
                     <Button name="$parentButtonSpell" parentKey="button_spell" inherits="MagicButtonTemplate">
                         <Size x="100" y="22"/>
                         <Anchors>
-                            <Anchor point="BOTTOMLEFT" relativeTo="CliqueConfig" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="CliqueConfig"/>
                         </Anchors>
                         <Scripts>
                             <OnClick>
@@ -239,7 +231,7 @@
                 <Frames>
                     <!-- Wrap the scroll frame in a frame that can capture clicks -->
                     <Button name="CliqueClickGrabber" parentKey="clickGrabber">
-                        <Size x="320" y="160" />
+                        <Size x="320" y="160"/>
                         <Anchors>
                             <Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
                                 <Offset>
@@ -303,7 +295,7 @@
                     <Button name="$parentButtonSave" parentKey="button_save" inherits="MagicButtonTemplate">
                         <Size x="100" y="22"/>
                         <Anchors>
-                            <Anchor point="BOTTOMLEFT" relativeTo="CliqueConfig" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="CliqueConfig"/>
                         </Anchors>
                         <Scripts>
                             <OnClick>
@@ -339,4 +331,3 @@
         </Scripts>
     </Frame> <!-- CliqueConfig -->
 </Ui>
-
