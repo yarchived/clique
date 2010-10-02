@@ -110,6 +110,11 @@ function addon:GetBindingActionText(binding)
     end
 end
 
+function addon:GetBindingKey(binding)
+    local key = binding.key:match("[^%-]+$")
+    return key
+end
+
 local binMap = {
     ALT = 1,
     LALT = 2,

@@ -36,10 +36,20 @@ function CliqueConfig:SetupGUI()
     self.page1.column1:SetText(L["Action"])
     self.page1.column2:SetText(L["Binding"])
 
+    -- Set columns up to handle sorting
+    self.page1.column1.sortType = "name"
+    self.page1.column2.sortType = "key"
+    self.page1.sortType = self.page1.column2.sortType
+
     self.button_add:SetText(L["Add binding"])
     self.button_edit:SetText(L["Edit"])
 
     self.page1:Show()
+end
+
+function CliqueConfig:Column_OnClick(frame, button)
+    self.page1.sortType = frame.sortType
+    self:UpdateList()
 end
 
 function CliqueConfig:HijackSpellbook()
@@ -172,7 +182,18 @@ end})
 
 local compareFunctions = {
     name = function(a, b)
-        return a.binding < b.binding
+        local texta = addon:GetBindingActionText(a)
+        local textb = addon:GetBindingActionText(b)
+        return texta < textb
+    end,
+    key = function(a, b)
+        local keya = addon:GetBindingKey(a)
+        local keyb = addon:GetBindingKey(b)
+        if keya == keyb then
+            return memoizeBindings[a] < memoizeBindings[b]
+        else
+            return keya < keyb
+        end
     end,
     binding = function(a, b)
         local mem = memoizeBindings
@@ -195,7 +216,12 @@ function CliqueConfig:UpdateList()
     for uid, entry in pairs(binds) do
         sort[#sort + 1] = entry
     end
-    table.sort(sort, compareFunctions.binding) 
+
+    if page.sortType then
+        table.sort(sort, compareFunctions[page.sortType]) 
+    else
+        table.sort(sort, compareFunctions.key)
+    end
 
     -- Enable or disable the scroll bar
     if #sort > MAX_ROWS - 1 then

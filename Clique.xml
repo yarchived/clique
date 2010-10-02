@@ -79,6 +79,7 @@
         <Scripts>
             <OnClick>
                 PlaySound("igMainMenuOptionCheckBoxOn");
+                CliqueConfig:Column_OnClick(self, button)
             </OnClick>
         </Scripts>
     </Button>
