@@ -11,6 +11,25 @@
 --    * Any keyboard combination can be set as a binding.
 --    * Any mouse combination can be set as a binding.
 --    * The only types that are allowed are spells and macros.
+--
+--  The concept of 'click-sets' has been simplified and extended
+--  so that the user can specify their own click-sets, allowing
+--  for different bindings for different sets of frames. By default
+--  the following click-sets are available:
+--
+--    * default - These bindings are active on all frames, unless
+--      overridden by another binding in a more specific click-set.
+--    * ooc - These bindings will ONLY be active when the player is
+--      out of combat.
+--    * harm - These bindings are ONLY active when the unit you are
+--      clicking on is an enemy, i.e. a unit that you can attack.
+--    * help - These bindings are ONLY active when the unit you are
+--      clicking on is a friendly unit, i.e. one that you can assist
+--
+--  The click-sets layer on each other, with the 'default' click-set
+--  being at the bottom, and any other click-set being layered on top.
+--  Clique will detect any conflicts that you have other than with
+--  default bindings, and will warn you of the situation.
 -------------------------------------------------------------------]]--
 
 local addonName, addon = ...
