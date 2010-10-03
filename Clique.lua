@@ -39,24 +39,6 @@ function addon:Initialize()
     self:InitializeDatabase()
     self.ccframes = {}
 
-    -- Compatability with old Clique 1.x registrations
-    local oldClickCastFrames = ClickCastFrames
-
-    ClickCastFrames = setmetatable({}, {__newindex = function(t, k, v)
-        if v == nil then
-            self:UnregisterFrame(k)
-        else
-            self:RegisterFrame(k, v)
-        end
-    end})
-
-    -- Iterate over the frames that were set before we arrived
-    if oldClickCastFrames then
-        for frame, options in pairs(oldClickCastFrames) do
-            self:RegisterFrame(frame, options)
-        end
-    end
-
     -- Registration for group headers (in-combat safe)
     self.header = CreateFrame("Frame", addonName .. "HeaderFrame", UIParent, "SecureHandlerBaseTemplate")
     ClickCastHeader = addon.header
@@ -91,9 +73,30 @@ function addon:Initialize()
     local set, clr = self:GetBindingAttributes()
     self.header:SetAttribute("setup_onenter", set)
     self.header:SetAttribute("setup_onleave", clr)
+
+    -- Clickcast registration systems
+    -- Compatability with old Clique 1.x registrations
+    local oldClickCastFrames = ClickCastFrames
+
+    ClickCastFrames = setmetatable({}, {__newindex = function(t, k, v)
+        if v == nil then
+            self:UnregisterFrame(k)
+        else
+            self:RegisterFrame(k, v)
+        end
+    end})
+
+    -- Iterate over the frames that were set before we arrived
+    if oldClickCastFrames then
+        for frame, options in pairs(oldClickCastFrames) do
+            self:RegisterFrame(frame, options)
+        end
+    end
+    self:EnableBlizzardFrames()
 end
 
 function addon:RegisterFrame(button)
+    print("Registered frame: " .. tostring(button:GetName()))
     self.ccframes[button] = true
 
     button:RegisterForClicks("AnyDown")

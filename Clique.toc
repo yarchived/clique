@@ -19,3 +19,5 @@ CliqueOptions.lua
 
 CliqueTest.xml
 CliqueTest.lua
+
+BlizzardFrames.lua
