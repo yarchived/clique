@@ -248,11 +248,16 @@
                             </OnClick>
                         </Scripts>
                     </Button>
-                    <Button name="$parentButtonEdit" parentKey="button_edit" inherits="MagicButtonTemplate">
+                    <Button name="$parentButtonOptions" parentKey="button_options" inherits="MagicButtonTemplate">
                         <Size x="80" y="22"/>
                         <Anchors>
                             <Anchor point="BOTTOMRIGHT" relativeTo="CliqueConfig"/>
                         </Anchors>
+                        <Scripts>
+                            <OnClick>
+                                CliqueConfig:Button_OnClick(self)
+                            </OnClick>
+                        </Scripts>
                     </Button>
                 </Frames>
                 <Scripts>
@@ -265,35 +270,8 @@
                 </Scripts>
             </Frame> <!-- Page 1 - Configuration List -->
 
-            <Frame name="$parentPage2" parentKey="page2" hidden="true">
-                <Frames>
-                    <Button name="$parentButtonSave" parentKey="button_save" inherits="MagicButtonTemplate">
-                        <Size x="80" y="22"/>
-                        <Anchors>
-                            <Anchor point="BOTTOMLEFT" relativeTo="CliqueConfig"/>
-                        </Anchors>
-                        <Scripts>
-                            <OnClick>
-                                CliqueConfig:Button_OnClick(self)
-                            </OnClick>
-                        </Scripts>
-                    </Button>
-                    <Button name="$parentButtonCancel" parentKey="button_cancel" inherits="MagicButtonTemplate">
-                        <Size x="80" y="22"/>
-                        <Anchors>
-                            <Anchor point="BOTTOMRIGHT" relativeTo="CliqueConfig"/>
-                        </Anchors>
-                        <Scripts>
-                            <OnClick>
-                                CliqueConfig:Button_OnClick(self)
-                            </OnClick>
-                        </Scripts>
-                    </Button>
-                 </Frames>
-             </Frame> <!-- End of target/menu edit page -->
-
-            <!-- Page definitions - Edit Page -->
-            <Frame name="$parentPage3" parentKey="page3" hidden="true">
+             <!-- Page definitions - Edit Page -->
+            <Frame name="$parentPage3" parentKey="page2" hidden="true">
                 <Frames>
                     <!-- Wrap the scroll frame in a frame that can capture clicks -->
                     <Button name="CliqueClickGrabber" parentKey="clickGrabber">
@@ -388,10 +366,8 @@
                 CliqueConfigPortrait:SetTexture("Interface\\FriendsFrame\\FriendsFrameScrollIcon");
                 CliqueConfig.page1:SetParent(CliqueConfig.Inset)
                 CliqueConfig.page2:SetParent(CliqueConfig.Inset)
-                CliqueConfig.page3:SetParent(CliqueConfig.Inset)
                 CliqueConfig.page1:SetAllPoints(CliqueConfig.Inset)
                 CliqueConfig.page2:SetAllPoints(CliqueConfig.Inset)
-                CliqueConfig.page3:SetAllPoints(CliqueConfig.Inset)
             </OnLoad>
             <OnShow>
                 CliqueConfig:OnShow()

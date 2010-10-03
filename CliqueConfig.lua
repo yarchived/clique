@@ -32,7 +32,7 @@ function CliqueConfig:SetupGUI()
     end
 
     -- Set text elements using localized values
-    _G[self:GetName() .. "TitleText"]:SetText(L["Clique Configuration"])
+    _G[self:GetName() .. "TitleText"]:SetText(L["Clique Binding Configuration"])
     
     self.dialog = _G["CliqueDialog"]
     self.dialog.title = _G["CliqueDialogTitleText"]
@@ -55,15 +55,11 @@ function CliqueConfig:SetupGUI()
 
     self.page1.button_spell:SetText(L["Bind spell"])
     self.page1.button_other:SetText(L["Bind other"])
-    self.page1.button_edit:SetText(L["Edit"])
+    self.page1.button_options:SetText(L["Options"])
    
     self.page2.button_save:SetText(L["Save"])
     self.page2.button_cancel:SetText(L["Cancel"])
 
-    self.page3.button_save:SetText(L["Save"])
-    self.page3.button_cancel:SetText(L["Cancel"])
-   
-    
     self.page1:Show()
 end
 
@@ -217,7 +213,8 @@ function CliqueConfig:Button_OnClick(button)
                 text = L["Run custom macro"],
                 func = function()
                     config.page1:Hide()
-                    config.page3:Show()
+                    config.page2.bindType = "macro"
+                    config.page2:Show()
                 end,
             },
         }
@@ -225,9 +222,10 @@ function CliqueConfig:Button_OnClick(button)
         EasyMenu(menu, self.dropdown, nil, 0, 0, nil, nil) 
 
     -- Click handler for "Edit" button
-    elseif button == self.page1.button_edit then
-    elseif button == self.page3.button_cancel then
-        self.page3:Hide()
+    elseif button == self.page1.button_options then
+        InterfaceOptionsFrame_OpenToCategory("Clique") 
+    elseif button == self.page2.button_cancel then
+        self.page2:Hide()
         self.page1:Show()
     elseif button == self.page2.button_cancel then
         self.page2:Hide()
