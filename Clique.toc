@@ -13,12 +13,12 @@ ClickCastTemplate.xml
 
 Clique.xml
 
-CliqueUtils.lua
 Clique.lua
-CliqueConfig.lua
-CliqueOptionsPanel.lua
+Utils.lua
+BindConfig.lua
+OptionsPanel.lua
 
-CliqueTest.xml
-CliqueTest.lua
+HeaderTest.xml
+HeaderTest.lua
 
 BlizzardFrames.lua
