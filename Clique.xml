@@ -115,6 +115,43 @@
         <HighlightTexture file="Interface\BUTTONS\ButtonHilight-Square" alphaMode="ADD"/>
     </Button>
 
+    <Frame name="CliqueDialog" toplevel="true" inherits="BasicFrameTemplate" parent="UIParent" frameStrata="DIALOG" hidden="true">
+        <Size x="350" y="160"/>
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+        <Layers>
+            <Layer level="OVERLAY">
+                <FontString name="$parentDesc" parentKey="desc" inherits="GameFontHighlightSmallLeftTop">
+                    <Size x="340" y="60"/>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" x="5" y="-25"/>
+                    </Anchors>
+                </FontString>
+                <FontString name="$parentBindText" parentKey="bindText" inherits="GameFontHighlightSmallLeftTop">
+                    <Size x="100" y="12"/>
+                    <Anchors>
+                        <Anchor point="BOTTOM" x="0" y="35"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <Button name="$parentButtonBinding" parentKey="button_binding" inherits="UIPanelButtonTemplate2">
+                <Size x="160" y="22"/>
+                <Anchors>
+                    <Anchor point="TOP" relativeTo="$parentDesc" relativePoint="BOTTOM" x="0" y="0"/>
+                </Anchors>
+            </Button>
+            <Button name="$parentButtonAccept" parentKey="button_accept" inherits="UIPanelButtonTemplate">
+                <Size x="80" y="22"/>
+                <Anchors>
+                    <Anchor point="BOTTOMRIGHT" x="-3" y="3"/>
+                </Anchors>
+            </Button>
+        </Frames>
+    </Frame>
+
     <!-- Main configuration frame -->
     <Frame name="CliqueConfig" inherits="ButtonFrameTemplate" parent="UIParent" hidden="true">
         <Size>
@@ -124,6 +161,9 @@
             <Anchor point="CENTER" x="0" y="0"/>
         </Anchors>
         <Frames>
+            <!-- Dropdown menu for utility -->
+            <Frame name="$parentDropdown" parentKey="dropdown" inherits="UIDropDownMenuTemplate"/>
+
             <!-- Page definitions - Configuration List -->
             <Frame name="$parentPage1" parentKey="page1" hidden="true">
                 <Frames>
@@ -225,9 +265,35 @@
                 </Scripts>
             </Frame> <!-- Page 1 - Configuration List -->
 
-            <!-- Page definitions - Edit Page -->
-
             <Frame name="$parentPage2" parentKey="page2" hidden="true">
+                <Frames>
+                    <Button name="$parentButtonSave" parentKey="button_save" inherits="MagicButtonTemplate">
+                        <Size x="80" y="22"/>
+                        <Anchors>
+                            <Anchor point="BOTTOMLEFT" relativeTo="CliqueConfig"/>
+                        </Anchors>
+                        <Scripts>
+                            <OnClick>
+                                CliqueConfig:Button_OnClick(self)
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                    <Button name="$parentButtonCancel" parentKey="button_cancel" inherits="MagicButtonTemplate">
+                        <Size x="80" y="22"/>
+                        <Anchors>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="CliqueConfig"/>
+                        </Anchors>
+                        <Scripts>
+                            <OnClick>
+                                CliqueConfig:Button_OnClick(self)
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                 </Frames>
+             </Frame> <!-- End of target/menu edit page -->
+
+            <!-- Page definitions - Edit Page -->
+            <Frame name="$parentPage3" parentKey="page3" hidden="true">
                 <Frames>
                     <!-- Wrap the scroll frame in a frame that can capture clicks -->
                     <Button name="CliqueClickGrabber" parentKey="clickGrabber">
@@ -293,7 +359,7 @@
                         </Frames>
                     </Button>
                     <Button name="$parentButtonSave" parentKey="button_save" inherits="MagicButtonTemplate">
-                        <Size x="100" y="22"/>
+                        <Size x="80" y="22"/>
                         <Anchors>
                             <Anchor point="BOTTOMLEFT" relativeTo="CliqueConfig"/>
                         </Anchors>
@@ -315,15 +381,17 @@
                         </Scripts>
                     </Button>
                  </Frames>
-            </Frame> <!-- Page 2 - Edit Page -->
+            </Frame> <!-- Page 3 - Macro Edit Page -->
         </Frames>
         <Scripts>
             <OnLoad>
                 CliqueConfigPortrait:SetTexture("Interface\\FriendsFrame\\FriendsFrameScrollIcon");
                 CliqueConfig.page1:SetParent(CliqueConfig.Inset)
                 CliqueConfig.page2:SetParent(CliqueConfig.Inset)
+                CliqueConfig.page3:SetParent(CliqueConfig.Inset)
                 CliqueConfig.page1:SetAllPoints(CliqueConfig.Inset)
                 CliqueConfig.page2:SetAllPoints(CliqueConfig.Inset)
+                CliqueConfig.page3:SetAllPoints(CliqueConfig.Inset)
             </OnLoad>
             <OnShow>
                 CliqueConfig:OnShow()

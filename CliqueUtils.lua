@@ -95,7 +95,7 @@ function addon:GetBindingActionText(binding)
     if btype == "menu" then
         return L["Show unit menu"]
     elseif btype == "target" then
-        return L["Target '%s' unit"]:format(binding.unit)
+        return L["Target clicked unit"]
     elseif btype == "spell" then
         if binding.rank then
             return L["Cast %s (Rank %d)"]:format(binding.spell, binding.rank)

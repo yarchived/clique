@@ -33,6 +33,18 @@ function CliqueConfig:SetupGUI()
 
     -- Set text elements using localized values
     _G[self:GetName() .. "TitleText"]:SetText(L["Clique Configuration"])
+    
+    self.dialog = _G["CliqueDialog"]
+    self.dialog.title = _G["CliqueDialogTitleText"]
+
+    self.dialog.title:SetText(L["Clique: Set binding"])
+    self.dialog.button_accept:SetText(L["Accept"])
+    self.dialog.bindText:SetText(L["Alt-Control-Shift-F"])
+
+    self.dialog.button_binding:SetText(L["Set binding"])
+    local desc = L["In order to specify a binding, move your mouse over the button labelled 'Set binding' and either click with your mouse or press a key on your keyboard. You can modify the binding by holding down a combination of the alt, control and shift keys on your keyboard."]
+    self.dialog.desc:SetText(desc)
+
     self.page1.column1:SetText(L["Action"])
     self.page1.column2:SetText(L["Binding"])
 
@@ -44,10 +56,14 @@ function CliqueConfig:SetupGUI()
     self.page1.button_spell:SetText(L["Bind spell"])
     self.page1.button_other:SetText(L["Bind other"])
     self.page1.button_edit:SetText(L["Edit"])
-    
+   
     self.page2.button_save:SetText(L["Save"])
     self.page2.button_cancel:SetText(L["Cancel"])
 
+    self.page3.button_save:SetText(L["Save"])
+    self.page3.button_cancel:SetText(L["Cancel"])
+   
+    
     self.page1:Show()
 end
 
@@ -175,11 +191,44 @@ function CliqueConfig:Button_OnClick(button)
 
     -- Click handler for "Bind other" button
     elseif button == self.page1.button_other then
-        self.page1:Hide()
-        self.page2:Show()
+        local config = CliqueConfig
+        local menu = {
+            { 
+                text = L["Select a binding type"], 
+                isTitle = true
+            },
+            { 
+                text = L["Target clicked unit"],
+                func = function()
+                    config.page1:Hide()
+                    config.page2.bindType = "target"
+                    config.page2:Show()
+                end,
+            },
+            {
+                text = L["Open unit menu"],
+                func = function()
+                    config.page1:Hide()
+                    config.page2.bindType = "menu"
+                    config.page2:Show()
+                end,
+            },
+            {
+                text = L["Run custom macro"],
+                func = function()
+                    config.page1:Hide()
+                    config.page3:Show()
+                end,
+            },
+        }
+        UIDropDownMenu_SetAnchor(self.dropdown, 0, 0, "BOTTOMLEFT", self.page1.button_other, "TOP")
+        EasyMenu(menu, self.dropdown, nil, 0, 0, nil, nil) 
 
     -- Click handler for "Edit" button
     elseif button == self.page1.button_edit then
+    elseif button == self.page3.button_cancel then
+        self.page3:Hide()
+        self.page1:Show()
     elseif button == self.page2.button_cancel then
         self.page2:Hide()
         self.page1:Show()
@@ -290,7 +339,7 @@ end
 function CliqueConfig:ShowEditPage()
     self:ClearEditPage()
     self.page1:Hide()
-    self.page2:Show()
+    self.page3:Show()
 end
 
 function CliqueConfig:Save_OnClick(button, button, down)
@@ -298,7 +347,7 @@ end
 
 function CliqueConfig:Cancel_OnClick(button, button, down)
     self:ClearEditPage()
-    self.page2:Hide()
+    self.page3:Hide()
     self.page1:Show()
 end
 
