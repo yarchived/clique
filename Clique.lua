@@ -96,7 +96,6 @@ function addon:Initialize()
 end
 
 function addon:RegisterFrame(button)
-    print("Registered frame: " .. tostring(button:GetName()))
     self.ccframes[button] = true
 
     button:RegisterForClicks("AnyDown")

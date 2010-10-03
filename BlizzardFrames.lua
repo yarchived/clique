@@ -1,11 +1,15 @@
 local addonName, addon = ...
 
+local function enable(frame)
+    ClickCastFrames[frame] = true
+end
+
 function addon:Enable_BlizzRaidPullouts()
     hooksecurefunc("CreateFrame", function(type, name, parent, template)
         if template == "RaidPulloutButtonTemplate" then
             local frame = _G[tostring(name) .. "ClearButton"]
             if frame then
-                ClickCastFrames[frame] = true
+                enable(frame)
             end
         end
     end)
@@ -13,7 +17,7 @@ end
 
 function addon:Enable_BlizzCompactUnitFrames()
     hooksecurefunc("CompactUnitFrame_SetUpFrame", function(frame, ...)
-        ClickCastFrames[frame] = true
+        enable(frame)
     end)
 end
 
@@ -26,7 +30,7 @@ function addon:Enable_BlizzArenaFrames()
         ArenaEnemyFrame5,
     }
     for idx, frame in ipairs(frames) do
-        ClickCastFrames[frame] = true
+        enable(frame)
     end
 end
 
@@ -40,7 +44,7 @@ function addon:Enable_BlizzSelfFrames()
         FocusFrameToT,
     }
     for idx, frame in ipairs(frames) do
-        ClickCastFrames[frame] = true
+        enable(frame)
     end
 end
 
@@ -58,7 +62,7 @@ function addon:Enable_BlizzPartyFrames()
         PartyMemberFrame5PetFrame,
     }
     for idx, frame in ipairs(frames) do
-        ClickCastFrames[frame] = true
+        enable(frame)
     end
 end
 
@@ -108,7 +112,7 @@ function addon:Enable_BlizzCompactParty()
         CompactPartyFrameMember5Debuff3, 
     }
     for idx, frame in ipairs(frames) do
-        ClickCastFrames[frame] = true
+        enable(frame)
     end
 end
 
@@ -120,7 +124,7 @@ function addon:Enable_BlizzBossFrames()
         Boss4TargetFrame,
     }
     for idx, frame in ipairs(frames) do
-        ClickCastFrames[frame] = true
+        enable(frame)
     end
 end
 
