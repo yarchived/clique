@@ -15,7 +15,8 @@ Clique.xml
 
 CliqueUtils.lua
 Clique.lua
-CliqueOptions.lua
+CliqueConfig.lua
+CliqueOptionsPanel.lua
 
 CliqueTest.xml
 CliqueTest.lua
