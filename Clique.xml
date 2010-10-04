@@ -115,21 +115,21 @@
         <HighlightTexture file="Interface\BUTTONS\ButtonHilight-Square" alphaMode="ADD"/>
     </Button>
 
-    <Frame name="CliqueDialog" toplevel="true" inherits="BasicFrameTemplate" parent="UIParent" frameStrata="DIALOG" hidden="true">
+    <Frame name="CliqueDialog" toplevel="true" movable="true" inherits="BasicFrameTemplate" parent="UIParent" frameStrata="DIALOG" hidden="true">
         <Size x="350" y="160"/>
         <Anchors>
-            <Anchor point="CENTER"/>
+            <Anchor point="CENTER" relativeTo="CliqueConfig" x="30" y="0"/>
         </Anchors>
         <Layers>
-            <Layer level="OVERLAY">
+            <Layer level="OVERLAY"> 
                 <FontString name="$parentDesc" parentKey="desc" inherits="GameFontHighlightSmallLeftTop">
                     <Size x="340" y="60"/>
                     <Anchors>
                         <Anchor point="TOPLEFT" x="5" y="-25"/>
                     </Anchors>
                 </FontString>
-                <FontString name="$parentBindText" parentKey="bindText" inherits="GameFontHighlightSmallLeftTop">
-                    <Size x="100" y="12"/>
+                <FontString name="$parentBindText" parentKey="bindText" JustifyH="CENTER" inherits="GameFontHighlightSmallLeftTop">
+                    <Size x="200" y="12"/>
                     <Anchors>
                         <Anchor point="BOTTOM" x="0" y="35"/>
                     </Anchors>
@@ -137,19 +137,71 @@
             </Layer>
         </Layers>
         <Frames>
+            <Button>
+                <Size x="0" y="20"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        self:RegisterForClicks("LeftButton") 
+                    </OnLoad>
+                    <OnMouseDown>
+                        self:GetParent():StartMoving()
+                    </OnMouseDown>
+                    <OnMouseUp>
+                        self:GetParent():StopMovingOrSizing()
+                    </OnMouseUp>
+                    <OnHide>
+                        self:GetParent():StopMovingOrSizing()
+                    </OnHide>
+                </Scripts>
+            </Button>
             <Button name="$parentButtonBinding" parentKey="button_binding" inherits="UIPanelButtonTemplate2">
                 <Size x="160" y="22"/>
                 <Anchors>
                     <Anchor point="TOP" relativeTo="$parentDesc" relativePoint="BOTTOM" x="0" y="0"/>
                 </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        self:RegisterForClicks("AnyUp")
+                    </OnLoad>
+                    <OnEnter>
+                        self:EnableKeyboard(true)
+                    </OnEnter>
+                    <OnLeave>
+                        self:EnableKeyboard(false)
+                    </OnLeave>
+                    <OnClick>
+                        CliqueConfig:BindingButton_OnClick(self, button)
+                    </OnClick>
+                    <OnKeyDown>
+                        CliqueConfig:BindingButton_OnClick(self, key)
+                    </OnKeyDown>
+                    <OnMouseWheel>
+                        local button = (delta > 0) and "MOUSEWHEELUP" or "MOUSEWHEELDOWN"
+                        CliqueConfig:BindingButton_OnClick(self, button)
+                    </OnMouseWheel>
+                </Scripts>
             </Button>
             <Button name="$parentButtonAccept" parentKey="button_accept" inherits="UIPanelButtonTemplate">
                 <Size x="80" y="22"/>
                 <Anchors>
                     <Anchor point="BOTTOMRIGHT" x="-3" y="3"/>
                 </Anchors>
+                <Scripts>
+                    <OnClick>
+                        CliqueConfig:AcceptSetBinding()
+                    </OnClick>
+                </Scripts>
             </Button>
         </Frames>
+        <Scripts>
+            <OnLoad>
+                table.insert(UISpecialFrames, "CliqueDialog")
+            </OnLoad>
+        </Scripts>
     </Frame>
 
     <!-- Main configuration frame -->

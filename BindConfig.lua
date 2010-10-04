@@ -37,9 +37,8 @@ function CliqueConfig:SetupGUI()
     self.dialog = _G["CliqueDialog"]
     self.dialog.title = _G["CliqueDialogTitleText"]
 
-    self.dialog.title:SetText(L["Clique: Set binding"])
+    self.dialog.title:SetText(L["Set binding"])
     self.dialog.button_accept:SetText(L["Accept"])
-    self.dialog.bindText:SetText(L["Alt-Control-Shift-F"])
 
     self.dialog.button_binding:SetText(L["Set binding"])
     local desc = L["In order to specify a binding, move your mouse over the button labelled 'Set binding' and either click with your mouse or press a key on your keyboard. You can modify the binding by holding down a combination of the alt, control and shift keys on your keyboard."]
@@ -124,48 +123,21 @@ function CliqueConfig:Spellbook_DisableKeyboard(button, motion)
     button:EnableKeyboard(false)
 end
 
-invalidKeys = {
-    ["UNKNOWN"] = true,
-    ["LSHIFT"] = true,
-    ["RSHIFT"] = true,
-    ["LCTRL"] = true,
-    ["RCTRL"] = true,
-    ["LALT"] = true,
-    ["RALT"] = true,
-}
-
 function CliqueConfig:Spellbook_OnBinding(button, key)
-    -- We can't bind modifiers or invalid keys
-    if invalidKeys[key] then
-        return
-    elseif key == "ESCAPE" then
+    if key == "ESCAPE" then
         HideUIPanel(CliqueConfig) 
         return
     end
 
-    -- Remap any mouse buttons
-    if key == "LeftButton" then
-        key = "BUTTON1"
-    elseif key == "RightButton" then
-        key = "BUTTON2"
-    elseif key == "MiddleButton" then
-        key = "BUTTON3"
-    else
-        buttonNum = key:match("Button(%d+)")
-        if buttonNum and tonumber(buttonNum) <= 31 then
-            key = "BUTTON" .. buttonNum
-        end
-    end
-
-    -- TODO: Support NOT splitting the modifier keys
-    local prefix = addon:GetPrefixString(true)
-
     local slot = SpellBook_GetSpellBookSlot(button:GetParent());
     local name, subtype = GetSpellBookItemName(slot, SpellBookFrame.bookType)
     local texture = GetSpellBookItemTexture(slot, SpellBookFrame.bookType)
+    
+    local key = addon:GetCapturedKey(key)
+    assert(key, "Unable to get binding information: " .. tostring(key))
 
     local succ, err = addon:AddBinding{
-        key = prefix .. key,
+        key = key,
         type = "spell",
         spell = name,
         icon = texture
@@ -196,17 +168,13 @@ function CliqueConfig:Button_OnClick(button)
             { 
                 text = L["Target clicked unit"],
                 func = function()
-                    config.page1:Hide()
-                    config.page2.bindType = "target"
-                    config.page2:Show()
+                    self:SetupCaptureDialog("target")
                 end,
             },
             {
                 text = L["Open unit menu"],
                 func = function()
-                    config.page1:Hide()
-                    config.page2.bindType = "menu"
-                    config.page2:Show()
+                    self:SetupCaptureDialog("menu")
                 end,
             },
             {
@@ -340,12 +308,41 @@ function CliqueConfig:ShowEditPage()
     self.page3:Show()
 end
 
-function CliqueConfig:Save_OnClick(button, button, down)
+function CliqueConfig:Save_OnClick(button, down)
 end
 
-function CliqueConfig:Cancel_OnClick(button, button, down)
+function CliqueConfig:Cancel_OnClick(button, down)
     self:ClearEditPage()
     self.page3:Hide()
     self.page1:Show()
 end
 
+function CliqueConfig:SetupCaptureDialog(type)
+    self.dialog.bindType = type
+    self.dialog.bindText:SetText("")
+
+    local actionText = addon:GetBindingActionText(type)
+    self.dialog.title:SetText(L["Set binding: %s"]:format(actionText))
+    self.dialog:Show()
+end
+
+function CliqueConfig:BindingButton_OnClick(button, key)
+    local dialog = CliqueDialog
+    dialog.key = addon:GetCapturedKey(key)
+    if dialog.key then
+        CliqueDialog.bindText:SetText(addon:GetBindingKeyComboText(dialog.key))
+    end
+end
+
+function CliqueConfig:AcceptSetBinding()
+    local dialog = CliqueDialog
+    local key = dialog.key
+    local succ, err = addon:AddBinding{
+        key = key,
+        type = dialog.bindType,
+    }
+    if succ then
+        CliqueConfig:UpdateList()
+    end
+    dialog:Hide()
+end

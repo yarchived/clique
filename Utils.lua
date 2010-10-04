@@ -48,6 +48,8 @@ local convertMap = setmetatable({
     BUTTON1 = L["LeftButton"],
     BUTTON2 = L["RightButton"],
     BUTTON3 = L["MiddleButton"],
+    MOUSEWHEELUP = L["MousewheelUp"],
+    MOUSEWHEELDOWN = L["MousewheelDown"],
 }, {
     __index = function(t, k, v)
         if k:match("^BUTTON(%d+)$") then
@@ -87,11 +89,16 @@ function addon:GetBindingIcon(binding)
 end
 
 function addon:GetBindingKeyComboText(binding)
-    return strconcat(convert(strsplit("-", binding.key))) 
+    if type(binding) == "table" then
+        return strconcat(convert(strsplit("-", binding.key))) 
+    elseif type(binding) == "string" then
+        return strconcat(convert(strsplit("-", binding)))
+    end
 end
 
 function addon:GetBindingActionText(binding)
-    local btype = binding.type
+    local btype = type(binding) == "table" and binding.type or binding
+
     if btype == "menu" then
         return L["Show unit menu"]
     elseif btype == "target" then
@@ -102,10 +109,6 @@ function addon:GetBindingActionText(binding)
         end
         return L["Cast %s"]:format(binding.spell)
     else
-        for k,v in pairs(binding) do
-            print("binding", k, v)
-        end
-
         return L["Unknown binding type '%s'"]:format(tostring(btype))
     end
 end
@@ -140,3 +143,40 @@ function addon:GetBinaryBindingKey(binding)
     end
     return table.concat(ret)
 end
+
+invalidKeys = {
+    ["UNKNOWN"] = true,
+    ["LSHIFT"] = true,
+    ["RSHIFT"] = true,
+    ["LCTRL"] = true,
+    ["RCTRL"] = true,
+    ["LALT"] = true,
+    ["RALT"] = true,
+    ["ESCAPE"] = true,
+}
+
+function addon:GetCapturedKey(key)
+    -- We can't bind modifiers or invalid keys
+    if invalidKeys[key] then
+        return
+    end
+
+    -- Remap any mouse buttons
+    if key == "LeftButton" then
+        key = "BUTTON1"
+    elseif key == "RightButton" then
+        key = "BUTTON2"
+    elseif key == "MiddleButton" then
+        key = "BUTTON3"
+    else
+        buttonNum = key:match("Button(%d+)")
+        if buttonNum and tonumber(buttonNum) <= 31 then
+            key = "BUTTON" .. buttonNum
+        end
+    end
+
+    -- TODO: Support NOT splitting the modifier keys
+    local prefix = addon:GetPrefixString(true)
+    return tostring(prefix) .. tostring(key)
+end
+
