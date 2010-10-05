@@ -395,7 +395,7 @@ function CliqueConfig:Row_OnClick(frame, button)
             text = L["Delete binding"],
             func = function()
                 local bindIndex = frame.bindIndex
-                table.remove(Clique.profile.binds, bindIndex)
+                addon:DeleteBinding(Clique.profile.binds[bindIndex])
                 self:UpdateList()
             end,
             notCheckable = true,

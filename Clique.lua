@@ -61,7 +61,9 @@ function addon:Initialize()
         header:RunFor(self, header:GetAttribute("setup_onleave"))
     ]===])
 
-    self.header:SetAttribute("setup_clicks", self:GetClickAttribute())
+    local setup, remove = self:GetClickAttributes()
+    self.header:SetAttribute("setup_clicks", setup) 
+    self.header:SetAttribute("remove_clicks", remove)
     self.header:SetAttribute("clickcast_register", ([===[
         local button = self:GetAttribute("clickcast_button")
         button:SetAttribute("clickcast_onenter", self:GetAttribute("clickcast_onenter"))
@@ -148,10 +150,20 @@ function ATTR(prefix, attr, suffix, value)
     return fmt:format(prefix, #prefix > 0 and "-" or "", attr, tonumber(suffix) and "" or "-", suffix, value)  
 end
 
+function REMATTR(prefix, attr, suffix, value)
+    local fmt = [[button:SetAttribute("%s%s%s%s%s", nil)]]
+    return fmt:format(prefix, #prefix > 0 and "-" or "", attr, tonumber(suffix) and "" or "-", suffix)  
+end
+
 -- This function will create an attribute that when run for a given frame
 -- will set the correct set of SAB attributes.
-function addon:GetClickAttribute()
+function addon:GetClickAttributes()
     local bits = {
+        "local setupbutton = self:GetFrameRef('cliquesetup_button')",
+        "local button = setupbutton or self",
+    }
+
+    local rembits = {
         "local setupbutton = self:GetFrameRef('cliquesetup_button')",
         "local button = setupbutton or self",
     }
@@ -175,18 +187,24 @@ function addon:GetClickAttribute()
         -- Build any needed SetAttribute() calls
         if entry.type == "target" or entry.type == "menu" then
             bits[#bits + 1] = ATTR(prefix, "type", suffix, entry.type)
+            rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
         elseif entry.type == "spell" then
             bits[#bits + 1] = ATTR(prefix, "type", suffix, entry.type)
             bits[#bits + 1] = ATTR(prefix, "spell", suffix, entry.spell)
+            rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
+            rembits[#rembits + 1] = REMATTR(prefix, "spell", suffix)
         elseif entry.type == "macro" then
             bits[#bits + 1] = ATTR(prefix, "type", suffix, entry.type)
             bits[#bits + 1] = ATTR(prefix, "macrotext", suffix, entry.macrotext)
+            rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
+            rembits[#rembits + 1] = REMATTR(prefix, "macrotext", suffix)
+
         else
             error(string.format("Invalid action type: '%s'", entry.type))
         end
     end
 
-    return table.concat(bits, "\n")
+    return table.concat(bits, "\n"), table.concat(rembits, "\n")
 end
 
 local B_SET = [[self:SetBindingClick(true, "%s", self, "%s");]]
@@ -244,12 +262,63 @@ function addon:AddBinding(entry)
     return true
 end
 
+local function bindingeq(a, b)
+    assert(type(a) == "table")
+    assert(type(b) == "table")
+    if a.type ~= b.type then
+        return false
+    elseif a.type == "target" then
+        return true
+    elseif a.type == "menu" then
+        return true
+    elseif a.type == "spell" then
+        return a.spell == b.spell
+    elseif a.type == "macro" then
+        return a.macrotext == b.macrotext
+    end
+
+    return false
+end
+
+function addon:DeleteBinding(entry)
+    -- Look for an entry that matches the given binding and remove it
+    for idx, bind in ipairs(self.profile.binds) do
+        if bindingeq(entry, bind) then
+            -- Found the entry that matches, so remove it
+            table.remove(self.profile.binds, idx)
+            break
+        end
+    end
+
+    -- Update the attributes
+    self:UpdateAttributes()
+end
+
+function addon:ClearAttributes()
+    self.header:Execute([[
+        for button, enabled in pairs(ccframes) do
+            self:RunFor(button, self:GetAttribute("remove_clicks")) 
+        end
+    ]])
+
+    for button, enabled in pairs(self.ccframes) do
+        -- Perform the setup of click bindings
+        self.header:SetFrameRef("cliquesetup_button", button)
+        self.header:Execute(self.header:GetAttribute("remove_clicks"), button)
+    end
+end
+
 function addon:UpdateAttributes()
     if InCombatLockdown() then
         error("panic: Clique:UpdateAttributes() called during combat")
     end
 
-    self.header:SetAttribute("setup_clicks", self:GetClickAttribute())
+    -- Clear any of the previously set attributes
+    self:ClearAttributes()
+
+    local setup, remove = self:GetClickAttributes()
+    self.header:SetAttribute("setup_clicks", setup)
+    self.header:SetAttribute("remove_clicks", remove)
 
     local set, clr = self:GetBindingAttributes()
     self.header:SetAttribute("setup_onenter", set)
