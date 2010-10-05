@@ -108,6 +108,8 @@ function addon:GetBindingActionText(binding)
             return L["Cast %s (Rank %d)"]:format(binding.spell, binding.rank)
         end
         return L["Cast %s"]:format(binding.spell)
+    elseif btype == "macro" then
+        return L["Run macro '%s'"]:format(tostring(binding.macrotext))
     else
         return L["Unknown binding type '%s'"]:format(tostring(btype))
     end

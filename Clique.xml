@@ -166,9 +166,12 @@
                 <Scripts>
                     <OnLoad>
                         self:RegisterForClicks("AnyUp")
+                        self:EnableKeyboard(false)
                     </OnLoad>
                     <OnEnter>
-                        self:EnableKeyboard(true)
+                        if motion then
+                            self:EnableKeyboard(true)
+                        end
                     </OnEnter>
                     <OnLeave>
                         self:EnableKeyboard(false)
@@ -323,8 +326,56 @@
             </Frame> <!-- Page 1 - Configuration List -->
 
              <!-- Page definitions - Edit Page -->
-            <Frame name="$parentPage3" parentKey="page2" hidden="true">
+            <Frame name="$parentPage2" parentKey="page2" hidden="true">
+                <Layers>
+                    <Layer level="OVERLAY">
+                        <FontString name="$parentDesc" parentKey="desc" inherits="GameFontHighlightSmallLeftTop">
+                            <Size x="0" y="200"/>
+                            <Anchors>
+                                <Anchor point="TOPLEFT" x="5" y="-5"/>
+                                <Anchor point="TOPRIGHT" x="-5" y="-5"/>
+                            </Anchors>
+                        </FontString>
+                        <FontString name="$parentBindText" parentKey="bindText" JustifyH="CENTER" inherits="GameFontHighlightSmallLeftTop">
+                            <Size x="200" y="12"/>
+                            <Anchors>
+                                <Anchor point="CENTER" relativeTo="$parent" x="0" y="-24"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
                 <Frames>
+                    <Button name="$parentButtonBinding" parentKey="button_binding" inherits="UIPanelButtonTemplate2">
+                        <Size x="160" y="22"/>
+                        <Anchors>
+                            <Anchor point="CENTER" relativeTo="$parent" x="0" y="0"/>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                self:RegisterForClicks("AnyUp")
+                                self:EnableKeyboard(false)
+                            </OnLoad>
+                            <OnEnter>
+                                if motion then
+                                    self:EnableKeyboard(true)
+                                end
+                            </OnEnter>
+                            <OnLeave>
+                                self:EnableKeyboard(false)
+                            </OnLeave>
+                            <OnClick>
+                                CliqueConfig:MacroBindingButton_OnClick(self, button)
+                            </OnClick>
+                            <OnKeyDown>
+                                CliqueConfig:MacroBindingButton_OnClick(self, key)
+                            </OnKeyDown>
+                            <OnMouseWheel>
+                                local button = (delta > 0) and "MOUSEWHEELUP" or "MOUSEWHEELDOWN"
+                                CliqueConfig:MacroBindingButton_OnClick(self, key)
+                            </OnMouseWheel>
+                        </Scripts>
+                    </Button>
+
                     <!-- Wrap the scroll frame in a frame that can capture clicks -->
                     <Button name="CliqueClickGrabber" parentKey="clickGrabber">
                         <Size x="320" y="160"/>
@@ -355,7 +406,7 @@
                                 CliqueScrollFrameEditBox:SetFocus()
                             </OnClick>
                         </Scripts>
-                        <Frames>
+                        <Frames> 
                             <ScrollFrame name="CliqueScrollFrame" parentKey="scrollFrame" inherits="UIPanelScrollFrameTemplate">
                                 <Size>
                                     <AbsDimension x="288" y="150"/>
@@ -368,7 +419,7 @@
                                     </Anchor>
                                 </Anchors>
                                 <ScrollChild>
-                                    <EditBox name="$parentEditBox" multiLine="true" autoFocus="false" countInvisibleLetters="true">
+                                    <EditBox name="$parentEditBox" parentKey="editbox" multiLine="true" autoFocus="false" countInvisibleLetters="true">
                                         <Size>
                                             <AbsDimension x="288" y="85"/>
                                         </Size>

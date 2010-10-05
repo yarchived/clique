@@ -55,9 +55,14 @@ function CliqueConfig:SetupGUI()
     self.page1.button_spell:SetText(L["Bind spell"])
     self.page1.button_other:SetText(L["Bind other"])
     self.page1.button_options:SetText(L["Options"])
-   
+  
+    self.page2.button_binding:SetText(L["Set binding"])
     self.page2.button_save:SetText(L["Save"])
     self.page2.button_cancel:SetText(L["Cancel"])
+    local desc = L["You can use this page to create a custom macro to be run when activating a binding on a unit. When creating this macro you should keep in mind that you will need to specify the target of any actions in the macro by using the 'mouseover' unit, which is the unit you are clicking on. For example, you can do any of the following:\n\n/cast [target=mouseover] Regrowth\n/cast [@mouseover] Regrowth\n/cast [@mouseovertarget] Taunt\n\nHover over the 'Set binding' button below and either click or press a key with any modifiers you would like included. Then edit the box below to contain the macro you would like to have run when this binding is activated."]
+    
+    self.page2.desc:SetText(desc)
+    self.page2.editbox = CliqueScrollFrameEditBox
 
     self.page1:Show()
 end
@@ -192,7 +197,16 @@ function CliqueConfig:Button_OnClick(button)
     -- Click handler for "Edit" button
     elseif button == self.page1.button_options then
         InterfaceOptionsFrame_OpenToCategory("Clique") 
-    elseif button == self.page2.button_cancel then
+    elseif button == self.page2.button_save then
+        -- Check the input
+        local key = self.page2.key
+        local macrotext = self.page2.editbox:GetText()
+        local succ, err = addon:AddBinding{
+            key = key,
+            type = "macro",
+            macrotext = macrotext,
+        }
+        self:UpdateList()
         self.page2:Hide()
         self.page1:Show()
     elseif button == self.page2.button_cancel then
@@ -331,6 +345,14 @@ function CliqueConfig:BindingButton_OnClick(button, key)
     dialog.key = addon:GetCapturedKey(key)
     if dialog.key then
         CliqueDialog.bindText:SetText(addon:GetBindingKeyComboText(dialog.key))
+    end
+end
+
+function CliqueConfig:MacroBindingButton_OnClick(button, key)
+    local key = addon:GetCapturedKey(key)
+    if key then
+        self.page2.key = key 
+        self.page2.bindText:SetText(addon:GetBindingKeyComboText(key))
     end
 end
 

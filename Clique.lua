@@ -134,7 +134,7 @@ function addon:InitializeDatabase()
 end
 
 function ATTR(prefix, attr, suffix, value)
-    local fmt = [[button:SetAttribute("%s%s%s%s%s", "%s")]]
+    local fmt = [[button:SetAttribute("%s%s%s%s%s", %q)]]
     return fmt:format(prefix, #prefix > 0 and "-" or "", attr, tonumber(suffix) and "" or "-", suffix, value)  
 end
 
