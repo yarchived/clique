@@ -4,7 +4,6 @@
 ## Version: @project-version@
 ## Notes: Simply powerful click-casting interface
 ## SavedVariables: CliqueDB
-## OptionalDeps: Dongle
 
 AddonCore.lua
 Localization.enUS.lua

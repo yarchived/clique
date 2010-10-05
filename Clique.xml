@@ -53,6 +53,12 @@
             </Layer>
         </Layers>
         <Scripts>
+            <OnLoad>
+                self:RegisterForClicks("RightButtonDown")
+            </OnLoad>
+            <OnClick>
+                CliqueConfig:Row_OnClick(self, button)
+            </OnClick>
             <OnMouseWheel>
                 local slider = CliqueConfig.page1.slider
                 slider:SetValue(slider:GetValue() - delta)
@@ -152,9 +158,11 @@
                     </OnMouseDown>
                     <OnMouseUp>
                         self:GetParent():StopMovingOrSizing()
+                        self:SetUserPlaced(false)
                     </OnMouseUp>
                     <OnHide>
                         self:GetParent():StopMovingOrSizing()
+                        self:SetUserPlaced(false)
                     </OnHide>
                 </Scripts>
             </Button>

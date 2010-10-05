@@ -121,16 +121,26 @@ end
 
 function addon:InitializeDatabase()
     -- TODO: This is all testing boilerplate, try to fix it up
-    self.profile = {
-        binds = {
-            [1] = {key = "BUTTON1", type = "target", unit = "mouseover"},
-            [2] = {key = "BUTTON2", type = "menu"},
-            [3] = {key = "F", type = "spell", spell = "Lifebloom"},
-            [4] = {key = "SHIFT-F", type = "spell", spell = "Regrowth"},
-            [5] = {key = "CTRL-BUTTON1", type = "spell", spell = "Rejuvenation"},
-            [6] = {key = "SHIFT-BUTTON1", type = "spell", spell = "Regrowth"},
-        },
-    }
+    local reset = false
+    if not CliqueDB then
+        reset = true
+    elseif type(CliqueDB) == "table" and not CliqueDB.dbversion then
+        reset = true
+    elseif type(CliqueDB) == "table" and CliqueDB.dbversion == 2 then
+        reset = false
+    end
+
+    if reset then
+        CliqueDB = {
+            binds = {
+                [1] = {key = "BUTTON1", type = "target", unit = "mouseover"},
+                [2] = {key = "BUTTON2", type = "menu"},
+            },
+            dbversion = 2,
+        }
+    end
+
+    self.profile = CliqueDB
 end
 
 function ATTR(prefix, attr, suffix, value)

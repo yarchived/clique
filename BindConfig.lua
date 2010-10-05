@@ -139,7 +139,9 @@ function CliqueConfig:Spellbook_OnBinding(button, key)
     local texture = GetSpellBookItemTexture(slot, SpellBookFrame.bookType)
     
     local key = addon:GetCapturedKey(key)
-    assert(key, "Unable to get binding information: " .. tostring(key))
+    if not key then
+        return
+    end
 
     local succ, err = addon:AddBinding{
         key = key,
@@ -168,27 +170,34 @@ function CliqueConfig:Button_OnClick(button)
         local menu = {
             { 
                 text = L["Select a binding type"], 
-                isTitle = true
+                isTitle = true,
+                notCheckable = true,
             },
             { 
                 text = L["Target clicked unit"],
                 func = function()
                     self:SetupCaptureDialog("target")
                 end,
+                notCheckable = true,
             },
             {
                 text = L["Open unit menu"],
                 func = function()
                     self:SetupCaptureDialog("menu")
                 end,
+                notCheckable = true,
             },
             {
                 text = L["Run custom macro"],
                 func = function()
                     config.page1:Hide()
                     config.page2.bindType = "macro"
+                    -- Clear out the entries
+                    config.page2.bindText:SetText("")
+                    config.page2.editbox:SetText("")
                     config.page2:Show()
                 end,
+                notCheckable = true,
             },
         }
         UIDropDownMenu_SetAnchor(self.dropdown, 0, 0, "BOTTOMLEFT", self.page1.button_other, "TOP")
@@ -252,7 +261,8 @@ compareFunctions = {
     end,
 }
 
-CliqueConfig.binds = {}
+-- Mapping between binding entry and index in profile
+local bindMap = {}
 function CliqueConfig:UpdateList()
     local page = self.page1
     local binds = Clique.profile.binds
@@ -264,7 +274,8 @@ function CliqueConfig:UpdateList()
 
     -- Sort the bindings
     local sort = {}
-    for uid, entry in pairs(binds) do
+    for idx, entry in pairs(binds) do
+        bindMap[entry] = idx
         sort[#sort + 1] = entry
     end
 
@@ -306,6 +317,7 @@ function CliqueConfig:UpdateList()
             row.name:SetText(addon:GetBindingActionText(bind))
             --row.type:SetText(bind.type)
             row.bind:SetText(addon:GetBindingKeyComboText(bind))
+            row.bindIndex = bindMap[bind]
             row:Show()
         else 
             row:Hide()
@@ -368,3 +380,27 @@ function CliqueConfig:AcceptSetBinding()
     end
     dialog:Hide()
 end
+
+function CliqueConfig:Row_OnClick(frame, button)
+    local menu = {
+        { 
+            text = L["Change binding"],
+            func = function()
+                -- Do nothing right now
+                -- self:SetupCaptureDialog("target")
+            end,
+            notCheckable = true,
+        },
+        {
+            text = L["Delete binding"],
+            func = function()
+                local bindIndex = frame.bindIndex
+                table.remove(Clique.profile.binds, bindIndex)
+                self:UpdateList()
+            end,
+            notCheckable = true,
+        },
+    }
+    EasyMenu(menu, self.dropdown, "cursor", 0, 0, nil, nil)
+end
+
