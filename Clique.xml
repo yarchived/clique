@@ -474,7 +474,7 @@
         </Frames>
         <Scripts>
             <OnLoad>
-                CliqueConfigPortrait:SetTexture("Interface\\FriendsFrame\\FriendsFrameScrollIcon");
+                CliqueConfigPortrait:SetTexture("Interface\\Addons\\Clique\\mousecircle")
                 CliqueConfig.page1:SetParent(CliqueConfig.Inset)
                 CliqueConfig.page2:SetParent(CliqueConfig.Inset)
                 CliqueConfig.page1:SetAllPoints(CliqueConfig.Inset)
