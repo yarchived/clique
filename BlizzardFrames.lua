@@ -64,12 +64,12 @@ function addon:Enable_BlizzPartyFrames()
 		"PartyMemberFrame2",
 		"PartyMemberFrame3",
 		"PartyMemberFrame4",
-        "PartyMemberFrame5",
+        --"PartyMemberFrame5",
 		"PartyMemberFrame1PetFrame",
 		"PartyMemberFrame2PetFrame",
 		"PartyMemberFrame3PetFrame",
         "PartyMemberFrame4PetFrame",
-        "PartyMemberFrame5PetFrame",
+        --"PartyMemberFrame5PetFrame",
     }
     for idx, frame in ipairs(frames) do
         enable(frame)
@@ -78,13 +78,13 @@ end
 
 function addon:Enable_BlizzCompactParty()
     local frames = {
-        "CompactPartyFrameMemberSelf", 
-        "CompactPartyFrameMemberSelfBuff1", 
-        "CompactPartyFrameMemberSelfBuff2", 
-        "CompactPartyFrameMemberSelfBuff3", 
-        "CompactPartyFrameMemberSelfDebuff1", 
-        "CompactPartyFrameMemberSelfDebuff2", 
-        "CompactPartyFrameMemberSelfDebuff3", 
+        --"CompactPartyFrameMemberSelf", 
+        --"CompactPartyFrameMemberSelfBuff1", 
+        --"CompactPartyFrameMemberSelfBuff2", 
+        --"CompactPartyFrameMemberSelfBuff3", 
+        --"CompactPartyFrameMemberSelfDebuff1", 
+        --"CompactPartyFrameMemberSelfDebuff2", 
+        --"CompactPartyFrameMemberSelfDebuff3", 
         "CompactPartyFrameMember1", 
         "CompactPartyFrameMember1Buff1", 
         "CompactPartyFrameMember1Buff2", 
@@ -142,7 +142,6 @@ end
 function addon:EnableBlizzardFrames()
     self:Enable_BlizzRaidPullouts()
     self:Enable_BlizzCompactUnitFrames()
-    self:Enable_BlizzArenaFrames()
     self:Enable_BlizzSelfFrames()
     self:Enable_BlizzPartyFrames()
     self:Enable_BlizzCompactParty()
