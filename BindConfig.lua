@@ -268,7 +268,7 @@ compareFunctions = {
 local bindMap = {}
 function CliqueConfig:UpdateList()
     local page = self.page1
-    local binds = Clique.profile.binds
+    local binds = addon.bindings
 
     -- GUI not created yet
     if not page then
@@ -417,7 +417,7 @@ function CliqueConfig:Row_OnClick(frame, button)
             text = L["Delete binding"],
             func = function()
                 local bindIndex = frame.bindIndex
-                addon:DeleteBinding(Clique.profile.binds[bindIndex])
+                addon:DeleteBinding(Clique.bindings[bindIndex])
                 self:UpdateList()
             end,
             notCheckable = true,
@@ -432,7 +432,7 @@ function CliqueConfig:Row_OnClick(frame, button)
     }
     table.insert(menu, submenu)
 
-    local binding = Clique.profile.binds[frame.bindIndex]
+    local binding = Clique.bindings[frame.bindIndex]
     
     table.insert(submenu.menuList, {
         text = L["Default"],

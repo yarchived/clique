@@ -3,7 +3,7 @@
 ## Author: Cladhaire
 ## Version: @project-version@
 ## Notes: Simply powerful click-casting interface
-## SavedVariables: CliqueDB
+## SavedVariables: CliqueDB, CliqueDB2
 
 AddonCore.lua
 Localization.enUS.lua

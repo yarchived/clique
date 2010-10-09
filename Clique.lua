@@ -142,28 +142,65 @@ function addon:Enable()
     CliqueSpellTab.tooltip = L["Clique binding configuration"]
 end
 
+-- Leave CliqueDB in place for now, to ease any migration that users might have.
+-- Instead use CliqueDB2 for the active database and use versioning to move
+-- forward from this point. The database consists of two sections:
+--   * settings - used to handle the basic options Clique uses
+--   * profiles - used for the binding configuration profiles, possibly shared
+local current_db_version = 3
 function addon:InitializeDatabase()
-    -- TODO: This is all testing boilerplate, try to fix it up
     local reset = false
-    if not CliqueDB then
+    if not CliqueDB2 then
         reset = true
-    elseif type(CliqueDB) == "table" and not CliqueDB.dbversion then
+    elseif type(CliqueDB2) == "table" and CliqueDB2.dbversion ~= current_db_version then
         reset = true
-    elseif type(CliqueDB) == "table" and CliqueDB.dbversion == 2 then
-        reset = false
     end
 
     if reset then
-        CliqueDB = {
-            binds = {
-                [1] = {key = "BUTTON1", type = "target", unit = "mouseover", sets = {default = true}},
-                [2] = {key = "BUTTON2", type = "menu", sets = {default = true}},
-            },
-            dbversion = 2,
+        CliqueDB2 = {
+            settings = {},
+            bindings = {},
+            dbversion = current_db_version,
         }
     end
 
-    self.profile = CliqueDB
+    local db = CliqueDB2
+    local realmKey = GetRealmName()
+    local charKey = UnitName("player") .. " - " .. realmKey
+
+    if not db.settings[charKey] then
+        db.settings[charKey] = {
+            profileKey = charKey,
+        }
+    end
+
+    addon.settings = db.settings[charKey]
+    self:InitializeBindingProfile()
+end
+
+function addon:InitializeBindingProfile()
+    local db = CliqueDB2
+    if not db.bindings[addon.settings.profileKey] then
+        db.bindings[addon.settings.profileKey] = {
+            [1] = {
+                key = "BUTTON1",
+                type = "target",
+                unit = "mouseover",
+                sets = {
+                    default = true
+                },
+            },
+            [2] = {
+                key = "BUTTON2",
+                type = "menu",
+                sets = {
+                    default = true
+                },
+            },
+        }
+    end
+
+    self.bindings = db.bindings[addon.settings.profileKey] 
 end
 
 function ATTR(prefix, attr, suffix, value)
@@ -189,7 +226,7 @@ function addon:GetClickAttributes(global)
         "local button = setupbutton or self",
     }
 
-    for idx, entry in ipairs(self.profile.binds) do
+    for idx, entry in ipairs(self.bindings) do
         if self:ShouldSetBinding(entry, global) then
             local prefix, suffix = addon:GetBindingPrefixSuffix(entry)
 
@@ -242,7 +279,7 @@ function addon:GetBindingAttributes(global)
     local set = {}
     local clr = {}
 
-    for idx, entry in ipairs(self.profile.binds) do
+    for idx, entry in ipairs(self.bindings) do
         if self:ShouldSetBinding(entry, global) then 
             if not entry.key:match("BUTTON%d+$") then
                 -- This is a key binding, so we need a binding for it
@@ -291,7 +328,7 @@ function addon:AddBinding(entry)
         entry.sets = {default = true}
     end
 
-    table.insert(self.profile.binds, entry)
+    table.insert(self.bindings, entry)
    
     self:UpdateAttributes()
     return true
@@ -317,10 +354,10 @@ end
 
 function addon:DeleteBinding(entry)
     -- Look for an entry that matches the given binding and remove it
-    for idx, bind in ipairs(self.profile.binds) do
+    for idx, bind in ipairs(self.bindings) do
         if bindingeq(entry, bind) then
             -- Found the entry that matches, so remove it
-            table.remove(self.profile.binds, idx)
+            table.remove(self.bindings, idx)
             break
         end
     end
