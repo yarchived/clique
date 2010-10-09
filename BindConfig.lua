@@ -315,7 +315,7 @@ function CliqueConfig:UpdateList()
             local bind = sort[offsetIndex]
             row.icon:SetTexture(addon:GetBindingIcon(bind))
             row.name:SetText(addon:GetBindingActionText(bind))
-            --row.type:SetText(bind.type)
+            row.info:SetText(addon:GetBindingInfoText(bind))
             row.bind:SetText(addon:GetBindingKeyComboText(bind))
             row.bindIndex = bindMap[bind]
             row:Show()

@@ -21,10 +21,14 @@
 --      overridden by another binding in a more specific click-set.
 --    * ooc - These bindings will ONLY be active when the player is
 --      out of combat.
---    * harm - These bindings are ONLY active when the unit you are
+--    * enemy - These bindings are ONLY active when the unit you are
 --      clicking on is an enemy, i.e. a unit that you can attack.
---    * help - These bindings are ONLY active when the unit you are
+--    * friendly - These bindings are ONLY active when the unit you are
 --      clicking on is a friendly unit, i.e. one that you can assist
+--    * glabal - These bindings will be available regardless of where
+--      your mouse is on the screen, be it in the 3D world, or over a
+--      unit frame. These bindings take up a slot that might otherwise
+--      be used in the 'Key Bindings' interface options.
 --
 --  The click-sets layer on each other, with the 'default' click-set
 --  being at the bottom, and any other click-set being layered on top.

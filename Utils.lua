@@ -182,3 +182,15 @@ function addon:GetCapturedKey(key)
     return tostring(prefix) .. tostring(key)
 end
 
+function addon:GetBindingInfoText(binding)
+    local sets = binding.sets
+    if not sets then
+        return ""
+    else
+        local bits = {}
+        for k,v in pairs(sets) do
+            table.insert(bits, k)
+        end
+        return table.concat(bits, ", ")
+    end
+end

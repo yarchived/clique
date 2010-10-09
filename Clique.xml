@@ -26,9 +26,9 @@
                         </Anchor>
                     </Anchors>
                 </FontString>
-                <FontString name="$parentInfo" parentKey="type" inherits="GameFontDarkGraySmall" justifyH="LEFT" text="Spell">
+                <FontString name="$parentInfo" parentKey="info" inherits="GameFontNormalSmall" justifyH="LEFT" text="Spell">
                     <Size>
-                        <AbsDimension x="40" y="12"/>
+                        <AbsDimension x="175" y="12"/>
                     </Size>
                     <Anchors>
                         <Anchor point="TOPLEFT" relativeTo="$parentName" relativePoint="BOTTOMLEFT">
@@ -37,6 +37,7 @@
                             </Offset>
                         </Anchor>
                     </Anchors>
+                    <Color r="0.6" g="0.6" b="0.6"/>
                 </FontString>
                 <FontString name="$parentBind" parentKey="bind" inherits="GameFontHighlightSmall" justifyH="RIGHT" text="Alt-LeftClick">
                     <Size>
