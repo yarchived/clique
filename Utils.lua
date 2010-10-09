@@ -194,6 +194,7 @@ function addon:GetBindingInfoText(binding)
         for k,v in pairs(sets) do
             table.insert(bits, k)
         end
+        table.sort(bits)
         return table.concat(bits, ", ")
     end
 end
