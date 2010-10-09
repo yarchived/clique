@@ -224,14 +224,18 @@ end
 function addon:ShouldSetBinding(binding, global)
     local apply = false
 
-    -- Check for global bindings first
-    if binding.sets.global and global then
-        apply = true
-    elseif binding.sets.global and (not global) then
-        apply = false
+    -- Check for global bindings first in isolation
+    if binding.sets.global then
+        if global then
+            return true
+        else
+            return false
+        end
+    elseif global then
+        return false
     end
 
-    if binding.sets.enemy or binding.sets.friend and not binding.sets.global then
+    if binding.sets.enemy or binding.sets.friend then
         apply = true
     end
 
