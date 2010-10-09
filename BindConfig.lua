@@ -39,6 +39,9 @@ function CliqueConfig:SetupGUI()
     
     self.dialog = _G["CliqueDialog"]
     self.dialog.title = _G["CliqueDialogTitleText"]
+    self.dialog:SetUserPlaced(false)
+    self.dialog:ClearAllPoints()
+    self.dialog:SetPoint("CENTER", self, "CENTER", 30, 0)
 
     self.dialog.title:SetText(L["Set binding"])
     self.dialog.button_accept:SetText(L["Accept"])

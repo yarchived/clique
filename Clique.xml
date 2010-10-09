@@ -167,7 +167,7 @@
             </Layer>
         </Layers>
         <Frames>
-            <Button>
+            <Button name="$parentDragButton">
                 <Size x="0" y="20"/>
                 <Anchors>
                     <Anchor point="TOPLEFT"/>
@@ -178,15 +178,16 @@
                         self:RegisterForClicks("LeftButton") 
                     </OnLoad>
                     <OnMouseDown>
-                        self:GetParent():StartMoving()
+                        CliqueDialog:SetUserPlaced(false)
+                        CliqueDialog:StartMoving()
                     </OnMouseDown>
                     <OnMouseUp>
-                        self:GetParent():StopMovingOrSizing()
-                        self:SetUserPlaced(false)
+                        CliqueDialog:SetUserPlaced(false)
+                        CliqueDialog:StopMovingOrSizing()
                     </OnMouseUp>
                     <OnHide>
-                        self:GetParent():StopMovingOrSizing()
-                        self:SetUserPlaced(false)
+                        CliqueDialog:SetUserPlaced(false)
+                        CliqueDialog:StopMovingOrSizing()
                     </OnHide>
                 </Scripts>
             </Button>
