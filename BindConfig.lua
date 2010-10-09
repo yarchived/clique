@@ -381,8 +381,26 @@ function CliqueConfig:AcceptSetBinding()
     dialog:Hide()
 end
 
+local function toggleSet(binding, set)
+    return function()
+        if not binding.sets then
+            binding.sets = {}
+        end
+        if binding.sets[set] then
+            binding.sets[set] = nil
+        else
+            binding.sets[set] = true
+        end
+        CliqueConfig:UpdateList()
+    end
+end
+
 function CliqueConfig:Row_OnClick(frame, button)
     local menu = {
+        {
+            text = L["Configure binding"],
+            isTitle = true,
+        },
         { 
             text = L["Change binding"],
             func = function()
@@ -401,6 +419,62 @@ function CliqueConfig:Row_OnClick(frame, button)
             notCheckable = true,
         },
     }
+
+    local submenu = {
+        text = L["Enable/Disable click-sets"],
+        hasArrow = true,
+        notCheckable = true,
+        menuList = {},
+    }
+    table.insert(menu, submenu)
+
+    local binding = Clique.profile.binds[frame.bindIndex]
+    
+    table.insert(submenu.menuList, {
+        text = L["Default"],
+        checked = function() return binding.sets["default"] end,
+        func = toggleSet(binding, "default"),
+        tooltipTitle = L["Clique: 'default' click-set"],
+        tooltipText = L["A binding that belongs to the 'default' click-set will always be active on your unit frames, unless you override it with another binding."],
+        keepShownOnClick = true,
+    })
+
+    table.insert(submenu.menuList, {
+        text = L["Friend"],
+        checked = function() return binding.sets["friend"] end,
+        func = toggleSet(binding, "friend"),
+        tooltipTitle = L["Clique: 'friend' click-set"],
+        tooltipText = L["A binding that belongs to the 'frield' click-set will only be active when clicking on unit frames that display friendly units, i.e. those you can heal and assist. If you click on a unit that you cannot heal or assist, nothing will happen."],
+        keepShownOnClick = true,
+    })
+
+    table.insert(submenu.menuList, {
+        text = L["Enemy"],
+        checked = function() return binding.sets["enemy"] end,
+        func = toggleSet(binding, "enemy"),
+        tooltipTitle = L["Clique: 'enemy' click-set"],
+        tooltipText = L["A binding that belongs to the 'enemy' click-set will always be active when clicking on unit frames that display enemy units, i.e. those you can attack. If you click on a unit that you cannot attack, nothing will happen."],
+        keepShownOnClick = true,
+    })
+
+    table.insert(submenu.menuList, {
+        text = L["Out-of-combat only"],
+        checked = function() return binding.sets["ooc"] end,
+        func = toggleSet(binding, "ooc"),
+        tooltipTitle = L["Clique: 'ooc' click-set"],
+        tooltipText = L["A binding that belongs to the 'ooc' click-set will only be active when the player is out-of-combat. As soon as the player enters combat, these bindings will no longer be active, so be careful when choosing this click-set for any spells you use frequently."],
+        keepShownOnClick = true,
+    })
+
+    table.insert(submenu.menuList, {
+        text = L["Global bindings"],
+        checked = function() return binding.sets["global"] end,
+        func = toggleSet(binding, "global"),
+        tooltipTitle = L["Clique: 'global' click-set"],
+        tooltipText = L["A binding that belongs to the 'global' click-set is always active, regardless of whether the mouse is over a unit frame or not. This click-set allows you to bind spells to keys that can then be used over the 3-D game world, to enable 'hovercasting', where you hover over a unit in the world and press a key to cast a spell on them. These bindings are also active over unit frames."],
+        keepShownOnClick = true,
+    })
+    
     EasyMenu(menu, self.dropdown, "cursor", 0, 0, nil, nil)
 end
 

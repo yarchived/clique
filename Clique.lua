@@ -139,8 +139,8 @@ function addon:InitializeDatabase()
     if reset then
         CliqueDB = {
             binds = {
-                [1] = {key = "BUTTON1", type = "target", unit = "mouseover"},
-                [2] = {key = "BUTTON2", type = "menu"},
+                [1] = {key = "BUTTON1", type = "target", unit = "mouseover", sets = {default = true}},
+                [2] = {key = "BUTTON2", type = "menu", sets = {default = true}},
             },
             dbversion = 2,
         }
@@ -257,9 +257,14 @@ end
 -- }
 
 function addon:AddBinding(entry)
-    -- Check to see if the new binding conflicts with an existing binding
+    -- TODO: Check to see if the new binding conflicts with an existing binding
 
-    -- Validate the entry to ensure it has the correct arguments, etc.
+    -- TODO: Validate the entry to ensure it has the correct arguments, etc.
+
+    if not entry.sets then
+        entry.sets = {default = true}
+    end
+
     table.insert(self.profile.binds, entry)
    
     self:UpdateAttributes()

@@ -186,6 +186,9 @@ function addon:GetBindingInfoText(binding)
     local sets = binding.sets
     if not sets then
         return ""
+    elseif not next(sets) then
+        -- No bindings set, so display a message
+        return L["This binding is DISABLED"]
     else
         local bits = {}
         for k,v in pairs(sets) do
