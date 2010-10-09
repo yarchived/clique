@@ -188,19 +188,21 @@ function addon:GetClickAttributes(global)
 
     for idx, entry in ipairs(self.profile.binds) do
         if self:ShouldSetBinding(entry, global) then
-            local prefix, suffix = entry.key:match("^(.-)([^%-]+)$")
-            if prefix:sub(-1, -1) == "-" then
-                prefix = prefix:sub(1, -2)
-            end
+            local prefix, suffix = addon:GetBindingPrefixSuffix(entry)
 
-            prefix = prefix:lower()
+            -- Set up help/harm bindings. The button value will be either a number, 
+            -- in the case of mouse buttons, otherwise it will be a string of
+            -- characters. Harmbuttons work alongside modifiers, so we need to include
+            -- then in the remapping. 
 
-            local button = suffix:match("^BUTTON(%d+)$")
-            if button then
-                suffix = button
-            else
-                suffix = "cliquebutton" .. idx
-                prefix = ""
+            if entry.sets.friend then
+                local newbutton = "friend" .. suffix
+                bits[#bits + 1] = ATTR(prefix, "helpbutton", suffix, newbutton)
+                suffix = newbutton
+            elseif entry.sets.enemy then
+                local newbutton = "enemy" .. suffix
+                bits[#bits + 1] = ATTR(prefix, "harmbutton", suffix, newbutton)
+                suffix = newbutton
             end
 
             -- Build any needed SetAttribute() calls
@@ -241,7 +243,10 @@ function addon:GetBindingAttributes(global)
         if self:ShouldSetBinding(entry, global) then 
             if not entry.key:match("BUTTON%d+$") then
                 -- This is a key binding, so we need a binding for it
-                set[#set + 1] = B_SET:format(entry.key, "cliquebutton" .. idx)
+                
+                local prefix, suffix = addon:GetBindingPrefixSuffix(entry)
+
+                set[#set + 1] = B_SET:format(entry.key, suffix)
                 clr[#clr + 1] = B_CLR:format(entry.key)
             end
         end

@@ -198,6 +198,27 @@ function addon:GetBindingInfoText(binding)
     end
 end
 
+function addon:GetBindingPrefixSuffix(binding)
+    local prefix, suffix = binding.key:match("^(.-)([^%-]+)$")
+    if prefix:sub(-1, -1) == "-" then
+        prefix = prefix:sub(1, -2)
+    end
+
+    prefix = prefix:lower()
+
+    local button = suffix:match("^BUTTON(%d+)$")
+    if button then
+        suffix = button
+    else
+        local mbid = (prefix .. suffix):gsub("[^A-Za-z0-9]", "")
+        suffix = "cliquebutton" .. mbid
+        prefix = ""
+    end
+
+    return prefix, suffix
+end
+
+
 -- This function examines the current state of the game
 function addon:ShouldSetBinding(binding, global)
     local apply = false
@@ -207,6 +228,10 @@ function addon:ShouldSetBinding(binding, global)
         apply = true
     elseif binding.sets.global and (not global) then
         apply = false
+    end
+
+    if binding.sets.enemy or binding.sets.friend and not binding.sets.global then
+        apply = true
     end
 
     if binding.sets.ooc then
