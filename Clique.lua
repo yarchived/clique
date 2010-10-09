@@ -137,6 +137,9 @@ function addon:Enable()
         pushable = 1,
         whileDead = 1,
     }
+
+    -- Set the tooltip for the spellbook tab
+    CliqueSpellTab.tooltip = L["Clique binding configuration"]
 end
 
 function addon:InitializeDatabase()

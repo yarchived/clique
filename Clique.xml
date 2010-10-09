@@ -122,6 +122,29 @@
         <HighlightTexture file="Interface\BUTTONS\ButtonHilight-Square" alphaMode="ADD"/>
     </Button>
 
+    <CheckButton name="CliqueSpellTab" inherits="SpellBookSkillLineTabTemplate" parent="SpellBookFrame" hidden="false">
+        <Scripts>
+            <OnClick>
+                if CliqueConfig:IsVisible() then
+                    HideUIPanel(CliqueConfig)
+                else
+                    ShowUIPanel(CliqueConfig)
+                end
+            </OnClick>
+            <OnShow>
+                if CliqueConfig:IsVisible() then
+                    self:SetChecked(true)
+                end
+
+                local num = GetNumSpellTabs()
+                self:ClearAllPoints()
+                local lastTab = _G["SpellBookSkillLineTab" .. num]
+                self:SetPoint("TOPLEFT", lastTab, "BOTTOMLEFT", 0, -17)
+            </OnShow>
+        </Scripts>
+        <NormalTexture file="Interface\AddOns\Clique\mousesquare64"/>
+    </CheckButton>
+
     <Frame name="CliqueDialog" toplevel="true" enableMouse="true" movable="true" inherits="BasicFrameTemplate" parent="UIParent" frameStrata="DIALOG" hidden="true">
         <Size x="350" y="160"/>
         <Anchors>
@@ -484,6 +507,9 @@
             <OnShow>
                 CliqueConfig:OnShow()
             </OnShow>
+            <OnHide>
+                CliqueConfig:OnHide()
+            </OnHide>
         </Scripts>
     </Frame> <!-- CliqueConfig -->
 </Ui>

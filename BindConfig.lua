@@ -10,10 +10,14 @@ function CliqueConfig:OnShow()
         self.initialized = true
     end
 
+    CliqueSpellTab:SetChecked(true)
     self:UpdateList()
     self:EnableSpellbookButtons()
 end
 
+function CliqueConfig:OnHide()
+    CliqueSpellTab:SetChecked(false)
+end
 
 function CliqueConfig:SetupGUI()
     self.rows = {}
@@ -31,7 +35,6 @@ function CliqueConfig:SetupGUI()
         self.rows[i]:SetPoint("RIGHT", CliqueConfigPage1Column2, "RIGHT", 0, 0)
     end
 
-    -- Set text elements using localized values
     _G[self:GetName() .. "TitleText"]:SetText(L["Clique Binding Configuration"])
     
     self.dialog = _G["CliqueDialog"]
