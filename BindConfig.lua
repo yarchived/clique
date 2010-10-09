@@ -391,6 +391,7 @@ local function toggleSet(binding, set)
         else
             binding.sets[set] = true
         end
+        addon:UpdateAttributes()
         CliqueConfig:UpdateList()
     end
 end

@@ -197,3 +197,25 @@ function addon:GetBindingInfoText(binding)
         return table.concat(bits, ", ")
     end
 end
+
+-- This function examines the current state of the game
+function addon:ShouldSetBinding(binding)
+    local apply = false
+
+    if binding.sets.ooc then
+        if UnitAffectingCombat("player") then
+            apply = false
+        else
+            apply = true
+        end
+    end
+
+    if binding.sets.default then
+        apply = true
+    end
+
+    return apply
+end
+
+function addon:ShouldSetBindingOnFrame(binding, frame)
+end

@@ -25,7 +25,7 @@
 --      clicking on is an enemy, i.e. a unit that you can attack.
 --    * friendly - These bindings are ONLY active when the unit you are
 --      clicking on is a friendly unit, i.e. one that you can assist
---    * glabal - These bindings will be available regardless of where
+--    * global - These bindings will be available regardless of where
 --      your mouse is on the screen, be it in the 3D world, or over a
 --      unit frame. These bindings take up a slot that might otherwise
 --      be used in the 'Key Bindings' interface options.
@@ -99,6 +99,10 @@ function addon:Initialize()
         end
     end
     self:EnableBlizzardFrames()
+
+    -- Register for combat events to ensure we can swap between the two states
+    self:RegisterEvent("PLAYER_REGEN_DISABLED", "UpdateAttributes")
+    self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateAttributes")
 end
 
 function addon:RegisterFrame(button)
@@ -173,38 +177,40 @@ function addon:GetClickAttributes()
     }
 
     for idx, entry in ipairs(self.profile.binds) do
-        local prefix, suffix = entry.key:match("^(.-)([^%-]+)$")
-        if prefix:sub(-1, -1) == "-" then
-            prefix = prefix:sub(1, -2)
-        end
+        if self:ShouldSetBinding(entry) then
+            local prefix, suffix = entry.key:match("^(.-)([^%-]+)$")
+            if prefix:sub(-1, -1) == "-" then
+                prefix = prefix:sub(1, -2)
+            end
 
-        prefix = prefix:lower()
+            prefix = prefix:lower()
 
-        local button = suffix:match("^BUTTON(%d+)$")
-        if button then
-            suffix = button
-        else
-            suffix = "cliquebutton" .. idx
-            prefix = ""
-        end
+            local button = suffix:match("^BUTTON(%d+)$")
+            if button then
+                suffix = button
+            else
+                suffix = "cliquebutton" .. idx
+                prefix = ""
+            end
 
-        -- Build any needed SetAttribute() calls
-        if entry.type == "target" or entry.type == "menu" then
-            bits[#bits + 1] = ATTR(prefix, "type", suffix, entry.type)
-            rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
-        elseif entry.type == "spell" then
-            bits[#bits + 1] = ATTR(prefix, "type", suffix, entry.type)
-            bits[#bits + 1] = ATTR(prefix, "spell", suffix, entry.spell)
-            rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
-            rembits[#rembits + 1] = REMATTR(prefix, "spell", suffix)
-        elseif entry.type == "macro" then
-            bits[#bits + 1] = ATTR(prefix, "type", suffix, entry.type)
-            bits[#bits + 1] = ATTR(prefix, "macrotext", suffix, entry.macrotext)
-            rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
-            rembits[#rembits + 1] = REMATTR(prefix, "macrotext", suffix)
+            -- Build any needed SetAttribute() calls
+            if entry.type == "target" or entry.type == "menu" then
+                bits[#bits + 1] = ATTR(prefix, "type", suffix, entry.type)
+                rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
+            elseif entry.type == "spell" then
+                bits[#bits + 1] = ATTR(prefix, "type", suffix, entry.type)
+                bits[#bits + 1] = ATTR(prefix, "spell", suffix, entry.spell)
+                rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
+                rembits[#rembits + 1] = REMATTR(prefix, "spell", suffix)
+            elseif entry.type == "macro" then
+                bits[#bits + 1] = ATTR(prefix, "type", suffix, entry.type)
+                bits[#bits + 1] = ATTR(prefix, "macrotext", suffix, entry.macrotext)
+                rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
+                rembits[#rembits + 1] = REMATTR(prefix, "macrotext", suffix)
 
-        else
-            error(string.format("Invalid action type: '%s'", entry.type))
+            else
+                error(string.format("Invalid action type: '%s'", entry.type))
+            end
         end
     end
 
@@ -222,10 +228,12 @@ function addon:GetBindingAttributes()
     local clr = {}
 
     for idx, entry in ipairs(self.profile.binds) do
-        if not entry.key:match("BUTTON%d+$") then
-            -- This is a key binding, so we need a binding for it
-            set[#set + 1] = B_SET:format(entry.key, "cliquebutton" .. idx)
-            clr[#clr + 1] = B_CLR:format(entry.key)
+        if self:ShouldSetBinding(entry) then 
+            if not entry.key:match("BUTTON%d+$") then
+                -- This is a key binding, so we need a binding for it
+                set[#set + 1] = B_SET:format(entry.key, "cliquebutton" .. idx)
+                clr[#clr + 1] = B_CLR:format(entry.key)
+            end
         end
     end
 
