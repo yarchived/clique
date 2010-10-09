@@ -199,8 +199,15 @@ function addon:GetBindingInfoText(binding)
 end
 
 -- This function examines the current state of the game
-function addon:ShouldSetBinding(binding)
+function addon:ShouldSetBinding(binding, global)
     local apply = false
+
+    -- Check for global bindings first
+    if binding.sets.global and global then
+        apply = true
+    elseif binding.sets.global and (not global) then
+        apply = false
+    end
 
     if binding.sets.ooc then
         if UnitAffectingCombat("player") then

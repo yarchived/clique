@@ -47,6 +47,10 @@ function addon:Initialize()
     self.header = CreateFrame("Frame", addonName .. "HeaderFrame", UIParent, "SecureHandlerBaseTemplate")
     ClickCastHeader = addon.header
 
+    -- Create a secure action button that can be used for 'global' bindings
+    self.globutton = CreateFrame("Button", addonName .. "SABButton", UIParent, "SecureActionButtonTemplate, SecureHandlerBaseTemplate")
+    self.globutton:SetAttribute("unit", "mouseover")
+
     -- Create a table within the addon header to store the frames
     -- that are registered for click-casting
     self.header:Execute([[
@@ -80,7 +84,10 @@ function addon:Initialize()
     self.header:SetAttribute("setup_onenter", set)
     self.header:SetAttribute("setup_onleave", clr)
 
-    -- Clickcast registration systems
+    -- Get the override binding attributes for the global click frame
+    self.globutton.setup, self.globutton.remove = self:GetClickAttributes(true)
+    self.globutton.setbinds, self.globutton.clearbinds = self:GetBindingAttributes(true)
+
     -- Compatability with old Clique 1.x registrations
     local oldClickCastFrames = ClickCastFrames
 
@@ -99,6 +106,9 @@ function addon:Initialize()
         end
     end
     self:EnableBlizzardFrames()
+
+    -- Update GLOBAL attributes
+    self:UpdateGlobalAttributes()
 
     -- Register for combat events to ensure we can swap between the two states
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "UpdateAttributes")
@@ -165,7 +175,7 @@ end
 
 -- This function will create an attribute that when run for a given frame
 -- will set the correct set of SAB attributes.
-function addon:GetClickAttributes()
+function addon:GetClickAttributes(global)
     local bits = {
         "local setupbutton = self:GetFrameRef('cliquesetup_button')",
         "local button = setupbutton or self",
@@ -177,7 +187,7 @@ function addon:GetClickAttributes()
     }
 
     for idx, entry in ipairs(self.profile.binds) do
-        if self:ShouldSetBinding(entry) then
+        if self:ShouldSetBinding(entry, global) then
             local prefix, suffix = entry.key:match("^(.-)([^%-]+)$")
             if prefix:sub(-1, -1) == "-" then
                 prefix = prefix:sub(1, -2)
@@ -223,12 +233,12 @@ local B_CLR = [[self:ClearBinding("%s");]]
 -- This function will create two attributes, the first being a "setup keybindings"
 -- script and the second being a "clear keybindings" script.
 
-function addon:GetBindingAttributes()
+function addon:GetBindingAttributes(global)
     local set = {}
     local clr = {}
 
     for idx, entry in ipairs(self.profile.binds) do
-        if self:ShouldSetBinding(entry) then 
+        if self:ShouldSetBinding(entry, global) then 
             if not entry.key:match("BUTTON%d+$") then
                 -- This is a key binding, so we need a binding for it
                 set[#set + 1] = B_SET:format(entry.key, "cliquebutton" .. idx)
@@ -330,6 +340,9 @@ function addon:UpdateAttributes()
         error("panic: Clique:UpdateAttributes() called during combat")
     end
 
+    -- Update global attributes
+    self:UpdateGlobalAttributes()
+
     -- Clear any of the previously set attributes
     self:ClearAttributes()
 
@@ -358,6 +371,25 @@ function addon:UpdateAttributes()
         self.header:SetFrameRef("cliquesetup_button", button)
         self.header:Execute(self.header:GetAttribute("setup_clicks"), button)
     end
+end
+
+function addon:ClearGlobalAttributes()
+    local globutton = self.globutton
+    globutton:Execute(globutton.remove)
+    globutton:Execute(globutton.clearbinds)
+end
+
+-- Update the global click attributes
+function addon:UpdateGlobalAttributes()
+    local globutton = self.globutton
+
+    self:ClearGlobalAttributes()
+
+    -- Get the override binding attributes for the global click frame
+    globutton.setup, globutton.remove = self:GetClickAttributes(true)
+    globutton.setbinds, globutton.clearbinds = self:GetBindingAttributes(true)
+    globutton:Execute(globutton.setup)
+    globutton:Execute(globutton.setbinds)
 end
 
 SLASH_CLIQUE1 = "/clique"
