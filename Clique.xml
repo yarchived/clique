@@ -475,7 +475,7 @@
         </Frames>
         <Scripts>
             <OnLoad>
-                CliqueConfigPortrait:SetTexture("Interface\\Addons\\Clique\\mousecircle")
+                CliqueConfigPortrait:SetTexture("Interface\\Addons\\Clique\\mousecircle128")
                 CliqueConfig.page1:SetParent(CliqueConfig.Inset)
                 CliqueConfig.page2:SetParent(CliqueConfig.Inset)
                 CliqueConfig.page1:SetAllPoints(CliqueConfig.Inset)
