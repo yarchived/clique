@@ -14,8 +14,11 @@ Clique.xml
 
 Clique.lua
 Utils.lua
+
 BindConfig.lua
+
 OptionsPanel.lua
+FrameOptionsPanel.lua
 
 HeaderTest.xml
 HeaderTest.lua

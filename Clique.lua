@@ -107,12 +107,15 @@ function addon:Initialize()
     end
     self:EnableBlizzardFrames()
 
-    -- Update GLOBAL attributes
-    self:UpdateGlobalAttributes()
+    -- Trigger a profile change, updating all attributes
+    self:ChangeProfile()
 
     -- Register for combat events to ensure we can swap between the two states
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "UpdateAttributes")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateAttributes")
+    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", function()
+        self:ChangeProfile()
+    end)
 end
 
 function addon:RegisterFrame(button)
@@ -167,7 +170,9 @@ function addon:InitializeDatabase()
     local db = CliqueDB2
     local realmKey = GetRealmName()
     local charKey = UnitName("player") .. " - " .. realmKey
+    addon.staticProfileKey = charKey
 
+    addon.db = db
     if not db.settings[charKey] then
         db.settings[charKey] = {
             profileKey = charKey,
@@ -435,6 +440,38 @@ function addon:UpdateGlobalAttributes()
     globutton.setbinds, globutton.clearbinds = self:GetBindingAttributes(true)
     globutton:Execute(globutton.setup)
     globutton:Execute(globutton.setbinds)
+end
+
+function addon:ChangeProfile(profileName)
+    -- Clear the current profile
+    addon:ClearAttributes()
+    addon:ClearGlobalAttributes()
+
+    -- Check to see if this is a force-create of a new profile
+    if type(profileName) == "string" and #profileName > 0 then
+        -- Do nothing
+    else
+        -- Determine which profile to set, based on talent group
+        self.talentGroup = GetActiveTalentGroup()
+        if self.talentGroup == 1 and self.settings.pri_profileKey then
+            profileName = self.settings.pri_profileKey
+        elseif self.talentGroup == 2 and self.settings.sec_profileKey then
+            profileName = self.settings.sec_profileKey
+        end
+
+        if type(profileName) == "string" and addon.db.bindings[profileName] then
+            -- Do nothing
+        else
+            profileName = addon.staticProfileKey
+        end
+    end
+
+    -- We've been given a profile name, so just change to it
+    addon.settings.profileKey = profileName
+    addon:InitializeBindingProfile()
+    addon:UpdateAttributes()
+    addon:UpdateGlobalAttributes()
+    addon:UpdateOptionsPanel()
 end
 
 SLASH_CLIQUE1 = "/clique"
