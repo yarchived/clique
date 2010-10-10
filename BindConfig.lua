@@ -274,7 +274,7 @@ function CliqueConfig:UpdateList()
     local binds = addon.bindings
 
     -- GUI not created yet
-    if not page then
+    if not self.initialized then
         return
     end
 

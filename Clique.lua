@@ -472,6 +472,8 @@ function addon:ChangeProfile(profileName)
     addon:UpdateAttributes()
     addon:UpdateGlobalAttributes()
     addon:UpdateOptionsPanel()
+
+    CliqueConfig:UpdateList()
 end
 
 SLASH_CLIQUE1 = "/clique"
