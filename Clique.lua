@@ -152,27 +152,60 @@ end
 -- forward from this point. The database consists of two sections:
 --   * settings - used to handle the basic options Clique uses
 --   * profiles - used for the binding configuration profiles, possibly shared
-local current_db_version = 3
+local current_db_version = 4
 function addon:InitializeDatabase()
+    local realmKey = GetRealmName()
+    local charKey = UnitName("player") .. " - " .. realmKey
+    addon.staticProfileKey = charKey
+
     local reset = false
     if not CliqueDB2 then
         reset = true
+    elseif type(CliqueDB2) == "table" and CliqueDB2.dbversion == 3 then
+        -- Upgrade to add 'BlizzFrames' subtable
+        local settings = CliqueDB2.settings[charKey]
+        settings.blizzframes = {
+            PlayerFrame = true,
+            PetFrame = true,
+            TargetFrame = true,
+            TargetFrameToT = true,
+            FocusFrame = true,
+            FocusFrameToT = true,
+            arena = true,
+            party = true,
+            compactraid = true,
+            compactparty = true,
+            boss = true,
+        }
+        -- Don't forget to update the version
+        CliqueDB2.dbversion = current_db_version
     elseif type(CliqueDB2) == "table" and CliqueDB2.dbversion ~= current_db_version then
         reset = true
     end
 
     if reset then
         CliqueDB2 = {
-            settings = {},
+            settings = {
+                blizzframes = {
+                    PlayerFrame = true,
+                    PetFrame = true,
+                    TargetFrame = true,
+                    TargetFrameToT = true,
+                    FocusFrame = true,
+                    FocusFrameToT = true,
+                    arena = true,
+                    party = true,
+                    compactraid = true,
+                    compactparty = true,
+                    boss = true,
+                }
+            },
             bindings = {},
             dbversion = current_db_version,
         }
     end
-
+    
     local db = CliqueDB2
-    local realmKey = GetRealmName()
-    local charKey = UnitName("player") .. " - " .. realmKey
-    addon.staticProfileKey = charKey
 
     addon.db = db
     if not db.settings[charKey] then

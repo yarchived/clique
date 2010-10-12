@@ -20,7 +20,7 @@ BindConfig.lua
 OptionsPanel.lua
 FrameOptionsPanel.lua
 
+BlizzardFrames.lua
+
 # HeaderTest.xml
 # HeaderTest.lua
-
-BlizzardFrames.lua
