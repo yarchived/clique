@@ -185,21 +185,7 @@ function addon:InitializeDatabase()
 
     if reset then
         CliqueDB2 = {
-            settings = {
-                blizzframes = {
-                    PlayerFrame = true,
-                    PetFrame = true,
-                    TargetFrame = true,
-                    TargetFrameToT = true,
-                    FocusFrame = true,
-                    FocusFrameToT = true,
-                    arena = true,
-                    party = true,
-                    compactraid = true,
-                    compactparty = true,
-                    boss = true,
-                }
-            },
+            settings = {},
             bindings = {},
             dbversion = current_db_version,
         }
@@ -211,6 +197,19 @@ function addon:InitializeDatabase()
     if not db.settings[charKey] then
         db.settings[charKey] = {
             profileKey = charKey,
+            blizzframes = {
+                PlayerFrame = true,
+                PetFrame = true,
+                TargetFrame = true,
+                TargetFrameToT = true,
+                FocusFrame = true,
+                FocusFrameToT = true,
+                arena = true,
+                party = true,
+                compactraid = true,
+                compactparty = true,
+                boss = true,
+            }
         }
     end
 
