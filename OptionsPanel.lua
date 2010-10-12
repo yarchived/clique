@@ -7,6 +7,7 @@ panel.name = addonName
 panel:SetScript("OnShow", function(self)
     if not panel.initialized then
         panel:CreateOptions()
+        panel.refresh()
     end
 end)
 
