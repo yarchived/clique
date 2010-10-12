@@ -7,9 +7,9 @@ local L = addon.L
 --   split - Whether or not to split the modifier keys into left and right components
 
 function addon:GetPrefixString(split)
-    shift, lshift, rshift = IsShiftKeyDown(), IsLeftShiftKeyDown(), IsRightShiftKeyDown()
-    ctrl, lctrl, rctrl = IsControlKeyDown(), IsLeftControlKeyDown(), IsRightControlKeyDown()
-    alt, lalt, ralt = IsAltKeyDown(), IsLeftAltKeyDown() IsRightAltKeyDown()
+    local shift, lshift, rshift = IsShiftKeyDown(), IsLeftShiftKeyDown(), IsRightShiftKeyDown()
+    local ctrl, lctrl, rctrl = IsControlKeyDown(), IsLeftControlKeyDown(), IsRightControlKeyDown()
+    local alt, lalt, ralt = IsAltKeyDown(), IsLeftAltKeyDown() IsRightAltKeyDown()
 
     if not extended then
         shift = shift or lshift or rshift
@@ -130,8 +130,8 @@ local binMap = {
 }
 
 function addon:GetBinaryBindingKey(binding)
-    ret = {"0", "0", "0", "0", "0", "0", "0", "0", "0"}
-    splits = {strsplit("-", binding.key)}
+    local ret = {"0", "0", "0", "0", "0", "0", "0", "0", "0"}
+    local splits = {strsplit("-", binding.key)}
     for idx, modifier in ipairs(splits) do
         local bit = binMap[modifier]
         if bit then
@@ -143,7 +143,7 @@ function addon:GetBinaryBindingKey(binding)
     return table.concat(ret)
 end
 
-invalidKeys = {
+local invalidKeys = {
     ["UNKNOWN"] = true,
     ["LSHIFT"] = true,
     ["RSHIFT"] = true,
@@ -168,7 +168,7 @@ function addon:GetCapturedKey(key)
     elseif key == "MiddleButton" then
         key = "BUTTON3"
     else
-        buttonNum = key:match("Button(%d+)")
+        local buttonNum = key:match("Button(%d+)")
         if buttonNum and tonumber(buttonNum) <= 31 then
             key = "BUTTON" .. buttonNum
         end

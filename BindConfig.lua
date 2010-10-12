@@ -108,10 +108,6 @@ function CliqueConfig:EnableSpellbookButtons()
 
     if self.page1:IsVisible() and SpellBookFrame:IsVisible() then
         enabled = true
-        self:SetNotification("Your spellbook is open.  You can mouse over a spell in your spellbook and click or press a key conbination to add it to your bindings configuration")
-    else
-        method = false
-        self:ClearNotification()
     end
 
     if self.spellbookButtons then
