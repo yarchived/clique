@@ -96,20 +96,17 @@ function addon:GetBindingKeyComboText(binding)
     end
 end
 
-function addon:GetBindingActionText(binding)
-    local btype = type(binding) == "table" and binding.type or binding
-
+function addon:GetBindingActionText(btype, binding)
     if btype == "menu" then
         return L["Show unit menu"]
     elseif btype == "target" then
         return L["Target clicked unit"]
     elseif btype == "spell" then
-        if binding.rank then
-            return L["Cast %s (Rank %d)"]:format(binding.spell, binding.rank)
-        end
         return L["Cast %s"]:format(binding.spell)
-    elseif btype == "macro" then
+    elseif btype == "macro" and type(binding) == "table" then
         return L["Run macro '%s'"]:format(tostring(binding.macrotext))
+    elseif btype == "macro" then
+        return L["Run macro"]:format(tostring(binding.macrotext))
     else
         return L["Unknown binding type '%s'"]:format(tostring(btype))
     end

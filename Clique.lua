@@ -358,8 +358,8 @@ function addon:AddBinding(entry)
 end
 
 local function bindingeq(a, b)
-    assert(type(a) == "table")
-    assert(type(b) == "table")
+    assert(type(a) == "table", "Error during deletion comparison")
+    assert(type(b) == "table", "Error during deletion comparison")
     if a.type ~= b.type then
         return false
     elseif a.type == "target" then

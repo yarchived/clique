@@ -245,8 +245,8 @@ end})
 local compareFunctions;
 compareFunctions = {
     name = function(a, b)
-        local texta = addon:GetBindingActionText(a)
-        local textb = addon:GetBindingActionText(b)
+        local texta = addon:GetBindingActionText(a.type, a)
+        local textb = addon:GetBindingActionText(b.type, b)
         if texta == textb then
             return compareFunctions.key(a, b)
         end
@@ -268,7 +268,6 @@ compareFunctions = {
 }
 
 -- Mapping between binding entry and index in profile
-local bindMap = {}
 function CliqueConfig:UpdateList()
     local page = self.page1
     local binds = addon.bindings
@@ -281,7 +280,6 @@ function CliqueConfig:UpdateList()
     -- Sort the bindings
     local sort = {}
     for idx, entry in pairs(binds) do
-        bindMap[entry] = idx
         sort[#sort + 1] = entry
     end
 
@@ -320,10 +318,10 @@ function CliqueConfig:UpdateList()
         if sort[offsetIndex] then
             local bind = sort[offsetIndex]
             row.icon:SetTexture(addon:GetBindingIcon(bind))
-            row.name:SetText(addon:GetBindingActionText(bind))
+            row.name:SetText(addon:GetBindingActionText(bind.type, bind))
             row.info:SetText(addon:GetBindingInfoText(bind))
             row.bind:SetText(addon:GetBindingKeyComboText(bind))
-            row.bindIndex = bindMap[bind]
+            row.binding = bind 
             row:Show()
         else 
             row:Hide()
@@ -349,12 +347,20 @@ function CliqueConfig:Cancel_OnClick(button, down)
     self.page1:Show()
 end
 
-function CliqueConfig:SetupCaptureDialog(type)
+function CliqueConfig:SetupCaptureDialog(type, binding)
     self.dialog.bindType = type
-    self.dialog.bindText:SetText("")
+    self.dialog.binding = binding
 
-    local actionText = addon:GetBindingActionText(type)
-    self.dialog.title:SetText(L["Set binding: %s"]:format(actionText))
+    if not binding then
+        local actionText = addon:GetBindingActionText(type, binding)
+        self.dialog.title:SetText(L["Set binding: %s"]:format(actionText))
+    else
+        -- This is a change to an existing binding
+        local actionText = addon:GetBindingActionText(type, binding)
+        self.dialog.title:SetText(L["Change binding: %s"]:format(actionText))
+    end
+
+    self.dialog.bindText:SetText("")
     self.dialog:Show()
 end
 
@@ -377,12 +383,20 @@ end
 function CliqueConfig:AcceptSetBinding()
     local dialog = CliqueDialog
     local key = dialog.key
-    local succ, err = addon:AddBinding{
-        key = key,
-        type = dialog.bindType,
-    }
-    if succ then
-        CliqueConfig:UpdateList()
+
+    if dialog.binding then
+        -- This was a CHANGE binding instead of a SET binding
+        dialog.binding.key = key
+        dialog.binding = nil
+        self:UpdateList()
+    else
+        local succ, err = addon:AddBinding{
+            key = key,
+            type = dialog.bindType,
+        }
+        if succ then
+            self:UpdateList()
+        end
     end
     dialog:Hide()
 end
@@ -403,24 +417,27 @@ local function toggleSet(binding, set)
 end
 
 function CliqueConfig:Row_OnClick(frame, button)
+    local binding = frame.binding
+    local actionText = addon:GetBindingActionText(binding.type, binding)
+
     local menu = {
         {
-            text = L["Configure binding"],
+            text = L["Configure binding: '%s'"]:format(actionText),
+            notCheckable = true,
             isTitle = true,
         },
         { 
             text = L["Change binding"],
             func = function()
-                -- Do nothing right now
-                -- self:SetupCaptureDialog("target")
+                local binding = frame.binding
+                self:SetupCaptureDialog(binding.type, binding)
             end,
             notCheckable = true,
         },
         {
             text = L["Delete binding"],
             func = function()
-                local bindIndex = frame.bindIndex
-                addon:DeleteBinding(Clique.bindings[bindIndex])
+                addon:DeleteBinding(frame.binding)
                 self:UpdateList()
             end,
             notCheckable = true,
@@ -434,9 +451,7 @@ function CliqueConfig:Row_OnClick(frame, button)
         menuList = {},
     }
     table.insert(menu, submenu)
-
-    local binding = Clique.bindings[frame.bindIndex]
-    
+ 
     table.insert(submenu.menuList, {
         text = L["Default"],
         checked = function() return binding.sets["default"] end,
