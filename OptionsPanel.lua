@@ -42,6 +42,9 @@ function panel:CreateOptions()
     self.updown = make_checkbox("CliqueOptionsUpDownClick", self)
     self.updown.text:SetText(L["Trigger bindings on the 'down' portion of the click (requires reload)"])
 
+    self.fastooc = make_checkbox("CliqueOptionsFastOoc", self)
+    self.fastooc.text:SetText(L["Disable out of combat clicks when party members enter combat"])
+
     self.specswap = make_checkbox("CliqueOptionsSpecSwap", self)
     self.specswap.text:SetText(L["Swap profiles based on talent spec"])
     self.specswap.EnableDisable = function()
@@ -73,8 +76,8 @@ function panel:CreateOptions()
     UIDropDownMenu_SetWidth(self.profiledd, 150)
 
     -- Collect and anchor the bits together
-    table.insert(bits, self.intro)
     table.insert(bits, self.updown)
+    table.insert(bits, self.fastooc)
     table.insert(bits, self.specswap)
     table.insert(bits, self.prispeclabel)
     table.insert(bits, self.prispec)
@@ -348,6 +351,7 @@ function panel.refresh()
     UIDropDownMenu_SetText(panel.profiledd, settings.profileKey)
     
     panel.updown:SetChecked(settings.downclick)
+    panel.fastooc:SetChecked(settings.fastooc)
     panel.specswap:SetChecked(settings.specswap)
     panel.specswap.EnableDisable()
 end
@@ -357,11 +361,13 @@ function panel.okay()
 
     -- Update the saved variables
     settings.downclick = not not panel.updown:GetChecked()
+    settings.fastooc = not not panel.fastooc:GetChecked()
     settings.specswap = not not panel.specswap:GetChecked()
     settings.pri_profileKey = UIDropDownMenu_GetSelectedValue(panel.prispec)
     settings.sec_profileKey = UIDropDownMenu_GetSelectedValue(panel.secspec)
     settings.profileKey = UIDropDownMenu_GetSelectedValue(panel.profiledd) 
 
+    addon:UpdateCombatWatch()
     addon:ChangeProfile()
 end
 

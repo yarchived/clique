@@ -111,11 +111,13 @@ function addon:Initialize()
     self:ChangeProfile()
 
     -- Register for combat events to ensure we can swap between the two states
-    self:RegisterEvent("PLAYER_REGEN_DISABLED", "UpdateAttributes")
-    self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateAttributes")
+    self:RegisterEvent("PLAYER_REGEN_DISABLED", "EnteringCombat")
+    self:RegisterEvent("PLAYER_REGEN_ENABLED", "LeavingCombat")
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", function()
         self:ChangeProfile()
     end)
+    -- Handle combat watching so we can change ooc based on party combat status
+    addon:UpdateCombatWatch()
 end
 
 function addon:RegisterFrame(button)
@@ -218,6 +220,20 @@ function REMATTR(prefix, attr, suffix, value)
     return fmt:format(prefix, #prefix > 0 and "-" or "", attr, tonumber(suffix) and "" or "-", suffix)  
 end
 
+-- A sort function that determines in what order bindings should be applied.
+-- This function should be treated with care, it can drastically change behavior
+
+local function ApplicationOrder(a, b)
+    local acnt, bcnt = 0, 0
+    for k,v in pairs(a.sets) do acnt = acnt + 1 end
+    for k,v in pairs(b.sets) do bcnt = bcnt + 1 end
+    if a.sets.default and not b.sets.default then
+        return true
+    elseif a.sets.default and b.sets.default then
+        return acnt < bcnt
+    end
+end
+
 -- This function will create an attribute that when run for a given frame
 -- will set the correct set of SAB attributes.
 function addon:GetClickAttributes(global)
@@ -230,6 +246,8 @@ function addon:GetClickAttributes(global)
         "local setupbutton = self:GetFrameRef('cliquesetup_button')",
         "local button = setupbutton or self",
     }
+
+    table.sort(self.bindings, ApplicationOrder)
 
     for idx, entry in ipairs(self.bindings) do
         if self:ShouldSetBinding(entry, global) then
@@ -474,6 +492,47 @@ function addon:ChangeProfile(profileName)
     addon:UpdateOptionsPanel()
 
     CliqueConfig:UpdateList()
+end
+
+function addon:UpdateCombatWatch()
+    if self.settings.fastooc then
+        self:RegisterEvent("UNIT_FLAGS", "CheckPartyCombat")
+    else
+        self:UnregisterEvent("UNIT_FLAGS")
+    end
+end
+
+function addon:EnteringCombat()
+    addon:UpdateAttributes()
+    addon:UpdateGlobalAttributes()
+end
+
+function addon:LeavingCombat()
+    self.partyincombat = false
+    addon:UpdateAttributes()
+    addon:UpdateGlobalAttributes()
+end
+
+function addon:CheckPartyCombat(event, unit)
+    if InCombatLockdown() or not unit then return end
+    if self.settings.fastooc then
+        if UnitInParty(unit) or UnitInRaid(unit) then
+            if UnitAffectingCombat(unit) == 1 then
+                -- Trigger pre-combat switch for fastooc
+                self.partyincombat = true
+                self.combattrigger = UnitGUID(unit)
+                addon:UpdateAttributes()
+                addon:UpdateGlobalAttributes()
+            elseif self.partyincombat then
+                -- The unit is out of combat, so try to clear our flag
+                if self.combattrigger == UnitGUID(unit) then
+                    self.partyincombat = false
+                    addon:UpdateAttributes()
+                    addon:UpdateGlobalAttributes()
+                end
+            end
+        end
+    end
 end
 
 SLASH_CLIQUE1 = "/clique"

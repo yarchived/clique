@@ -240,7 +240,7 @@ function addon:ShouldSetBinding(binding, global)
     end
 
     if binding.sets.ooc then
-        if UnitAffectingCombat("player") then
+        if UnitAffectingCombat("player") or addon.partyincombat then
             apply = false
         else
             apply = true
