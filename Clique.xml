@@ -142,7 +142,7 @@
                 self:SetPoint("TOPLEFT", lastTab, "BOTTOMLEFT", 0, -17)
             </OnShow>
         </Scripts>
-        <NormalTexture file="Interface\AddOns\Clique\mousesquare64"/>
+        <NormalTexture file="Interface\AddOns\Clique\images\icon_square_64"/>
     </CheckButton>
 
     <Frame name="CliqueDialog" toplevel="true" enableMouse="true" movable="true" inherits="BasicFrameTemplate" parent="UIParent" frameStrata="DIALOG" hidden="true">
@@ -499,7 +499,7 @@
         </Frames>
         <Scripts>
             <OnLoad>
-                CliqueConfigPortrait:SetTexture("Interface\\Addons\\Clique\\mousecircle128")
+                CliqueConfigPortrait:SetTexture("Interface\\Addons\\Clique\\images\\icon_circle_128")
                 CliqueConfig.page1:SetParent(CliqueConfig.Inset)
                 CliqueConfig.page2:SetParent(CliqueConfig.Inset)
                 CliqueConfig.page1:SetAllPoints(CliqueConfig.Inset)
