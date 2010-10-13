@@ -174,7 +174,7 @@ function addon:InitializeDatabase()
     if not CliqueDB2 then
         reset = true
     elseif CliqueDB2.dbversion == 5 then
-        if not CliqueDB2.settings or CliqueDB2.settings[charKey] then
+        if not CliqueDB2.settings or not CliqueDB2.settings[charKey] then
             reset = true
         else
             -- Upgrade to add the blacklist table to settings
