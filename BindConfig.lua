@@ -20,6 +20,7 @@ function CliqueConfig:OnShow()
     CliqueSpellTab:SetChecked(true)
     self:UpdateList()
     self:EnableSpellbookButtons()
+    self:UpdateAlert()
 end
 
 function CliqueConfig:OnHide()
@@ -27,6 +28,7 @@ function CliqueConfig:OnHide()
     self:SetParent(UIParent)
     self:Hide()
     CliqueSpellTab:SetChecked(false)
+    self:UpdateAlert()
 end
 
 function CliqueConfig:SetupGUI()
@@ -59,6 +61,13 @@ function CliqueConfig:SetupGUI()
     self.dialog.button_binding:SetText(L["Set binding"])
     local desc = L["In order to specify a binding, move your mouse over the button labelled 'Set binding' and either click with your mouse or press a key on your keyboard. You can modify the binding by holding down a combination of the alt, control and shift keys on your keyboard."]
     self.dialog.desc:SetText(desc)
+
+    self.alert = _G["CliqueTabAlert"]
+
+    self.close = _G[self:GetName() .. "CloseButton"]
+    self.close:SetScript("OnClick", function()
+        HideUIPanel(CliqueConfig)
+    end)
 
     self.page1.column1:SetText(L["Action"])
     self.page1.column2:SetText(L["Binding"])
@@ -515,5 +524,16 @@ function CliqueConfig:SpellTab_OnClick(frame)
         self:ShowWithSpellBook()
     else
         ShowUIPanel(CliqueConfig)
+    end
+end
+
+function CliqueConfig:UpdateAlert(type)
+    local alert = CliqueTabAlert
+    if not addon.settings.alerthidden and SpellBookFrame:IsVisible() and CliqueConfig:IsVisible() then
+        alert.type = type
+        alert.text:SetText(L["When both the Clique binding configuration window and the spellbook are open, you can set new bindings simply by performing them on the spell icon in your spellbook. Simply move your mouse over a spell and then click or press a key on your keyboard along with any combination of the alt, control, and shift keys. The new binding will be added to your binding configuration."])
+        alert:Show()
+    else
+        alert:Hide()
     end
 end

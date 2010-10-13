@@ -141,6 +141,59 @@
         <NormalTexture file="Interface\AddOns\Clique\images\icon_square_64"/>
     </CheckButton>
 
+    <Frame name="CliqueTabAlert" parentKey="alert" inherits="GlowBoxTemplate" parent="SpellBookFrame" enableMouse="true" hidden="true" frameStrata="DIALOG" framelevel="2">
+        <Size x="220" y="100"/>
+        <Anchors>
+            <Anchor point="LEFT" relativeTo="CliqueSpellTab" relativePoint="RIGHT" x="20" y="0"/>
+        </Anchors>
+        <Layers>
+            <Layer level="OVERLAY">
+                <FontString name="$parentText" parentKey="text" inherits="GameFontHighlightLeft" justifyV="TOP" text="TALENT_MICRO_BUTTON_TUTORIAL" >
+                    <Size x="188" y="0"/>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" x="16" y="-24"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <Button name="$parentClose" parentKey="close" inherits="UIPanelCloseButton">
+                <Anchors>
+                    <Anchor point="TOPRIGHT" x="6" y="6"/>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        Clique.settings.alerthidden = true
+                        CliqueTabAlert:Hide();
+                    </OnClick>
+                </Scripts>
+            </Button>
+            <Frame name="$parentArrow" parentKey="arrow" inherits="GlowBoxArrowTemplate">
+                <Anchors>
+                    <Anchor point="RIGHT" relativePoint="LEFT" x="0" y="0"/>
+                </Anchors>
+            </Frame>
+        </Frames>
+        <Scripts>
+            <OnLoad>
+                self.arrow:SetSize(21, 53)
+                self.arrow.arrow = _G[self.arrow:GetName() .. "Arrow"]
+                self.arrow.glow = _G[self.arrow:GetName() .. "Glow"]
+                self.arrow.arrow:SetAllPoints(true)
+                self.arrow.glow:SetAllPoints(true)
+                -- Rotate 90 degrees
+                -- left, bottom, right, bottom, left, top, right, top
+                self.arrow.arrow:SetTexCoord(0.78515625, 0.58789063, 0.99218750, 0.58789063, 0.78515625, 0.54687500, 0.99218750, 0.54687500)
+                self.arrow.glow:SetTexCoord(0.40625000, 0.82812500, 0.66015625, 0.82812500, 0.40625000, 0.77343750, 0.66015625, 0.77343750)
+                self.text:SetSpacing(4)
+
+            </OnLoad>
+            <OnShow>
+                self:SetHeight(self.text:GetHeight() + 42)
+            </OnShow>
+        </Scripts>
+    </Frame>
+
     <Frame name="CliqueDialog" toplevel="true" enableMouse="true" movable="true" inherits="BasicFrameTemplate" parent="UIParent" frameStrata="DIALOG" hidden="true">
         <Size x="350" y="160"/>
         <Anchors>
