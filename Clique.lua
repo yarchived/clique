@@ -161,24 +161,6 @@ function addon:InitializeDatabase()
     local reset = false
     if not CliqueDB2 then
         reset = true
-    elseif type(CliqueDB2) == "table" and CliqueDB2.dbversion == 3 then
-        -- Upgrade to add 'BlizzFrames' subtable
-        local settings = CliqueDB2.settings[charKey]
-        settings.blizzframes = {
-            PlayerFrame = true,
-            PetFrame = true,
-            TargetFrame = true,
-            TargetFrameToT = true,
-            FocusFrame = true,
-            FocusFrameToT = true,
-            arena = true,
-            party = true,
-            compactraid = true,
-            compactparty = true,
-            boss = true,
-        }
-        -- Don't forget to update the version
-        CliqueDB2.dbversion = current_db_version
     elseif type(CliqueDB2) == "table" and CliqueDB2.dbversion ~= current_db_version then
         reset = true
     end
