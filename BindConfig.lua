@@ -228,6 +228,8 @@ function CliqueConfig:Button_OnClick(button)
 
     -- Click handler for "Edit" button
     elseif button == self.page1.button_options then
+        SpellBookFrame:Hide()
+        CliqueConfig:Hide()
         InterfaceOptionsFrame_OpenToCategory("Clique") 
     elseif button == self.page2.button_save then
         -- Check the input
