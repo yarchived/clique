@@ -1,5 +1,5 @@
 enable-nolib-creation: no
 tools-used:
-    - Ace3
-    - LibStub
-    - CallbackHandler-1.0
+    - ace3
+    - libstub
+    - callbackhandler
