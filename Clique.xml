@@ -404,7 +404,7 @@
                             </OnKeyDown>
                             <OnMouseWheel>
                                 local button = (delta > 0) and "MOUSEWHEELUP" or "MOUSEWHEELDOWN"
-                                CliqueConfig:MacroBindingButton_OnClick(self, key)
+                                CliqueConfig:MacroBindingButton_OnClick(self, button)
                             </OnMouseWheel>
                         </Scripts>
                     </Button>
