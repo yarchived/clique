@@ -42,6 +42,7 @@ local L = addon.L
 function addon:Initialize()
     self:InitializeDatabase()
     self.ccframes = {}
+    self.hccframes = {}
 
     -- Registration for group headers (in-combat safe)
     self.header = CreateFrame("Frame", addonName .. "HeaderFrame", UIParent, "SecureHandlerBaseTemplate")
@@ -56,6 +57,12 @@ function addon:Initialize()
     self.header:Execute([[
         ccframes = table.new()
     ]])
+
+    -- Create a table within the addon header to store the frame bakcklist
+    self.header:Execute([[
+        blacklist = table.new()
+    ]])
+    self:UpdateBlacklist()
 
     -- OnEnter bootstrap script for group-header frames
     self.header:SetAttribute("clickcast_onenter", [===[
@@ -79,6 +86,12 @@ function addon:Initialize()
         ccframes[button] = true
         self:RunFor(button, self:GetAttribute("setup_clicks"))
     ]===]):format(self.attr_setup_clicks))
+
+    self.header:SetScript("OnAttributeChanged", function(frame, name, value)
+        if name == "clickcast_button" and type(value) ~= nil then
+            self.hccframes[value] = true
+        end
+    end)
 
     local set, clr = self:GetBindingAttributes()
     self.header:SetAttribute("setup_onenter", set)
@@ -151,7 +164,7 @@ end
 -- forward from this point. The database consists of two sections:
 --   * settings - used to handle the basic options Clique uses
 --   * profiles - used for the binding configuration profiles, possibly shared
-local current_db_version = 5
+local current_db_version = 6
 function addon:InitializeDatabase()
     local realmKey = GetRealmName()
     local charKey = UnitName("player") .. " - " .. realmKey
@@ -160,7 +173,15 @@ function addon:InitializeDatabase()
     local reset = false
     if not CliqueDB2 then
         reset = true
-    elseif type(CliqueDB2) == "table" and CliqueDB2.dbversion ~= current_db_version then
+    elseif CliqueDB2.dbversion == 5 then
+        if not CliqueDB2.settings or CliqueDB2.settings[charKey] then
+            reset = true
+        else
+            -- Upgrade to add the blacklist table to settings
+            CliqueDB2.settings[charKey].blacklist = {}
+        end
+        CliqueDB2.dbversion = current_db_version
+    elseif CliqueDB2.dbversion ~= current_db_version then
         reset = true
     end
 
@@ -178,6 +199,7 @@ function addon:InitializeDatabase()
     if not db.settings[charKey] then
         db.settings[charKey] = {
             profileKey = charKey,
+            blacklist = {},
             blizzframes = {
                 PlayerFrame = true,
                 PetFrame = true,
@@ -190,7 +212,7 @@ function addon:InitializeDatabase()
                 compactraid = true,
                 compactparty = true,
                 boss = true,
-            }
+            },
         }
     end
 
@@ -260,6 +282,15 @@ function addon:GetClickAttributes(global)
         "local button = setupbutton or self",
     }
 
+    -- Global attributes are never blacklisted
+    if not global then
+        bits[#bits + 1] = "local name = button:GetName()"
+        bits[#bits + 1] = "if blacklist[name] then return end"
+
+        rembits[#rembits + 1] = "local name = button:GetName()"
+        rembits[#rembits + 1] = "if blacklist[name] then return end"
+    end
+
     table.sort(self.bindings, ApplicationOrder)
 
     for idx, entry in ipairs(self.bindings) do
@@ -312,8 +343,23 @@ local B_CLR = [[self:ClearBinding("%s");]]
 -- script and the second being a "clear keybindings" script.
 
 function addon:GetBindingAttributes(global)
-    local set = {}
-    local clr = {}
+    local set = {
+    }
+    local clr = {
+    }
+
+    if not global then
+        set = {
+            "local button = self",
+            "local name = button:GetName()",
+            "if blacklist[name] then return end",
+        }
+        clr = {
+            "local button = self",
+            "local name = button:GetName()",
+            "if blacklist[name] then return end",
+        }
+    end
 
     for idx, entry in ipairs(self.bindings) do
         if self:ShouldSetBinding(entry, global) then 
@@ -513,6 +559,20 @@ function addon:UpdateCombatWatch()
     else
         self:UnregisterEvent("UNIT_FLAGS")
     end
+end
+
+function addon:UpdateBlacklist()
+    local bits = {
+        "blacklist = table.wipe(blacklist)",
+    }
+
+    for frame, value in pairs(self.settings.blacklist) do
+        if not not value then
+            bits[#bits + 1] = string.format("blacklist[%q] = true", frame)
+        end
+    end
+
+    addon.header:Execute(table.concat(bits, ";\n"))
 end
 
 function addon:EnteringCombat()
