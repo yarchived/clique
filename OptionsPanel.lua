@@ -62,19 +62,19 @@ function panel:CreateOptions()
     self.prispeclabel = make_label("CliqueOptionsPriSpecLabel", self, "GameFontNormalSmall")
     self.prispeclabel:SetText(L["Primary talent spec profile:"])
     self.prispec = make_dropdown("CliqueOptionsPriSpec", self)
-    UIDropDownMenu_SetWidth(self.prispec, 150)
+    UIDropDownMenu_SetWidth(self.prispec, 200)
     BlizzardOptionsPanel_SetupDependentControl(self.specswap, self.prispec)
 
     self.secspeclabel = make_label("CliqueOptionsSecSpecLabel", self, "GameFontNormalSmall")
     self.secspeclabel:SetText(L["Secondary talent spec profile:"])
     self.secspec = make_dropdown("CliqueOptionsSecSpec", self)
-    UIDropDownMenu_SetWidth(self.secspec, 150)
+    UIDropDownMenu_SetWidth(self.secspec, 200)
     BlizzardOptionsPanel_SetupDependentControl(self.specswap, self.secspec)
 
     self.profilelabel = make_label("CliqueOptionsProfileMgmtLabel", self, "GameFontNormalSmall")
     self.profilelabel:SetText(L["Profile Management:"])
     self.profiledd = make_dropdown("CliqueOptionsProfileMgmt", self)
-    UIDropDownMenu_SetWidth(self.profiledd, 150)
+    UIDropDownMenu_SetWidth(self.profiledd, 200)
 
     -- Collect and anchor the bits together
     table.insert(bits, self.updown)
@@ -125,7 +125,7 @@ StaticPopupDialogs["CLIQUE_NEW_PROFILE"] = {
 		local base = self:GetName()
 		local editbox = getglobal(base .. "EditBox")
         local profileName = editbox:GetText()
-        addon:ChangeProfile(profileName)
+        addon.db:SetProfile(profileName)
 	end,
 	timeout = 0,
 	whileDead = 1,
@@ -143,7 +143,7 @@ StaticPopupDialogs["CLIQUE_NEW_PROFILE"] = {
             local base = self:GetParent():GetName()
             local editbox = _G[base .. "EditBox"]
             local profileName = editbox:GetText()
-            addon:ChangeProfile(profileName)
+            addon.db:SetProfile(profileName)
         end
         self:GetParent():Hide();
 	end,
@@ -163,9 +163,10 @@ StaticPopupDialogs["CLIQUE_NEW_PROFILE"] = {
 }
 
 local function getsorttbl()
+    local profiles = addon.db:GetProfiles()
     local sort = {}
-    for k, v in pairs(addon.db.bindings) do
-        table.insert(sort, k)
+    for idx, profileName in ipairs(profiles) do
+        table.insert(sort, profileName)
     end
     table.sort(sort)
     return sort
@@ -224,6 +225,7 @@ end
 local function mgmt_initialize(dropdown, level)
     local sort = getsorttbl()
     local paged = (#sort >= 15)
+    local currentProfile = addon.db:GetCurrentProfile()
 
     if not level or level == 1 then
         if not paged then
@@ -281,24 +283,25 @@ local function mgmt_initialize(dropdown, level)
             info.text = L["Select profile: %s"]:format(UIDROPDOWNMENU_MENU_VALUE)
             info.value = sort[UIDROPDOWNMENU_MENU_VALUE]
             info.notCheckable = true
-            info.disabled = addon.settings.specswap
+            -- Don't disable this, allow the user to make their own mistakes
+            --info.disabled = addon.settings.specswap
             info.func = function(frame)
                 UIDropDownMenu_SetSelectedValue(dropdown, UIDROPDOWNMENU_MENU_VALUE)
                 UIDropDownMenu_SetText(dropdown, UIDROPDOWNMENU_MENU_VALUE) 
-                addon:ChangeProfile(UIDROPDOWNMENU_MENU_VALUE)
+                addon.db:SetProfile(UIDROPDOWNMENU_MENU_VALUE)
             end
             UIDropDownMenu_AddButton(info, level)
 
             info = UIDropDownMenu_CreateInfo()
             info.text = L["Delete profile: %s"]:format(UIDROPDOWNMENU_MENU_VALUE)
-            info.disabled = UIDROPDOWNMENU_MENU_VALUE == addon.settings.profileKey
+            info.disabled = UIDROPDOWNMENU_MENU_VALUE == currentProfile
             info.value = sort[UIDROPDOWNMENU_MENU_VALUE]
             info.notCheckable = true
             info.func = function(frame)
                 local dialog = StaticPopupDialogs["CLIQUE_CONFIRM_PROFILE_DELETE"]
                 dialog.text = L["Delete profile '%s'"]:format(UIDROPDOWNMENU_MENU_VALUE)
                 dialog.OnAccept = function(self)
-                    addon.db.bindings[UIDROPDOWNMENU_MENU_VALUE] = nil
+                    addon.db:DeleteProfile(UIDROPDOWNMENU_MENU_VALUE)
                 end
                 HideDropDownMenu(1)
                 StaticPopup_Show("CLIQUE_CONFIRM_PROFILE_DELETE")
@@ -313,19 +316,19 @@ local function mgmt_initialize(dropdown, level)
         info.func = function(frame)
             UIDropDownMenu_SetSelectedValue(dropdown, UIDROPDOWNMENU_MENU_VALUE)
             UIDropDownMenu_SetText(dropdown, UIDROPDOWNMENU_MENU_VALUE) 
-            addon:ChangeProfile(UIDROPDOWNMENU_MENU_VALUE)
+            addon.db:SetProfile(UIDROPDOWNMENU_MENU_VALUE)
         end
         UIDropDownMenu_AddButton(info, level)
 
         info = UIDropDownMenu_CreateInfo()
         info.text = L["Delete profile: %s"]:format(UIDROPDOWNMENU_MENU_VALUE)
-        info.disabled = UIDROPDOWNMENU_MENU_VALUE == addon.settings.profileKey
+        info.disabled = UIDROPDOWNMENU_MENU_VALUE == currentProfile 
         info.value = sort[UIDROPDOWNMENU_MENU_VALUE]
         info.func = function(frame)
             local dialog = StaticPopupDialogs["CLIQUE_CONFIRM_PROFILE_DELETE"]
             dialog.text = L["Delete profile '%s'"]:format(UIDROPDOWNMENU_MENU_VALUE)
             dialog.OnAccept = function(self)
-                addon.db.bindings[UIDROPDOWNMENU_MENU_VALUE] = nil
+                addon.db:DeleteProfile(UIDROPDOWNMENU_MENU_VALUE)
             end
             HideDropDownMenu(1)
             StaticPopup_Show("CLIQUE_CONFIRM_PROFILE_DELETE")
@@ -338,18 +341,19 @@ end
 function panel.refresh()
     -- Initialize the dropdowns
     local settings = addon.settings
-    
+    local currentProfile = addon.db:GetCurrentProfile()
+
     UIDropDownMenu_Initialize(panel.prispec, spec_initialize)
-    UIDropDownMenu_SetSelectedValue(panel.prispec, settings.pri_profileKey or settings.profileKey)
-    UIDropDownMenu_SetText(panel.prispec, settings.pri_profileKey or settings.profileKey)
+    UIDropDownMenu_SetSelectedValue(panel.prispec, settings.pri_profileKey or currentProfile)
+    UIDropDownMenu_SetText(panel.prispec, settings.pri_profileKey or currentProfile)
    
     UIDropDownMenu_Initialize(panel.secspec, spec_initialize)    
-    UIDropDownMenu_SetSelectedValue(panel.secspec, settings.sec_profileKey or settings.profileKey)
-    UIDropDownMenu_SetText(panel.secspec, settings.sec_profileKey or settings.profileKey)
+    UIDropDownMenu_SetSelectedValue(panel.secspec, settings.sec_profileKey or currentProfile)
+    UIDropDownMenu_SetText(panel.secspec, settings.sec_profileKey or currentProfile)
     
     UIDropDownMenu_Initialize(panel.profiledd, mgmt_initialize)
-    UIDropDownMenu_SetSelectedValue(panel.profiledd, settings.profileKey)
-    UIDropDownMenu_SetText(panel.profiledd, settings.profileKey)
+    UIDropDownMenu_SetSelectedValue(panel.profiledd, currentProfile)
+    UIDropDownMenu_SetText(panel.profiledd, L["Current: "] .. currentProfile)
     
     panel.updown:SetChecked(settings.downclick)
     panel.fastooc:SetChecked(settings.fastooc)
@@ -359,6 +363,7 @@ end
 
 function panel.okay()
     local settings = addon.settings
+    local currentProfile = addon.db:GetCurrentProfile()
 
     -- Update the saved variables
     settings.downclick = not not panel.updown:GetChecked()
@@ -366,10 +371,11 @@ function panel.okay()
     settings.specswap = not not panel.specswap:GetChecked()
     settings.pri_profileKey = UIDropDownMenu_GetSelectedValue(panel.prispec)
     settings.sec_profileKey = UIDropDownMenu_GetSelectedValue(panel.secspec)
-    settings.profileKey = UIDropDownMenu_GetSelectedValue(panel.profiledd) 
 
+    if newProfile ~= currentProfile then
+        addon.db:SetProfile(newProfile)
+    end
     addon:UpdateCombatWatch()
-    addon:ChangeProfile()
 end
 
 panel.cancel = panel.refresh

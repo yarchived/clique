@@ -40,7 +40,14 @@ local addonName, addon = ...
 local L = addon.L 
 
 function addon:Initialize()
-    self:InitializeDatabase()
+    -- Create an AceDB, but it needs to be cleared first
+    self.db = LibStub("AceDB-3.0"):New("CliqueDB3", self.defaults)
+    self.db.RegisterCallback(self, "OnNewProfile", "OnNewProfile")
+    self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
+
+    self.settings = self.db.char
+    self.bindings = self.db.profile.bindings
+    
     self.ccframes = {}
     self.hccframes = {}
 
@@ -120,23 +127,27 @@ function addon:Initialize()
     end
     self:EnableBlizzardFrames()
 
-    -- Trigger a profile change, updating all attributes
-    self:ChangeProfile()
-
     -- Register for combat events to ensure we can swap between the two states
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "EnteringCombat")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "LeavingCombat")
-    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", function()
-        self:ChangeProfile()
-    end)
+    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "TalentGroupChanged")
+
     -- Handle combat watching so we can change ooc based on party combat status
     addon:UpdateCombatWatch()
+
+    -- Trigger a 'TalentGroupChanged' so we end up on the right profile
+    addon:TalentGroupChanged()
+    addon:UpdateEverything()
 end
 
 function addon:RegisterFrame(button)
     self.ccframes[button] = true
 
-    button:RegisterForClicks("AnyDown")
+    if self.settings.downclick then
+        button:RegisterForClicks("AnyDown")
+    else
+        button:RegisterForClicks("AnyUp")
+    end
 
     -- Wrap the OnEnter/OnLeave scripts in order to handle keybindings
     addon.header:WrapScript(button, "OnEnter", addon.header:GetAttribute("setup_onenter"))
@@ -159,90 +170,29 @@ function addon:Enable()
     CliqueSpellTab.tooltip = L["Clique binding configuration"]
 end
 
--- Leave CliqueDB in place for now, to ease any migration that users might have.
--- Instead use CliqueDB2 for the active database and use versioning to move
--- forward from this point. The database consists of two sections:
---   * settings - used to handle the basic options Clique uses
---   * profiles - used for the binding configuration profiles, possibly shared
-local current_db_version = 6
-function addon:InitializeDatabase()
-    local realmKey = GetRealmName()
-    local charKey = UnitName("player") .. " - " .. realmKey
-    addon.staticProfileKey = charKey
-
-    local reset = false
-    if not CliqueDB2 then
-        reset = true
-    elseif CliqueDB2.dbversion == 5 then
-        if not CliqueDB2.settings or not CliqueDB2.settings[charKey] then
-            reset = true
-        else
-            -- Upgrade to add the blacklist table to settings
-            CliqueDB2.settings[charKey].blacklist = {}
-        end
-        CliqueDB2.dbversion = current_db_version
-    elseif CliqueDB2.dbversion ~= current_db_version then
-        reset = true
-    end
-
-    if reset then
-        CliqueDB2 = {
-            settings = {},
-            bindings = {},
-            dbversion = current_db_version,
-        }
-    end
-    
-    local db = CliqueDB2
-
-    addon.db = db
-    if not db.settings[charKey] then
-        db.settings[charKey] = {
-            profileKey = charKey,
-            blacklist = {},
-            blizzframes = {
-                PlayerFrame = true,
-                PetFrame = true,
-                TargetFrame = true,
-                TargetFrameToT = true,
-                FocusFrame = true,
-                FocusFrameToT = true,
-                arena = true,
-                party = true,
-                compactraid = true,
-                compactparty = true,
-                boss = true,
-            },
-        }
-    end
-
-    addon.settings = db.settings[charKey]
-    self:InitializeBindingProfile()
+-- A new profile is being created in the db, called 'profile'
+function addon:OnNewProfile(event, db, profile)
+    table.insert(db.profile.bindings, {
+        key = "BUTTON1",
+        type = "target",
+        unit = "mouseover",
+        sets = {
+            default = true
+        },
+    })
+    table.insert(db.profile.bindings, {
+        key = "BUTTON2",
+        type = "menu",
+        sets = {
+            default = true
+        },
+    })
+    self.bindings = db.profile.bindings
 end
 
-function addon:InitializeBindingProfile()
-    local db = CliqueDB2
-    if not db.bindings[addon.settings.profileKey] then
-        db.bindings[addon.settings.profileKey] = {
-            [1] = {
-                key = "BUTTON1",
-                type = "target",
-                unit = "mouseover",
-                sets = {
-                    default = true
-                },
-            },
-            [2] = {
-                key = "BUTTON2",
-                type = "menu",
-                sets = {
-                    default = true
-                },
-            },
-        }
-    end
-
-    self.bindings = db.bindings[addon.settings.profileKey] 
+function addon:OnProfileChanged(event, db, newProfile)
+    self.bindings = db.profile.bindings
+    self:UpdateEverything() 
 end
 
 local function ATTR(prefix, attr, suffix, value)
@@ -412,7 +362,6 @@ end
 
 function addon:AddBinding(entry)
     -- TODO: Check to see if the new binding conflicts with an existing binding
-
     -- TODO: Validate the entry to ensure it has the correct arguments, etc.
 
     if not entry.sets then
@@ -420,9 +369,7 @@ function addon:AddBinding(entry)
     end
 
     table.insert(self.bindings, entry)
-   
     self:UpdateAttributes()
-    
     return true
 end
 
@@ -530,38 +477,23 @@ function addon:UpdateGlobalAttributes()
     globutton:Execute(globutton.setbinds)
 end
 
-function addon:ChangeProfile(profileName)
-    -- Clear the current profile
-    addon:ClearAttributes()
-    addon:ClearGlobalAttributes()
+function addon:TalentGroupChanged()
+    local currentProfile = self.db:GetCurrentProfile()
+    local newProfile
 
-    -- Check to see if this is a force-create of a new profile
-    if type(profileName) == "string" and #profileName > 0 then
-        -- Do nothing
-    else
-        -- Determine which profile to set, based on talent group
-        self.talentGroup = GetActiveTalentGroup()
-        if self.talentGroup == 1 and self.settings.pri_profileKey then
-            profileName = self.settings.pri_profileKey
-        elseif self.talentGroup == 2 and self.settings.sec_profileKey then
-            profileName = self.settings.sec_profileKey
-        end
-
-        if type(profileName) == "string" and addon.db.bindings[profileName] then
-            -- Do nothing
-        else
-            profileName = addon.staticProfileKey
-        end
+    -- Determine which profile to set, based on talent group
+    self.talentGroup = GetActiveTalentGroup()
+    if self.talentGroup == 1 and self.settings.pri_profileKey then
+        newProfile = self.settings.pri_profileKey
+    elseif self.talentGroup == 2 and self.settings.sec_profileKey then
+        newProfile = self.settings.sec_profileKey
     end
 
-    -- We've been given a profile name, so just change to it
-    addon.settings.profileKey = profileName
-    addon:InitializeBindingProfile()
-    addon:UpdateAttributes()
-    addon:UpdateGlobalAttributes()
-    addon:UpdateOptionsPanel()
+    if newProfile ~= currentProfile and type(newProfile) == "string" then
+        self.db:SetProfile(newProfile)
+    end
 
-    CliqueConfig:UpdateList()
+    self:UpdateEverything()
 end
 
 function addon:UpdateCombatWatch()
@@ -617,6 +549,14 @@ function addon:CheckPartyCombat(event, unit)
             end
         end
     end
+end
+
+function addon:UpdateEverything()
+    -- Update all running attributes and windows (block)
+    addon:UpdateAttributes()
+    addon:UpdateGlobalAttributes()
+    addon:UpdateOptionsPanel()
+    CliqueConfig:UpdateList()
 end
 
 SLASH_CLIQUE1 = "/clique"

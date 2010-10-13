@@ -170,11 +170,7 @@ function CliqueConfig:Spellbook_OnBinding(button, key)
         icon = texture
     }
 
-    if not succ then
-        CliqueConfig:SetNotification(err)
-    else
-        CliqueConfig:UpdateList()
-    end
+    CliqueConfig:UpdateList()
 end
 
 function CliqueConfig:Button_OnClick(button)
@@ -212,8 +208,9 @@ function CliqueConfig:Button_OnClick(button)
                     config.page1:Hide()
                     config.page2.bindType = "macro"
                     -- Clear out the entries
-                    config.page2.bindText:SetText("")
+                    config.page2.bindText:SetText(L["No binding set"])
                     config.page2.editbox:SetText("")
+                    config.page2.button_save:Disable()
                     config.page2:Show()
                 end,
                 notCheckable = true,
@@ -243,12 +240,6 @@ function CliqueConfig:Button_OnClick(button)
         self.page2:Hide()
         self.page1:Show()
     end
-end
-
-function CliqueConfig:SetNotification(text)
-end
-
-function CliqueConfig:ClearNotification()
 end
 
 local memoizeBindings = setmetatable({}, {__index = function(t, k, v)
@@ -392,6 +383,10 @@ function CliqueConfig:MacroBindingButton_OnClick(button, key)
     if key then
         self.page2.key = key 
         self.page2.bindText:SetText(addon:GetBindingKeyComboText(key))
+        self.page2.button_save:Enable()
+    else
+        self.page2.bindText:SetText(L["No binding set"])
+        self.page2.button_save:Disable()
     end
 end
 

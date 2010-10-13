@@ -3,10 +3,16 @@
 ## Author: Cladhaire
 ## Version: @project-version@
 ## Notes: Simply powerful click-casting interface
-## SavedVariables: CliqueDB, CliqueDB2
+## SavedVariables: CliqueDB, CliqueDB3
 
 AddonCore.lua
 Localization.enUS.lua
+
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+libs\AceDB-3.0\AceDB-3.0.xml
+
+DatabaseDefaults.lua
 
 ClickCastTemplate.xml
 
