@@ -122,7 +122,7 @@
         <HighlightTexture file="Interface\BUTTONS\ButtonHilight-Square" alphaMode="ADD"/>
     </Button>
 
-    <CheckButton name="CliqueSpellTab" inherits="SpellBookSkillLineTabTemplate" parent="SpellBookFrame" hidden="false">
+    <CheckButton name="CliqueSpellTab" inherits="SpellBookSkillLineTabTemplate" parent="SpellBookSkillLineTab1" hidden="false">
         <Scripts>
             <OnClick>
                 CliqueConfig:SpellTab_OnClick()
@@ -196,9 +196,6 @@
 
     <Frame name="CliqueDialog" toplevel="true" enableMouse="true" movable="true" inherits="BasicFrameTemplate" parent="UIParent" frameStrata="DIALOG" hidden="true">
         <Size x="350" y="160"/>
-        <Anchors>
-            <Anchor point="CENTER" relativeTo="CliqueConfig" x="30" y="0"/>
-        </Anchors>
         <Layers>
             <Layer level="OVERLAY"> 
                 <FontString name="$parentDesc" parentKey="desc" inherits="GameFontHighlightSmallLeftTop">

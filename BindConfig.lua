@@ -118,16 +118,12 @@ function CliqueConfig:HijackSpellbook()
         self:EnableSpellbookButtons()
     end)
 
-    -- TODO: This isn't a great way to do this, but for now
-    hooksecurefunc("SpellBookSkillLineTab_OnClick", function()
-        self:EnableSpellbookButtons()
-    end)
     self:EnableSpellbookButtons()
 end
 
 function CliqueConfig:EnableSpellbookButtons()
     local enabled;
-
+    
     if self.page1:IsVisible() and SpellBookFrame:IsVisible() then
         enabled = true
     end
