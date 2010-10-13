@@ -422,6 +422,7 @@ function addon:AddBinding(entry)
     table.insert(self.bindings, entry)
    
     self:UpdateAttributes()
+    
     return true
 end
 
@@ -455,6 +456,7 @@ function addon:DeleteBinding(entry)
 
     -- Update the attributes
     self:UpdateAttributes()
+    self:UpdateGlobalAttributes()
 end
 
 function addon:ClearAttributes()

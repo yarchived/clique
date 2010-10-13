@@ -407,7 +407,10 @@ function CliqueConfig:AcceptSetBinding()
         -- This was a CHANGE binding instead of a SET binding
         dialog.binding.key = key
         dialog.binding = nil
+        -- Do not forget to update the attributes as well
         self:UpdateList()
+        addon:UpdateAttributes()
+        addon:UpdateGlobalAttributes()
     else
         local succ, err = addon:AddBinding{
             key = key,
@@ -430,8 +433,9 @@ local function toggleSet(binding, set)
         else
             binding.sets[set] = true
         end
-        addon:UpdateAttributes()
         CliqueConfig:UpdateList()
+        addon:UpdateAttributes()
+        addon:UpdateGlobalAttributes()
     end
 end
 
