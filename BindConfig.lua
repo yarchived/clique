@@ -3,6 +3,13 @@ local L = addon.L
 
 local MAX_ROWS = 12
 
+function CliqueConfig:ShowWithSpellBook()
+    self:ClearAllPoints()
+    self:SetParent(SpellBookFrame)
+    self:SetPoint("LEFT", SpellBookFrame, "RIGHT", 55, 0)
+    self:Show()
+end
+
 function CliqueConfig:OnShow()
     if not self.initialized then
         self:SetupGUI()
@@ -16,6 +23,9 @@ function CliqueConfig:OnShow()
 end
 
 function CliqueConfig:OnHide()
+    self:ClearAllPoints()
+    self:SetParent(UIParent)
+    self:Hide()
     CliqueSpellTab:SetChecked(false)
 end
 
@@ -92,14 +102,17 @@ function CliqueConfig:HijackSpellbook()
         self.spellbookButtons[idx] = button
     end
 
-    local function showHideHandler(frame)
+    SpellBookFrame:HookScript("OnShow", function(frame)
         self:EnableSpellbookButtons()
-    end
-    SpellBookFrame:HookScript("OnShow", showHideHandler)
-    SpellBookFrame:HookScript("OnHide", showHideHandler)
+    end)
+    SpellBookFrame:HookScript("OnHide", function(frame)
+        self:EnableSpellbookButtons()
+    end)
 
     -- TODO: This isn't a great way to do this, but for now
-    hooksecurefunc("SpellBookSkillLineTab_OnClick", showHideHandler)
+    hooksecurefunc("SpellBookSkillLineTab_OnClick", function()
+        self:EnableSpellbookButtons()
+    end)
     self:EnableSpellbookButtons()
 end
 
@@ -162,9 +175,8 @@ end
 function CliqueConfig:Button_OnClick(button)
     -- Click handler for "Bind spell" button
     if button == self.page1.button_spell then
-        if SpellBookFrame and not SpellBookFrame:IsVisible() then
-            ShowUIPanel(SpellBookFrame)
-        end
+        ShowUIPanel(SpellBookFrame)
+        CliqueConfig:ShowWithSpellBook()
 
     -- Click handler for "Bind other" button
     elseif button == self.page1.button_other then
@@ -496,3 +508,12 @@ function CliqueConfig:Row_OnClick(frame, button)
     EasyMenu(menu, self.dropdown, "cursor", 0, 0, nil, nil)
 end
 
+function CliqueConfig:SpellTab_OnClick(frame)
+    if self:IsVisible() then
+        HideUIPanel(CliqueConfig)
+    elseif SpellBookFrame:IsVisible() then
+        self:ShowWithSpellBook()
+    else
+        ShowUIPanel(CliqueConfig)
+    end
+end

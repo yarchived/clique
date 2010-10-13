@@ -551,5 +551,9 @@ end
 
 SLASH_CLIQUE1 = "/clique"
 SlashCmdList["CLIQUE"] = function(msg, editbox)
-    ShowUIPanel(CliqueConfig)
+    if SpellBookFrame:IsVisible() then
+        CliqueConfig:ShowWithSpellBook()
+    else
+        ShowUIPanel(CliqueConfig)
+    end
 end

@@ -125,11 +125,7 @@
     <CheckButton name="CliqueSpellTab" inherits="SpellBookSkillLineTabTemplate" parent="SpellBookFrame" hidden="false">
         <Scripts>
             <OnClick>
-                if CliqueConfig:IsVisible() then
-                    HideUIPanel(CliqueConfig)
-                else
-                    ShowUIPanel(CliqueConfig)
-                end
+                CliqueConfig:SpellTab_OnClick()
             </OnClick>
             <OnShow>
                 if CliqueConfig:IsVisible() then
