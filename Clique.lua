@@ -152,7 +152,7 @@ end
 -- forward from this point. The database consists of two sections:
 --   * settings - used to handle the basic options Clique uses
 --   * profiles - used for the binding configuration profiles, possibly shared
-local current_db_version = 4
+local current_db_version = 5
 function addon:InitializeDatabase()
     local realmKey = GetRealmName()
     local charKey = UnitName("player") .. " - " .. realmKey
