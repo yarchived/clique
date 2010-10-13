@@ -262,6 +262,15 @@ local function ApplicationOrder(a, b)
     local acnt, bcnt = 0, 0
     for k,v in pairs(a.sets) do acnt = acnt + 1 end
     for k,v in pairs(b.sets) do bcnt = bcnt + 1 end
+
+    -- Force out-of-combat clicks to take the HIGHEST priority
+    if a.sets.ooc and not b.sets.ooc then
+        return false
+    elseif a.sets.ooc and b.sets.ooc then
+        return bcnt < acnt
+    end
+
+    -- Try to give any 'default' clicks LOWEST priority
     if a.sets.default and not b.sets.default then
         return true
     elseif a.sets.default and b.sets.default then
