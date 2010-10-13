@@ -135,7 +135,6 @@ function addon:RegisterFrame(button)
 end
 
 function addon:Enable()
-    print("Addon " .. addonName .. " enabled")
     -- Make the options window a pushable panel window
     UIPanelWindows["CliqueConfig"] = {
         area = "left",
