@@ -1,3 +1,13 @@
+--[[-------------------------------------------------------------------------
+-- OptionsPanel.lua
+--
+-- This file contains the definitions of the main interface options panel.
+-- Any other options panels are sub-categories of this main panel.
+--
+-- Events registered:
+--   None
+-------------------------------------------------------------------------]]--
+
 local addonName, addon = ...
 local L = addon.L 
 

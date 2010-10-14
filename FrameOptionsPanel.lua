@@ -1,3 +1,12 @@
+--[[-------------------------------------------------------------------------
+-- FrameOptionsPanel.lua
+--
+-- This file contains the definitions of the frame blacklist options panel.
+--
+-- Events registered:
+--   None
+-------------------------------------------------------------------------]]--
+
 local addonName, addon = ...
 local L = addon.L
 

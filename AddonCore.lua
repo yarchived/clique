@@ -1,3 +1,18 @@
+--[[-------------------------------------------------------------------------
+-- AddonCore.lua
+--
+-- This is a very simple, bare-minimum core for addon development. It provide
+-- methods to register events, call initialization functions, and sets up the
+-- localization table so it can be used elsewhere. This file is designed to be
+-- loaded first, as it has no further dependencies.
+--
+-- Events registered:
+--   * ADDON_LOADED - Watch for saved variables to be loaded, and call the
+--       'Initialize' function in response.
+--   * PLAYER_LOGIN - Call the 'Enable' method once the major UI elements
+--       have been loaded and initialized.
+-------------------------------------------------------------------------]]--
+
 local addonName, addon = ...
 
 -- Set global name of addon

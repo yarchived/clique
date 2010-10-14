@@ -1,3 +1,14 @@
+--[[-------------------------------------------------------------------------
+-- Utils.lua
+--
+-- This file contains a series of general utility functions that could be
+-- used throughout the addon, although in practice they are mostly used in
+-- the GUI.
+--
+-- Events registered:
+--   None
+-------------------------------------------------------------------------]]--
+
 local addonName, addon = ...
 local L = addon.L
 

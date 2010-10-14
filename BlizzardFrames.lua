@@ -1,3 +1,14 @@
+--[[-------------------------------------------------------------------------
+-- BlizzardFrames.lua
+--
+-- This file contains the definitions of the blizzard frame integration
+-- options. These settings will not apply until the user interface is
+-- reloaded.
+--
+-- Events registered:
+--   * ADDON_LOADED - To watch for loading of the ArenaUI
+-------------------------------------------------------------------------]]--
+
 local addonName, addon = ...
 local L = addon.L 
 

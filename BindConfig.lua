@@ -1,3 +1,12 @@
+--[[-------------------------------------------------------------------------
+-- BindConfig.lua
+--
+-- This file contains the definitions of the binding configuration panel.
+--
+-- Events registered:
+--   None
+-------------------------------------------------------------------------]]--
+
 local addonName, addon = ...
 local L = addon.L
 
