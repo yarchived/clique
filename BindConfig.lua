@@ -228,15 +228,26 @@ function CliqueConfig:Button_OnClick(button)
         -- Check the input
         local key = self.page2.key
         local macrotext = self.page2.editbox:GetText()
-        local succ, err = addon:AddBinding{
-            key = key,
-            type = "macro",
-            macrotext = macrotext,
-        }
+
+        if self.page2.binding then  
+            self.page2.binding.key = key
+            self.page2.binding.macrotext = macrotext
+            self.page2.binding = nil
+            if not InCombatLockdown() then
+                addon:UpdateEverything()
+            end
+        else
+            local succ, err = addon:AddBinding{
+                key = key,
+                type = "macro",
+                macrotext = macrotext,
+            }
+        end
         self:UpdateList()
         self.page2:Hide()
         self.page1:Show()
     elseif button == self.page2.button_cancel then
+        self.page2.binding = nil
         self.page2:Hide()
         self.page1:Show()
     end
@@ -448,7 +459,7 @@ function CliqueConfig:Row_OnClick(frame, button)
 
     local menu = {
         {
-            text = L["Configure binding: '%s'"]:format(actionText),
+            text = L["Configure binding: '%s'"]:format(actionText:sub(1,15)),
             notCheckable = true,
             isTitle = true,
         },
@@ -469,6 +480,24 @@ function CliqueConfig:Row_OnClick(frame, button)
             notCheckable = true,
         },
     }
+
+    if binding.type == "macro" then
+        -- Add an edit binding menu
+        table.insert(menu, 3, {
+            text = L["Edit macro"],
+            func = function()
+                self.page2.bindType = "macro"
+                local bindText = addon:GetBindingKeyComboText(binding)
+                self.page2.bindText:SetText(bindText)
+                self.page2.binding = binding
+                self.page2.editbox:SetText(binding.macrotext)
+                self.page2.button_save:Enable()
+                self.page1:Hide()
+                self.page2:Show()
+            end,
+            notCheckable = true,
+        })
+    end
 
     local submenu = {
         text = L["Enable/Disable click-sets"],
