@@ -123,7 +123,7 @@ StaticPopupDialogs["CLIQUE_NEW_PROFILE"] = {
 	button2 = TEXT(CANCEL),
 	OnAccept = function(self)
 		local base = self:GetName()
-		local editbox = getglobal(base .. "EditBox")
+		local editbox = _G[base .. "EditBox"]
         local profileName = editbox:GetText()
         addon.db:SetProfile(profileName)
 	end,
@@ -135,11 +135,11 @@ StaticPopupDialogs["CLIQUE_NEW_PROFILE"] = {
 	hasEditBox = 1,
 	maxLetters = 32,
 	OnShow = function(self)
-		getglobal(self:GetName().."Button1"):Disable();
-		getglobal(self:GetName().."EditBox"):SetFocus();
+		_G[self:GetName().."Button1"]:Disable();
+		_G[self:GetName().."EditBox"]:SetFocus();
 	end,
 	EditBoxOnEnterPressed = function(self)
-		if ( getglobal(self:GetParent():GetName().."Button1"):IsEnabled() == 1 ) then
+		if (_G[self:GetParent():GetName().."Button1"]:IsEnabled() == 1) then
             local base = self:GetParent():GetName()
             local editbox = _G[base .. "EditBox"]
             local profileName = editbox:GetText()
@@ -148,12 +148,12 @@ StaticPopupDialogs["CLIQUE_NEW_PROFILE"] = {
         self:GetParent():Hide();
 	end,
 	EditBoxOnTextChanged = function (self)
-		local editBox = getglobal(self:GetParent():GetName().."EditBox");
+		local editBox = _G[self:GetParent():GetName().."EditBox"];
 		local txt = editBox:GetText()
 		if #txt > 0 then
-			getglobal(self:GetParent():GetName().."Button1"):Enable();
+			_G[self:GetParent():GetName().."Button1"]:Enable();
 		else
-			getglobal(self:GetParent():GetName().."Button1"):Disable();
+			_G[self:GetParent():GetName().."Button1"]:Disable();
 		end
 	end,
 	EditBoxOnEscapePressed = function(self)

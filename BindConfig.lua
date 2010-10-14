@@ -101,7 +101,7 @@ function CliqueConfig:HijackSpellbook()
     self.spellbookButtons = {}
 
     for idx = 1, 12 do
-        local parent = getglobal("SpellButton" .. idx)
+        local parent = _G["SpellButton" .. idx]
         local button = CreateFrame("Button", "CliqueSpellbookButton" .. idx, parent, "CliqueSpellbookButtonTemplate")
         button.spellbutton = parent
         button:EnableKeyboard(false)
