@@ -482,8 +482,8 @@ function CliqueConfig:Row_OnClick(frame, button)
     }
 
     if binding.type == "macro" then
-        -- Add an edit binding menu
-        table.insert(menu, 3, {
+        -- Replace 'Change Binding' with 'Edit macro' 
+        menu[2] = {
             text = L["Edit macro"],
             func = function()
                 self.page2.bindType = "macro"
@@ -496,7 +496,7 @@ function CliqueConfig:Row_OnClick(frame, button)
                 self.page2:Show()
             end,
             notCheckable = true,
-        })
+        }
     end
 
     local submenu = {
