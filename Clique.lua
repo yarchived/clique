@@ -381,6 +381,10 @@ end
 -- }
 
 function addon:AddBinding(entry)
+    if InCombatLockdown() then
+        return false
+    end
+
     -- TODO: Check to see if the new binding conflicts with an existing binding
     -- TODO: Validate the entry to ensure it has the correct arguments, etc.
 
@@ -412,6 +416,10 @@ local function bindingeq(a, b)
 end
 
 function addon:DeleteBinding(entry)
+    if InCombatLockdown() then
+        return false
+    end
+
     -- Look for an entry that matches the given binding and remove it
     for idx, bind in ipairs(self.bindings) do
         if bindingeq(entry, bind) then
