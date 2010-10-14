@@ -101,16 +101,16 @@ end
 
 function panel.okay()
     local opt = addon.settings.blizzframes
-    opt.PlayerFrame = panel.PlayerFrame:GetChecked()
-    opt.PetFrame = panel.PetFrame:GetChecked()
-    opt.TargetFrame = panel.TargetFrame:GetChecked()
-    opt.FocusFrame = panel.FocusFrame:GetChecked()
-    opt.FocusFrameToT = panel.FocusFrameToT:GetChecked()
-    opt.arena = panel.arena:GetChecked()
-    opt.party = panel.party:GetChecked()
-    opt.compactraid = panel.compactraid:GetChecked()
-    opt.compactparty = panel.compactparty:GetChecked()
-    opt.boss = panel.boss:GetChecked()
+    opt.PlayerFrame = not not panel.PlayerFrame:GetChecked()
+    opt.PetFrame = not not panel.PetFrame:GetChecked()
+    opt.TargetFrame = not not panel.TargetFrame:GetChecked()
+    opt.FocusFrame = not not panel.FocusFrame:GetChecked()
+    opt.FocusFrameToT = not not panel.FocusFrameToT:GetChecked()
+    opt.arena = not not panel.arena:GetChecked()
+    opt.party = not not panel.party:GetChecked()
+    opt.compactraid = not not panel.compactraid:GetChecked()
+    opt.compactparty = not not panel.compactparty:GetChecked()
+    opt.boss = not not panel.boss:GetChecked()
 end
 
 InterfaceOptions_AddCategory(panel)
