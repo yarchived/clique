@@ -222,7 +222,7 @@ function addon:ShouldSetBinding(binding, global)
     local apply = false
 
     -- Check for global bindings first in isolation
-    if binding.sets.global then
+    if binding.sets.hovercast or binding.sets.global then
         if global then
             return true
         else

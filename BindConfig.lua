@@ -414,7 +414,13 @@ function CliqueConfig:AcceptSetBinding()
     dialog:Hide()
 end
 
-local function toggleSet(binding, set)
+local function toggleSet(binding, set, ...)
+    local exclude = {}
+    for i = 1, select("#", ...) do
+        local item = select(i, ...)
+        table.insert(exclude, item)
+    end
+
     return function()
         if not binding.sets then
             binding.sets = {}
@@ -424,6 +430,12 @@ local function toggleSet(binding, set)
         else
             binding.sets[set] = true
         end
+
+        for idx, exclset in ipairs(exclude) do
+            binding.sets[exclset] = nil
+        end
+
+        UIDropDownMenu_Refresh(UIDROPDOWNMENU_OPEN_MENU, nil, UIDROPDOWNMENU_MENU_LEVEL) 
         CliqueConfig:UpdateList()
         addon:UpdateAttributes()
         addon:UpdateGlobalAttributes()
@@ -503,11 +515,20 @@ function CliqueConfig:Row_OnClick(frame, button)
     })
 
     table.insert(submenu.menuList, {
-        text = L["Global bindings"],
+        text = L["Hovercast bindings (target required)"],
+        checked = function() return binding.sets["hovercast"] end,
+        func = toggleSet(binding, "hovercast", "global"),
+        tooltipTitle = L["Clique: 'hovercast' click-set"],
+        tooltipText = L["A binding that belongs to the 'hovercast' click-set is active whenever the mouse is over a unit frame, or a character in the 3D world. This allows you to use 'hovercasting', where you hover over a unit in the world and press a key to cast a spell on them. THese bindings are also active over unit frames."],
+        keepShownOnClick = true,
+    })
+
+    table.insert(submenu.menuList, {
+        text = L["Global bindings (no target)"],
         checked = function() return binding.sets["global"] end,
-        func = toggleSet(binding, "global"),
+        func = toggleSet(binding, "global", "hovercast"),
         tooltipTitle = L["Clique: 'global' click-set"],
-        tooltipText = L["A binding that belongs to the 'global' click-set is always active, regardless of whether the mouse is over a unit frame or not. This click-set allows you to bind spells to keys that can then be used over the 3-D game world, to enable 'hovercasting', where you hover over a unit in the world and press a key to cast a spell on them. These bindings are also active over unit frames."],
+        tooltipText = L["A binding that belongs to the 'global' click-set is always active. If the spell requires a target, you will be given the 'casting hand', otherwise the spell will be cast. If the spell is an AOE spell, then you will be given the ground targeting circle."],
         keepShownOnClick = true,
     })
     

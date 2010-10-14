@@ -25,10 +25,11 @@
 --      clicking on is an enemy, i.e. a unit that you can attack.
 --    * friendly - These bindings are ONLY active when the unit you are
 --      clicking on is a friendly unit, i.e. one that you can assist
---    * global - These bindings will be available regardless of where
---      your mouse is on the screen, be it in the 3D world, or over a
---      unit frame. These bindings take up a slot that might otherwise
---      be used in the 'Key Bindings' interface options.
+--    * hovercast - These bindings will be available whenever you are over
+--      a unit frame, or a unit in the 3D world.
+--    * global - These bindings will be always available. They
+--      do not specify a target for the action, so if the action requires
+--      a target, you must specify it after performing the binding.
 --
 --  The click-sets layer on each other, with the 'default' click-set
 --  being at the bottom, and any other click-set being layered on top.
@@ -55,9 +56,8 @@ function addon:Initialize()
     self.header = CreateFrame("Frame", addonName .. "HeaderFrame", UIParent, "SecureHandlerBaseTemplate")
     ClickCastHeader = addon.header
 
-    -- Create a secure action button that can be used for 'global' bindings
+    -- Create a secure action button that can be used for 'hovercast' and 'global'
     self.globutton = CreateFrame("Button", addonName .. "SABButton", UIParent, "SecureActionButtonTemplate, SecureHandlerBaseTemplate")
-    self.globutton:SetAttribute("unit", "mouseover")
 
     -- Create a table within the addon header to store the frames
     -- that are registered for click-casting
@@ -285,6 +285,13 @@ function addon:GetClickAttributes(global)
                 suffix = newbutton
             end
 
+            -- Give globutton the 'mouseover' unit as target when using the 'hovercast'
+            -- binding set, as opposed to the global set.
+            if entry.sets.hovercast then
+                bits[#bits + 1] = ATTR(prefix, "unit", suffix, "mouseover")
+                rembits[#rembits + 1] = REMATTR(prefix, "unit", suffix)
+            end
+
             -- Build any needed SetAttribute() calls
             if entry.type == "target" or entry.type == "menu" then
                 bits[#bits + 1] = ATTR(prefix, "type", suffix, entry.type)
@@ -299,7 +306,6 @@ function addon:GetClickAttributes(global)
                 bits[#bits + 1] = ATTR(prefix, "macrotext", suffix, entry.macrotext)
                 rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
                 rembits[#rembits + 1] = REMATTR(prefix, "macrotext", suffix)
-
             else
                 error(string.format("Invalid action type: '%s'", entry.type))
             end
