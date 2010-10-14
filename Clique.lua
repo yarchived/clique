@@ -400,16 +400,17 @@ end
 local function bindingeq(a, b)
     assert(type(a) == "table", "Error during deletion comparison")
     assert(type(b) == "table", "Error during deletion comparison")
+
     if a.type ~= b.type then
         return false
     elseif a.type == "target" then
-        return true
+        return a.key == b.key
     elseif a.type == "menu" then
-        return true
+        return a.key == b.key
     elseif a.type == "spell" then
-        return a.spell == b.spell
+        return a.spell == b.spell and a.key == b.key
     elseif a.type == "macro" then
-        return a.macrotext == b.macrotext
+        return a.macrotext == b.macrotext and a.key == b.key
     end
 
     return false
