@@ -140,7 +140,21 @@ function addon:Initialize()
     addon:UpdateEverything()
 end
 
+-- This function may be called during combat. When that is the case, the
+-- request must be queued until combat ends, and then we can attempt to
+-- register those frames. This is mainly due to integration with the
+-- Blizzard raid frames, which we cannot 'register' while in combat.
+--
+-- TODO: There may be a way, with a handle to the blizzard headers to
+-- find these new frames within a secure snippet, but I'm not sure how
+-- that would be possible
+addon.regqueue = {}
 function addon:RegisterFrame(button)
+    if InCombatLockdown() then
+        table.insert(regqueue, button)
+        return
+    end
+
     self.ccframes[button] = true
 
     if self.settings.downclick then
@@ -525,8 +539,20 @@ end
 
 function addon:LeavingCombat()
     self.partyincombat = false
-    addon:UpdateAttributes()
-    addon:UpdateGlobalAttributes()
+
+    -- Sanity check
+    if not InCombatLockdown() then
+        for idx, button in ipairs(self.regqueue) do
+            self:RegisterFrame(button)
+        end
+
+        if #self.regqueue > 0 then
+            self.regqueue = {}
+        end
+    end
+
+    self:UpdateAttributes()
+    self:UpdateGlobalAttributes()
 end
 
 function addon:CheckPartyCombat(event, unit)
