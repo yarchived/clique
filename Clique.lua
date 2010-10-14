@@ -151,7 +151,7 @@ end
 addon.regqueue = {}
 function addon:RegisterFrame(button)
     if InCombatLockdown() then
-        table.insert(regqueue, button)
+        table.insert(self.regqueue, button)
         return
     end
 
