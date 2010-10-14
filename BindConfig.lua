@@ -301,6 +301,8 @@ function CliqueConfig:UpdateList()
     -- GUI not created yet
     if not self.initialized then
         return
+    elseif not self:IsVisible() then
+        return
     end
 
     -- Sort the bindings
