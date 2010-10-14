@@ -107,8 +107,11 @@
                 CliqueConfig:Spellbook_OnBinding(self, key)
             </OnKeyDown>
             <OnMouseWheel>
-                local button = (delta &gt; 0) and "MOUSEWHEELUP" or "MOUSEWHEELDOWN"
-                CliqueConfig:Spellbook_OnBinding(self, button)
+                if time() ~= self.last_mousewheel then
+                    local button = (delta &gt; 0) and "MOUSEWHEELUP" or "MOUSEWHEELDOWN"
+                    CliqueConfig:Spellbook_OnBinding(self, button)
+                    self.last_mousewheel = time()
+                end
             </OnMouseWheel>
         </Scripts>
         <NormalTexture file="Interface\BUTTONS/GLOWSTAR">
