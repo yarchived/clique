@@ -178,6 +178,8 @@ function addon:GetCapturedKey(key)
         key = "BUTTON2"
     elseif key == "MiddleButton" then
         key = "BUTTON3"
+    elseif key == "-" then
+        key = "DASH"
     else
         local buttonNum = key:match("Button(%d+)")
         if buttonNum and tonumber(buttonNum) <= 31 then

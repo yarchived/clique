@@ -346,9 +346,14 @@ function addon:GetBindingAttributes(global)
                 -- This is a key binding, so we need a binding for it
                 
                 local prefix, suffix = addon:GetBindingPrefixSuffix(entry)
+                local key = entry.key
 
-                set[#set + 1] = B_SET:format(entry.key, suffix)
-                clr[#clr + 1] = B_CLR:format(entry.key)
+                if key == "DASH" then
+                    key = "-"
+                end
+
+                set[#set + 1] = B_SET:format(key, suffix)
+                clr[#clr + 1] = B_CLR:format(key)
             end
         end
     end
