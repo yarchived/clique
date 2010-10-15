@@ -315,8 +315,8 @@ function addon:GetClickAttributes(global)
     return table.concat(bits, "\n"), table.concat(rembits, "\n")
 end
 
-local B_SET = [[self:SetBindingClick(true, "%s", self, "%s");]]
-local B_CLR = [[self:ClearBinding("%s");]]
+local B_SET = [[self:SetBindingClick(true, %q, self, %q);]]
+local B_CLR = [[self:ClearBinding(%q);]]
 
 -- This function will create two attributes, the first being a "setup keybindings"
 -- script and the second being a "clear keybindings" script.
