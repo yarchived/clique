@@ -254,10 +254,6 @@ end
 
 -- This function examines the current state of the game
 function addon:ShouldSetBinding(binding, global)
-    if type(binding) ~= table or not binding.key or not binding.sets then
-        return false
-    end
-
     local apply = false
 
     -- Check for global bindings first in isolation
