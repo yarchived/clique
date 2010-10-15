@@ -511,7 +511,7 @@ function CliqueConfig:Row_OnClick(frame, button)
     end
 
     local submenu = {
-        text = L["Enable/Disable click-sets"],
+        text = L["Enable/Disable binding-sets"],
         hasArrow = true,
         notCheckable = true,
         menuList = {},
@@ -522,8 +522,8 @@ function CliqueConfig:Row_OnClick(frame, button)
         text = L["Default"],
         checked = function() return binding.sets["default"] end,
         func = toggleSet(binding, "default"),
-        tooltipTitle = L["Clique: 'default' click-set"],
-        tooltipText = L["A binding that belongs to the 'default' click-set will always be active on your unit frames, unless you override it with another binding."],
+        tooltipTitle = L["Clique: 'default' binding-set"],
+        tooltipText = L["A binding that belongs to the 'default' binding-set will always be active on your unit frames, unless you override it with another binding."],
         keepShownOnClick = true,
     })
 
@@ -531,8 +531,8 @@ function CliqueConfig:Row_OnClick(frame, button)
         text = L["Friend"],
         checked = function() return binding.sets["friend"] end,
         func = toggleSet(binding, "friend"),
-        tooltipTitle = L["Clique: 'friend' click-set"],
-        tooltipText = L["A binding that belongs to the 'frield' click-set will only be active when clicking on unit frames that display friendly units, i.e. those you can heal and assist. If you click on a unit that you cannot heal or assist, nothing will happen."],
+        tooltipTitle = L["Clique: 'friend' binding-set"],
+        tooltipText = L["A binding that belongs to the 'frield' binding-set will only be active when clicking on unit frames that display friendly units, i.e. those you can heal and assist. If you click on a unit that you cannot heal or assist, nothing will happen."],
         keepShownOnClick = true,
     })
 
@@ -540,8 +540,8 @@ function CliqueConfig:Row_OnClick(frame, button)
         text = L["Enemy"],
         checked = function() return binding.sets["enemy"] end,
         func = toggleSet(binding, "enemy"),
-        tooltipTitle = L["Clique: 'enemy' click-set"],
-        tooltipText = L["A binding that belongs to the 'enemy' click-set will always be active when clicking on unit frames that display enemy units, i.e. those you can attack. If you click on a unit that you cannot attack, nothing will happen."],
+        tooltipTitle = L["Clique: 'enemy' binding-set"],
+        tooltipText = L["A binding that belongs to the 'enemy' binding-set will always be active when clicking on unit frames that display enemy units, i.e. those you can attack. If you click on a unit that you cannot attack, nothing will happen."],
         keepShownOnClick = true,
     })
 
@@ -549,8 +549,8 @@ function CliqueConfig:Row_OnClick(frame, button)
         text = L["Out-of-combat only"],
         checked = function() return binding.sets["ooc"] end,
         func = toggleSet(binding, "ooc"),
-        tooltipTitle = L["Clique: 'ooc' click-set"],
-        tooltipText = L["A binding that belongs to the 'ooc' click-set will only be active when the player is out-of-combat. As soon as the player enters combat, these bindings will no longer be active, so be careful when choosing this click-set for any spells you use frequently."],
+        tooltipTitle = L["Clique: 'ooc' binding-set"],
+        tooltipText = L["A binding that belongs to the 'ooc' binding-set will only be active when the player is out-of-combat. As soon as the player enters combat, these bindings will no longer be active, so be careful when choosing this binding-set for any spells you use frequently."],
         keepShownOnClick = true,
     })
 
@@ -558,8 +558,8 @@ function CliqueConfig:Row_OnClick(frame, button)
         text = L["Hovercast bindings (target required)"],
         checked = function() return binding.sets["hovercast"] end,
         func = toggleSet(binding, "hovercast", "global"),
-        tooltipTitle = L["Clique: 'hovercast' click-set"],
-        tooltipText = L["A binding that belongs to the 'hovercast' click-set is active whenever the mouse is over a unit frame, or a character in the 3D world. This allows you to use 'hovercasting', where you hover over a unit in the world and press a key to cast a spell on them. THese bindings are also active over unit frames."],
+        tooltipTitle = L["Clique: 'hovercast' binding-set"],
+        tooltipText = L["A binding that belongs to the 'hovercast' binding-set is active whenever the mouse is over a unit frame, or a character in the 3D world. This allows you to use 'hovercasting', where you hover over a unit in the world and press a key to cast a spell on them. THese bindings are also active over unit frames."],
         keepShownOnClick = true,
     })
 
@@ -567,8 +567,8 @@ function CliqueConfig:Row_OnClick(frame, button)
         text = L["Global bindings (no target)"],
         checked = function() return binding.sets["global"] end,
         func = toggleSet(binding, "global", "hovercast"),
-        tooltipTitle = L["Clique: 'global' click-set"],
-        tooltipText = L["A binding that belongs to the 'global' click-set is always active. If the spell requires a target, you will be given the 'casting hand', otherwise the spell will be cast. If the spell is an AOE spell, then you will be given the ground targeting circle."],
+        tooltipTitle = L["Clique: 'global' binding-set"],
+        tooltipText = L["A binding that belongs to the 'global' binding-set is always active. If the spell requires a target, you will be given the 'casting hand', otherwise the spell will be cast. If the spell is an AOE spell, then you will be given the ground targeting circle."],
         keepShownOnClick = true,
     })
     

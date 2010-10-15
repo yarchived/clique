@@ -13,12 +13,12 @@
 --    * The only types that are allowed are spells and macros.
 --
 --  The concept of 'click-sets' has been simplified and extended
---  so that the user can specify their own click-sets, allowing
+--  so that the user can specify their own binding-sets, allowing
 --  for different bindings for different sets of frames. By default
---  the following click-sets are available:
+--  the following binding-sets are available:
 --
 --    * default - These bindings are active on all frames, unless
---      overridden by another binding in a more specific click-set.
+--      overridden by another binding in a more specific binding-set.
 --    * ooc - These bindings will ONLY be active when the player is
 --      out of combat.
 --    * enemy - These bindings are ONLY active when the unit you are
@@ -31,8 +31,8 @@
 --      do not specify a target for the action, so if the action requires
 --      a target, you must specify it after performing the binding.
 --
---  The click-sets layer on each other, with the 'default' click-set
---  being at the bottom, and any other click-set being layered on top.
+--  The binding-sets layer on each other, with the 'default' binding-set
+--  being at the bottom, and any other binding-set being layered on top.
 --  Clique will detect any conflicts that you have other than with
 --  default bindings, and will warn you of the situation.
 -------------------------------------------------------------------]]--
