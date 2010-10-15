@@ -515,16 +515,18 @@ function addon:TalentGroupChanged()
     local currentProfile = self.db:GetCurrentProfile()
     local newProfile
 
-    -- Determine which profile to set, based on talent group
-    self.talentGroup = GetActiveTalentGroup()
-    if self.talentGroup == 1 and self.settings.pri_profileKey then
-        newProfile = self.settings.pri_profileKey
-    elseif self.talentGroup == 2 and self.settings.sec_profileKey then
-        newProfile = self.settings.sec_profileKey
-    end
+    if self.settings.specswap then
+        -- Determine which profile to set, based on talent group
+        self.talentGroup = GetActiveTalentGroup()
+        if self.talentGroup == 1 and self.settings.pri_profileKey then
+            newProfile = self.settings.pri_profileKey
+        elseif self.talentGroup == 2 and self.settings.sec_profileKey then
+            newProfile = self.settings.sec_profileKey
+        end
 
-    if newProfile ~= currentProfile and type(newProfile) == "string" then
-        self.db:SetProfile(newProfile)
+        if newProfile ~= currentProfile and type(newProfile) == "string" then
+            self.db:SetProfile(newProfile)
+        end
     end
 
     self:UpdateEverything()
