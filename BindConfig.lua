@@ -73,6 +73,8 @@ function CliqueConfig:SetupGUI()
 
     self.alert = _G["CliqueTabAlert"]
 
+    self.bindAlert.text:SetText(L["You are in Clique binding mode"])
+
     self.close = _G[self:GetName() .. "CloseButton"]
     self.close:SetScript("OnClick", function()
         HideUIPanel(CliqueConfig)

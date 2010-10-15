@@ -114,14 +114,6 @@
                 end
             </OnMouseWheel>
         </Scripts>
-        <NormalTexture file="Interface\BUTTONS/GLOWSTAR">
-            <Size x="16" y="16"/>
-            <Anchors>
-                <Anchor point="BOTTOMRIGHT">
-                    <Offset x="-3" y="3"/>
-                </Anchor>
-            </Anchors>
-        </NormalTexture>
         <HighlightTexture file="Interface\BUTTONS\ButtonHilight-Square" alphaMode="ADD"/>
     </Button>
 
@@ -151,7 +143,7 @@
         </Anchors>
         <Layers>
             <Layer level="OVERLAY">
-                <FontString name="$parentText" parentKey="text" inherits="GameFontHighlightLeft" justifyV="TOP" text="TALENT_MICRO_BUTTON_TUTORIAL" >
+                <FontString name="$parentText" parentKey="text" inherits="GameFontHighlightLeft" justifyV="TOP" text="" >
                     <Size x="188" y="0"/>
                     <Anchors>
                         <Anchor point="TOPLEFT" x="16" y="-24"/>
@@ -548,6 +540,36 @@
                     </Button>
                  </Frames>
             </Frame> <!-- Page 3 - Macro Edit Page -->
+
+            <!-- Alert above the spellbook to show we're in binding mode -->
+            <Frame name="CliqueConfigBindAlert" parentKey="bindAlert" inherits="GlowBoxTemplate" hidden="false" frameStrata="DIALOG" framelevel="2">
+                <Size x="220" y="43"/>
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT" relativeTo="SpellButton1" relativePoint="TOP" x="-40" y="25"/>
+                </Anchors>
+                <Layers>
+                    <Layer level="OVERLAY">
+                        <FontString name="$parentText" parentKey="text" inherits="GameFontHighlightLeft" justifyV="TOP" text="" >
+                            <Size x="230" y="0"/>
+                            <Anchors>
+                                <Anchor point="TOPLEFT" x="16" y="-15"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+                <Frames>
+                    <Frame name="$parentArrow" parentKey="arrow" inherits="GlowBoxArrowTemplate">
+                        <Anchors>
+                            <Anchor point="TOP" relativePoint="BOTTOMLEFT" x="40" y="1"/>
+                        </Anchors>
+                    </Frame>
+                </Frames>
+                <Scripts>
+                    <OnLoad>
+                        self.text:SetSpacing(4)
+                    </OnLoad>
+                </Scripts>
+            </Frame> <!-- End bindAlert -->
         </Frames>
         <Scripts>
             <OnLoad>
