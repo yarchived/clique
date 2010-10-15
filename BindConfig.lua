@@ -283,6 +283,8 @@ compareFunctions = {
         local keyb = addon:GetBindingKey(b)
         if keya == keyb then
             return memoizeBindings[a] < memoizeBindings[b]
+        elseif not keya or not keyb then
+            return false
         else
             return keya < keyb
         end
