@@ -26,6 +26,13 @@ function CliqueConfig:OnShow()
         self.initialized = true
     end
 
+    -- Hide the alertTab if the spellbook isn't shown
+    if SpellButton1:IsVisible() then
+        self.bindAlert:Show()
+    else
+        self.bindAlert:Hide()
+    end
+
     CliqueSpellTab:SetChecked(true)
     self:UpdateList()
     self:EnableSpellbookButtons()
