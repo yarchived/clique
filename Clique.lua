@@ -71,13 +71,17 @@ function addon:Initialize()
     ]])
     self:UpdateBlacklist()
 
-    -- OnEnter bootstrap script for group-header frames
+    -- This snippet is executed from the SecureHandlerEnterLeaveTemplate
+    -- _onenter and _onleave attributes. The 'self' attribute will contain
+    -- the unit frame itself.
     self.header:SetAttribute("clickcast_onenter", [===[
         local header = self:GetParent():GetFrameRef("clickcast_header")
         header:RunFor(self, header:GetAttribute("setup_onenter"))
     ]===])
 
-    -- OnLeave bootstrap script for group-header frames
+    -- This snippet is executed from the SecureHandlerEnterLeaveTemplate
+    -- _onenter and _onleave attributes. The 'self' attribute will contain
+    -- the unit frame itself.
     self.header:SetAttribute("clickcast_onleave", [===[
         local header = self:GetParent():GetFrameRef("clickcast_header")
         header:RunFor(self, header:GetAttribute("setup_onleave"))
@@ -86,17 +90,49 @@ function addon:Initialize()
     local setup, remove = self:GetClickAttributes()
     self.header:SetAttribute("setup_clicks", setup) 
     self.header:SetAttribute("remove_clicks", remove)
-    self.header:SetAttribute("clickcast_register", ([===[
+
+    -- This snippet is executed from within the initialConfigFunction secure
+    -- snippet. The unit frame button is passed in the 'clickcast_button'
+    -- attribute, which can only be accomplished in a restricted environment.
+    self.header:SetAttribute("clickcast_register", [===[
         local button = self:GetAttribute("clickcast_button")
+
+        -- Export this frame so we can display it in the insecure environment
+        self:SetAttribute("export_register", button)
+
         button:SetAttribute("clickcast_onenter", self:GetAttribute("clickcast_onenter"))
         button:SetAttribute("clickcast_onleave", self:GetAttribute("clickcast_onleave"))
         ccframes[button] = true
         self:RunFor(button, self:GetAttribute("setup_clicks"))
-    ]===]):format(self.attr_setup_clicks))
+    ]===])
 
+    -- This snippet is executed from the Clique:UnregisterFrame() function, or
+    -- possibly from some other restricted environment. The unit frame is passed
+    -- in the 'clickcast_button' attribute, which can only be accomplished
+    -- in a restricted environment.
+    self.header:SetAttribute("clickcast_unregister", [===[
+        local button = self:GetAttribute("clickcast_button")
+
+        -- Export this frame so it can be removed from the blacklist editor
+        self:SetAttribute("export_unregister", button)
+
+        -- Remove any click and binding attributes that have already been set
+        self:RunFor(button, self:GetAttribute("clickcast_onleave"))
+        self:RunFor(button, self:GetAttribute("remove_clicks")) 
+
+        button:SetAttribute("clickcast_onenter", nil)
+        button:SetAttribute("clickcast_onleave", nil)
+        ccframes[button] = nil
+    ]===])
+
+    -- We need to track frame registrations so we can display secure frames in
+    -- the frame blacklist editor. This is done via the 'export_register' and
+    -- 'export_unregister' attributes.
     self.header:SetScript("OnAttributeChanged", function(frame, name, value)
-        if name == "clickcast_button" and type(value) ~= nil then
+        if name == "export_register" and type(value) ~= nil then
             self.hccframes[value] = true
+        elseif name == "export_unregister" and type(value) ~= nil then
+            self.hccframes[value] = nil
         end
     end)
 
@@ -112,7 +148,7 @@ function addon:Initialize()
     local oldClickCastFrames = ClickCastFrames
 
     ClickCastFrames = setmetatable({}, {__newindex = function(t, k, v)
-        if v == nil then
+        if v == nil or v == false then
             self:UnregisterFrame(k)
         else
             self:RegisterFrame(k, v)
@@ -140,15 +176,14 @@ function addon:Initialize()
     addon:UpdateEverything()
 end
 
--- This function may be called during combat. When that is the case, the
+-- These tables are a queue for frame registration/unregistration
+addon.regqueue = {}
+addon.unregqueue = {}
+
+-- these function may be called during combat. When that is the case, the
 -- request must be queued until combat ends, and then we can attempt to
 -- register those frames. This is mainly due to integration with the
 -- Blizzard raid frames, which we cannot 'register' while in combat.
---
--- TODO: There may be a way, with a handle to the blizzard headers to
--- find these new frames within a secure snippet, but I'm not sure how
--- that would be possible
-addon.regqueue = {}
 function addon:RegisterFrame(button)
     if InCombatLockdown() then
         table.insert(self.regqueue, button)
@@ -170,6 +205,27 @@ function addon:RegisterFrame(button)
     -- Set the attributes on the frame
     self.header:SetFrameRef("cliquesetup_button", button)
     self.header:Execute(self.header:GetAttribute("setup_clicks"), button)
+end
+
+function addon:UnregisterFrame(button)
+    if InCombatLockdown() then
+        table.insert(self.unregqueue, button)
+        return
+    end
+
+    -- Clear any click/bind attributes
+    self.header:SetFrameRef("cliquesetup_button", button)
+    self.header:Execute([[
+        local button = self:GetFrameRef("cliquesetup_button")
+        self:RunFor(button, self:GetAttribute("setup_onleave"))
+        self:RunAttribute("remove_clicks")
+    ]])
+    
+    self.ccframes[button] = nil
+
+    -- Unwrap the OnEnter/OnLeave scripts, if they were set
+    addon.header:UnwrapScript(button, "OnEnter")
+    addon.header:UnwrapScript(button, "OnLeave")
 end
 
 function addon:Enable()
