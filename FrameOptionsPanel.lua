@@ -114,7 +114,20 @@ function panel:CreateOptions()
     self.selectnone:SetPoint("BOTTOMLEFT", self.selectall, "BOTTOMRIGHT", 5, 0)
     self.selectnone:SetWidth(100)
     self.selectnone:SetScript("OnClick", function(button)
-        state = {}
+        for frame in pairs(addon.ccframes) do
+            local name = frame:GetName()
+            if name then
+                state[name] = false
+            end
+        end
+
+        for frame in pairs(addon.hccframes) do
+            local name = frame:GetName()
+            if name then
+                state[name] = false
+            end
+        end
+
         self:UpdateScrollFrame()
     end)
 end
