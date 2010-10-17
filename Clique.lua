@@ -391,12 +391,15 @@ function addon:GetBindingAttributes(global)
         set = {
             "local button = self",
             "local name = button:GetName()",
+            "if danglingButton then control:RunFor(danglingButton, control:GetAttribute('setup_onleave')) end",
             "if blacklist[name] then return end",
+            "danglingButton = button",
         }
         clr = {
             "local button = self",
             "local name = button:GetName()",
             "if blacklist[name] then return end",
+            "danglingButton = nil",
         }
     end
 
