@@ -194,7 +194,6 @@ function addon:RegisterFrame(button)
 
     local name = button.GetName and button:GetName()
     if not self.settings.blacklist[name] then
-        print("Register for clicks", name)
         if self.settings.downclick then
             button:RegisterForClicks("AnyDown")
         else
