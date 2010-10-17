@@ -397,7 +397,7 @@ function addon:GetBindingAttributes(global)
     end
 
     for idx, entry in ipairs(self.bindings) do
-        if self:ShouldSetBinding(entry, global) then 
+        if self:ShouldSetBinding(entry, global) and entry.key then 
             if not entry.key:match("BUTTON%d+$") then
                 -- This is a key binding, so we need a binding for it
                 

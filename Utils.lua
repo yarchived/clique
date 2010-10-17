@@ -46,6 +46,35 @@ function addon:GetPrefixString(split)
     return prefix
 end
 
+-- This function can return a substring of a UTF-8 string, properly handling
+-- UTF-8 codepoints.  Rather than taking a start index and optionally an end
+-- index, it takes the string, the start index and the number of characters
+-- to select from the string.
+--
+-- UTF-8 Reference:
+-- 0xxxxxx - ASCII character
+-- 110yyyxx - 2 byte UTF codepoint
+-- 1110yyyy - 3 byte UTF codepoint
+-- 11110zzz - 4 byte UTF codepoint
+
+local function utf8sub(str, start, numChars)
+    local currentIndex = start
+    while numChars > 0 and currentIndex <= #str do
+        local char = string.byte(str, currentIndex)
+        if char >= 240 then
+            currentIndex = currentIndex + 4
+        elseif char >= 225 then
+            currentIndex = currentIndex + 3
+        elseif char >= 192 then
+            currentIndex = currentIndex + 2
+        else
+            currentIndex = currentIndex + 1
+        end
+        numChars = numChars - 1
+    end
+    return str:sub(start, currentIndex - 1)
+end
+
 local convertMap = setmetatable({
     LSHIFT = L["LShift"],
     RSHIFT = L["RShift"],
@@ -66,7 +95,13 @@ local convertMap = setmetatable({
         if k:match("^BUTTON(%d+)$") then
             return k:gsub("^BUTTON(%d+)$", "Button%1")
         else
-            return k:sub(1,1) .. k:sub(2, -1):lower()
+            if utf8sub(k, 1, 1) ~= k:sub(1, 1) then
+                -- If the first character is a multi-byte UTF-8 character
+                return k
+            else
+                -- Make the first character upper-case, lower the rest
+                return tostring(k:sub(1, 1):upper()) .. tostring(k:sub(2, -1):lower())
+            end
         end
     end,
 })
@@ -243,7 +278,7 @@ function addon:GetBindingPrefixSuffix(binding)
     if button then
         suffix = button
     else
-        local mbid = (prefix .. suffix):gsub("[^A-Za-z0-9]", "")
+        local mbid = (prefix .. suffix)
         suffix = "cliquebutton" .. mbid
         prefix = ""
     end
