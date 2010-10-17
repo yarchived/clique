@@ -51,7 +51,7 @@ function panel:CreateOptions()
     local bits = {}
    
     self.updown = make_checkbox("CliqueOptionsUpDownClick", self)
-    self.updown.text:SetText(L["Trigger bindings on the 'down' portion of the click (requires reload)"])
+    self.updown.text:SetText(L["Trigger bindings on the 'down' portion of the click (only works on some frames)"])
 
     self.fastooc = make_checkbox("CliqueOptionsFastOoc", self)
     self.fastooc.text:SetText(L["Disable out of combat clicks when party members enter combat"])

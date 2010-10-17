@@ -180,7 +180,7 @@ end
 addon.regqueue = {}
 addon.unregqueue = {}
 
--- these function may be called during combat. When that is the case, the
+-- These function may be called during combat. When that is the case, the
 -- request must be queued until combat ends, and then we can attempt to
 -- register those frames. This is mainly due to integration with the
 -- Blizzard raid frames, which we cannot 'register' while in combat.
