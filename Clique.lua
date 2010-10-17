@@ -192,10 +192,14 @@ function addon:RegisterFrame(button)
 
     self.ccframes[button] = true
 
-    if self.settings.downclick then
-        button:RegisterForClicks("AnyDown")
-    else
-        button:RegisterForClicks("AnyUp")
+    local name = button.GetName and button:GetName()
+    if not self.settings.blacklist[name] then
+        print("Register for clicks", name)
+        if self.settings.downclick then
+            button:RegisterForClicks("AnyDown")
+        else
+            button:RegisterForClicks("AnyUp")
+        end
     end
 
     -- Wrap the OnEnter/OnLeave scripts in order to handle keybindings
@@ -596,6 +600,19 @@ function addon:UpdateCombatWatch()
     end
 end
 
+function addon:UpdateRegisteredClicks()
+    for button, enabled in pairs(self.ccframes) do
+        local name = button.GetName and button:GetName() 
+        if not self.settings.blacklist[name] and enabled then
+            if self.settings.downclick then
+                button:RegisterForClicks("AnyDown")
+            else
+                button:RegisterForClicks("AnyUp")
+            end
+        end
+    end
+end
+
 function addon:UpdateBlacklist()
     local bits = {
         "blacklist = table.wipe(blacklist)",
@@ -608,6 +625,7 @@ function addon:UpdateBlacklist()
     end
 
     addon.header:Execute(table.concat(bits, ";\n"))
+    addon:UpdateRegisteredClicks()
 end
 
 function addon:EnteringCombat()
