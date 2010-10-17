@@ -262,7 +262,7 @@ function addon:GetBindingInfoText(binding)
     end
 end
 
-function addon:GetBindingPrefixSuffix(binding)
+function addon:GetBindingPrefixSuffix(binding, global)
     if type(binding) ~= "table" or not binding.key then
         return "UNKNOWN", "UNKNOWN"
     end
@@ -274,12 +274,16 @@ function addon:GetBindingPrefixSuffix(binding)
 
     prefix = prefix:lower()
 
-    local button = suffix:match("^BUTTON(%d+)$")
-    if button then
-        suffix = button
+    local prefixKey = prefix:gsub("[%A]", "")
+    local buttonNum = suffix:match("^BUTTON(%d+)$")
+
+    if buttonNum and global then
+        suffix = "cliquemouse" .. tostring(prefixKey) .. tostring(buttonNum)
+        prefix = ""
+    elseif buttonNum then
+        suffix = buttonNum
     else
-        local mbid = (prefix .. suffix)
-        suffix = "cliquebutton" .. mbid
+        suffix = "cliquebutton" .. tostring(prefixKey) .. tostring(suffix)
         prefix = ""
     end
 

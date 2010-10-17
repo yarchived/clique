@@ -327,7 +327,7 @@ function addon:GetClickAttributes(global)
 
     for idx, entry in ipairs(self.bindings) do
         if self:ShouldSetBinding(entry, global) then
-            local prefix, suffix = addon:GetBindingPrefixSuffix(entry)
+            local prefix, suffix = addon:GetBindingPrefixSuffix(entry, global)
 
             -- Set up help/harm bindings. The button value will be either a number, 
             -- in the case of mouse buttons, otherwise it will be a string of
@@ -379,7 +379,6 @@ local B_CLR = [[self:ClearBinding(%q);]]
 
 -- This function will create two attributes, the first being a "setup keybindings"
 -- script and the second being a "clear keybindings" script.
-
 function addon:GetBindingAttributes(global)
     local set = {
     }
@@ -404,10 +403,24 @@ function addon:GetBindingAttributes(global)
 
     for idx, entry in ipairs(self.bindings) do
         if self:ShouldSetBinding(entry, global) and entry.key then 
-            if not entry.key:match("BUTTON%d+$") then
+            local buttonNum = entry.key:match("BUTTON%d+$")
+
+            -- Button bindings cannot be bound in the global or hovercast
+            -- bind-sets. This is due to a limitation in the Blizzard API
+            -- and there does not appear to be any way around this
+
+            if buttonNum and global and entry.sets.hovercast or entry.sets.global then 
+                -- Do NOT allow re-bindings of unmodified left/right-click
+                if entry.key ~= "BUTTON1" and entry.key ~= "BUTTON2" then
+                    local prefix, suffix = addon:GetBindingPrefixSuffix(entry, global)
+                    local key = entry.key
+
+                    set[#set + 1] = B_SET:format(key, suffix)
+                    clr[#clr + 1] = B_CLR:format(key)
+                end
+            else
                 -- This is a key binding, so we need a binding for it
-                
-                local prefix, suffix = addon:GetBindingPrefixSuffix(entry)
+                local prefix, suffix = addon:GetBindingPrefixSuffix(entry, global)
                 local key = entry.key
 
                 if key == "DASH" then
