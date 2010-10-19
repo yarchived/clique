@@ -42,7 +42,6 @@ end
 function CliqueConfig:OnHide()
     self:ClearAllPoints()
     self:SetParent(UIParent)
-    self:Hide()
     CliqueSpellTab:SetChecked(false)
     self:UpdateAlert()
 end
@@ -239,7 +238,7 @@ function CliqueConfig:Button_OnClick(button)
 
     -- Click handler for "Edit" button
     elseif button == self.page1.button_options then
-        SpellBookFrame:Hide()
+        HideUIPanel(SpellBookFrame)
         HideUIPanel(CliqueConfig)
         InterfaceOptionsFrame_OpenToCategory("Clique") 
     elseif button == self.page2.button_save then
