@@ -18,6 +18,28 @@ local addonName, addon = ...
 -- Set global name of addon
 _G[addonName] = addon
 
+-- Set up an EMERGENCY debug mode
+local EMERGENCY_DEBUG = false
+if EMERGENCY_DEBUG then
+    local private = {}
+    for k,v in pairs(addon) do
+        rawset(private, k, v)
+        rawset(addon, k, nil)
+    end
+
+    setmetatable(addon, {
+        __index = function(t, k)
+            local value = rawget(private, k)
+            print(addonName, "INDEX", k, value)
+            return value
+        end,
+        __newindex = function(t, k, v)
+            print(addonName, "NEWINDEX", k, v)
+            rawset(private, k, v)
+        end,
+    })
+end
+
 -- Extract version information from TOC file
 addon.version = GetAddOnMetadata(addonName, "Version")
 if addon.version == "@project-version" then
