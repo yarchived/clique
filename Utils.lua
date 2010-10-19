@@ -299,8 +299,6 @@ function addon:ShouldSetBinding(binding, global)
     if binding.sets.hovercast or binding.sets.global then
         if global then
             return true
-        else
-            return false
         end
     elseif global then
         return false

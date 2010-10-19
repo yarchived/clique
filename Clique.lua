@@ -70,7 +70,7 @@ function addon:Initialize()
         blacklist = table.new()
     ]])
     self:UpdateBlacklist()
-
+ 
     -- This snippet is executed from the SecureHandlerEnterLeaveTemplate
     -- _onenter and _onleave attributes. The 'self' attribute will contain
     -- the unit frame itself.
@@ -154,7 +154,7 @@ function addon:Initialize()
             self:RegisterFrame(k, v)
         end
     end})
-
+ 
     -- Iterate over the frames that were set before we arrived
     if oldClickCastFrames then
         for frame, options in pairs(oldClickCastFrames) do
@@ -162,7 +162,7 @@ function addon:Initialize()
         end
     end
     self:EnableBlizzardFrames()
-
+    
     -- Register for combat events to ensure we can swap between the two states
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "EnteringCombat")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "LeavingCombat")
@@ -403,20 +403,24 @@ function addon:GetBindingAttributes(global)
 
     for idx, entry in ipairs(self.bindings) do
         if self:ShouldSetBinding(entry, global) and entry.key then 
-            local buttonNum = entry.key:match("BUTTON%d+$")
+            local buttonNum = entry.key:match("BUTTON(%d+)$")
 
-            -- Button bindings cannot be bound in the global or hovercast
-            -- bind-sets. This is due to a limitation in the Blizzard API
-            -- and there does not appear to be any way around this
+            -- A mouse button cannot be bound as an onenter/onleave binding over
+            -- frames. This is due to a Blizzard limitation of the way clicks
+            -- are handled. In order to get this functionality, the button should
+            -- be bound as both 'default' and whatever global set you'd like, so
+            -- you can use it in both situations.
 
-            if buttonNum and global and entry.sets.hovercast or entry.sets.global then 
-                -- Do NOT allow re-bindings of unmodified left/right-click
-                if entry.key ~= "BUTTON1" and entry.key ~= "BUTTON2" then
-                    local prefix, suffix = addon:GetBindingPrefixSuffix(entry, global)
-                    local key = entry.key
+            if buttonNum then
+                if global and entry.sets.hovercast or entry.sets.global then 
+                    -- Do NOT allow re-bindings of unmodified left/right-click
+                    if entry.key ~= "BUTTON1" and entry.key ~= "BUTTON2" then
+                        local prefix, suffix = addon:GetBindingPrefixSuffix(entry, global)
+                        local key = entry.key
 
-                    set[#set + 1] = B_SET:format(key, suffix)
-                    clr[#clr + 1] = B_CLR:format(key)
+                        set[#set + 1] = B_SET:format(key, suffix)
+                        clr[#clr + 1] = B_CLR:format(key)
+                    end
                 end
             else
                 -- This is a key binding, so we need a binding for it
