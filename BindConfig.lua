@@ -42,6 +42,7 @@ end
 function CliqueConfig:OnHide()
     self:ClearAllPoints()
     self:SetParent(UIParent)
+    HideUIPanel(self)
     CliqueSpellTab:SetChecked(false)
     self:UpdateAlert()
 end
