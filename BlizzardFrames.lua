@@ -20,6 +20,9 @@ local panel = CreateFrame("Frame")
 panel.name = "Blizzard Frame Options"
 panel.parent = addonName
 
+addon.optpanels = addon.optpanels or {}
+addon.optpanels["BLIZZFRAMES"] = panel
+
 panel:SetScript("OnShow", function(self)
     if not panel.initialized then
         panel:CreateOptions()

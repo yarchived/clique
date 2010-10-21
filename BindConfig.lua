@@ -239,9 +239,42 @@ function CliqueConfig:Button_OnClick(button)
 
     -- Click handler for "Edit" button
     elseif button == self.page1.button_options then
-        HideUIPanel(SpellBookFrame)
-        HideUIPanel(CliqueConfig)
-        InterfaceOptionsFrame_OpenToCategory("Clique") 
+        local menu = {
+            { 
+                text = L["Select an options category"], 
+                isTitle = true,
+                notCheckable = true,
+            },
+            { 
+                text = L["Clique general options"],
+                func = function()
+                    HideUIPanel(SpellBookFrame)
+                    HideUIPanel(CliqueConfig)
+                    InterfaceOptionsFrame_OpenToCategory(addon.optpanels["GENERAL"])
+                end,
+                notCheckable = true,
+            },
+            {
+                text = L["Frame blacklist"],
+                func = function()
+                    HideUIPanel(SpellBookFrame)
+                    HideUIPanel(CliqueConfig)
+                    InterfaceOptionsFrame_OpenToCategory(addon.optpanels["BLACKLIST"])
+                end,
+                notCheckable = true,
+            },
+            {
+                text = L["Blizzard frame integration options"],
+                func = function()
+                    HideUIPanel(SpellBookFrame)
+                    HideUIPanel(CliqueConfig)
+                    InterfaceOptionsFrame_OpenToCategory(addon.optpanels["BLIZZFRAMES"])
+                end,
+                notCheckable = true,
+            },
+        }
+        UIDropDownMenu_SetAnchor(self.dropdown, 0, 0, "BOTTOMLEFT", self.page1.button_options, "TOP")
+        EasyMenu(menu, self.dropdown, nil, 0, 0, nil, nil) 
     elseif button == self.page2.button_save then
         -- Check the input
         local key = self.page2.key

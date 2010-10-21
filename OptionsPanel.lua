@@ -14,6 +14,9 @@ local L = addon.L
 local panel = CreateFrame("Frame")
 panel.name = addonName
 
+addon.optpanels = addon.optpanels or {}
+addon.optpanels["GENERAL"] = panel
+
 panel:SetScript("OnShow", function(self)
     if not panel.initialized then
         panel:CreateOptions()
@@ -51,7 +54,7 @@ function panel:CreateOptions()
     local bits = {}
    
     self.updown = make_checkbox("CliqueOptionsUpDownClick", self)
-    self.updown.text:SetText(L["Trigger bindings on the 'down' portion of the click (only works on some frames)"])
+    self.updown.text:SetText(L["Trigger bindings on the 'down' portion of the click (experimental)"])
 
     self.fastooc = make_checkbox("CliqueOptionsFastOoc", self)
     self.fastooc.text:SetText(L["Disable out of combat clicks when party members enter combat"])
