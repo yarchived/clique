@@ -5,8 +5,13 @@
 ## Notes: Simply powerful click-casting interface
 ## SavedVariables: CliqueDB, CliqueDB3
 
+## X-Localizations: enUS, enGB, zhCN, zhTW
+## X-CompatibleLocales: enUS, enGB, deDE, frFR, esES, esMX, zhCN, zhTW, koKR, ruRU
+
 AddonCore.lua
 Localization.enUS.lua
+Localization.zhCN.lua
+Localization.zhTW.lua
 
 libs\LibStub\LibStub.lua
 libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
