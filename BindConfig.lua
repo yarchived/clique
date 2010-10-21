@@ -512,6 +512,7 @@ function CliqueConfig:Row_OnClick(frame, button)
                 local bindText = addon:GetBindingKeyComboText(binding)
                 self.page2.bindText:SetText(bindText)
                 self.page2.binding = binding
+                self.page2.key = binding.key
                 self.page2.editbox:SetText(binding.macrotext)
                 self.page2.button_save:Enable()
                 self.page1:Hide()
