@@ -337,10 +337,12 @@ function addon:GetClickAttributes(global)
             if entry.sets.friend then
                 local newbutton = "friend" .. suffix
                 bits[#bits + 1] = ATTR(prefix, "helpbutton", suffix, newbutton)
+                rembits[#rembits + 1] = REMATTR(prefix, "helpbutton", suffix)
                 suffix = newbutton
             elseif entry.sets.enemy then
                 local newbutton = "enemy" .. suffix
                 bits[#bits + 1] = ATTR(prefix, "harmbutton", suffix, newbutton)
+                rembits[#rembits + 1] = REMATTR(prefix, "harmbutton", suffix)
                 suffix = newbutton
             end
 
