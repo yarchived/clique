@@ -335,11 +335,25 @@ function addon:GetClickAttributes(global)
             -- then in the remapping. 
 
             if entry.sets.friend then
+                if global then
+                    -- A modified binding that uses friend/enemy must have the unmodified
+                    -- 'unit' attribute set, in order to do the friend/enemy lookup. Add
+                    -- that here.
+                    bits[#bits + 1] = ATTR(prefix, "unit", suffix, "mouseover")
+                    rembits[#rembits + 1] = REMATTR(prefix, "unit", suffix)
+                end
                 local newbutton = "friend" .. suffix
                 bits[#bits + 1] = ATTR(prefix, "helpbutton", suffix, newbutton)
                 rembits[#rembits + 1] = REMATTR(prefix, "helpbutton", suffix)
                 suffix = newbutton
             elseif entry.sets.enemy then
+                if global then
+                    -- A modified binding that uses friend/enemy must have the unmodified
+                    -- 'unit' attribute set, in order to do the friend/enemy lookup. Add
+                    -- that here.
+                    bits[#bits + 1] = ATTR(prefix, "unit", suffix, "mouseover")
+                    rembits[#rembits + 1] = REMATTR(prefix, "unit", suffix)
+                end
                 local newbutton = "enemy" .. suffix
                 bits[#bits + 1] = ATTR(prefix, "harmbutton", suffix, newbutton)
                 rembits[#rembits + 1] = REMATTR(prefix, "harmbutton", suffix)
