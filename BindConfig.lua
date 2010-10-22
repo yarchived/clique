@@ -173,6 +173,7 @@ function CliqueConfig:Spellbook_OnBinding(button, key)
     end
 
     local slot = SpellBook_GetSpellBookSlot(button:GetParent());
+    local stype, id = GetSpellBookItemInfo(slot, SpellBookFrame.bookType) 
     local name, subtype = GetSpellBookItemName(slot, SpellBookFrame.bookType)
     local texture = GetSpellBookItemTexture(slot, SpellBookFrame.bookType)
     
@@ -184,7 +185,7 @@ function CliqueConfig:Spellbook_OnBinding(button, key)
     local succ, err = addon:AddBinding{
         key = key,
         type = "spell",
-        spell = name,
+        spell = id,
         icon = texture
     }
 
