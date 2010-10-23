@@ -494,10 +494,6 @@ function addon:AddBinding(entry)
         entry.sets = {default = true}
     end
 
-    if entry.type == "spell" and tonumber(entry.spell) then
-        entry.spellName = GetSpellInfo(entry.spell)
-    end
-
     table.insert(self.bindings, entry)
     self:UpdateAttributes()
     return true

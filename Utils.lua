@@ -154,11 +154,7 @@ function addon:GetBindingActionText(btype, binding)
     elseif btype == "target" then
         return L["Target clicked unit"]
     elseif btype == "spell" then
-        local name = binding.spell
-        if tonumber(binding.spell) then
-            name = GetSpellInfo(binding.spell) or "Unknown"
-        end
-        return L["Cast %s"]:format(tostring(name))
+        return L["Cast %s"]:format(tostring(binding.spell))
     elseif btype == "macro" and type(binding) == "table" then
         return L["Run macro '%s'"]:format(tostring(binding.macrotext))
     elseif btype == "macro" then
