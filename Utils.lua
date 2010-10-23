@@ -233,6 +233,8 @@ function addon:GetCapturedKey(key)
         key = "BUTTON3"
     elseif key == "-" then
         key = "DASH"
+    elseif key == "\\" then
+        key = "BACKSLASH"
     else
         local buttonNum = key:match("Button(%d+)")
         if buttonNum and tonumber(buttonNum) <= 31 then

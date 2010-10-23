@@ -445,6 +445,8 @@ function addon:GetBindingAttributes(global)
 
                 if key == "DASH" then
                     key = "-"
+                elseif key == "BACKSLASH" then
+                    key = "\\"
                 end
 
                 set[#set + 1] = B_SET:format(key, suffix)
