@@ -264,6 +264,21 @@ function addon:GetBindingInfoText(binding)
     end
 end
 
+function addon:ConvertSpecialKeys(binding)
+    if type(binding) ~= "table" or not binding.key then
+        return "UNKNOWN"
+    end
+
+    local mods, key = binding.key:match("^(.-)([^%-]+)$")
+    if key == "DASH" then
+        key = "-"
+    elseif key == "BACKSLASH" then
+        key = "\\"
+    end
+
+    return tostring(mods) .. tostring(key)
+end
+
 function addon:GetBindingPrefixSuffix(binding, global)
     if type(binding) ~= "table" or not binding.key then
         return "UNKNOWN", "UNKNOWN"

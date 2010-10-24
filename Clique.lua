@@ -440,14 +440,8 @@ function addon:GetBindingAttributes(global)
                 end
             else
                 -- This is a key binding, so we need a binding for it
-                local prefix, suffix = addon:GetBindingPrefixSuffix(entry, global)
-                local key = entry.key
-
-                if key == "DASH" then
-                    key = "-"
-                elseif key == "BACKSLASH" then
-                    key = "\\"
-                end
+                local prefix, suffix = self:GetBindingPrefixSuffix(entry, global)
+                local key = self:ConvertSpecialKeys(entry)
 
                 set[#set + 1] = B_SET:format(key, suffix)
                 clr[#clr + 1] = B_CLR:format(key)
