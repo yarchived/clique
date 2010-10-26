@@ -3,11 +3,11 @@
 --
 --  This is an updated version of the original 'Clique' addon
 --  designed to work better with multi-button mice, and those players
---  who want to be able to bind keyboard combinations to enable 
+--  who want to be able to bind keyboard combinations to enable
 --  hover-casting on unit frames.  It's a bit of a paradigm shift from
 --  the original addon, but should make a much simpler and more
 --  powerful addon.
---  
+--
 --    * Any keyboard combination can be set as a binding.
 --    * Any mouse combination can be set as a binding.
 --    * The only types that are allowed are spells and macros.
@@ -38,7 +38,7 @@
 -------------------------------------------------------------------]]--
 
 local addonName, addon = ...
-local L = addon.L 
+local L = addon.L
 
 function addon:Initialize()
     -- Create an AceDB, but it needs to be cleared first
@@ -48,7 +48,7 @@ function addon:Initialize()
 
     self.settings = self.db.char
     self.bindings = self.db.profile.bindings
-    
+
     self.ccframes = {}
     self.hccframes = {}
 
@@ -70,7 +70,7 @@ function addon:Initialize()
         blacklist = table.new()
     ]])
     self:UpdateBlacklist()
- 
+
     -- This snippet is executed from the SecureHandlerEnterLeaveTemplate
     -- _onenter and _onleave attributes. The 'self' attribute will contain
     -- the unit frame itself.
@@ -88,7 +88,7 @@ function addon:Initialize()
     ]===])
 
     local setup, remove = self:GetClickAttributes()
-    self.header:SetAttribute("setup_clicks", setup) 
+    self.header:SetAttribute("setup_clicks", setup)
     self.header:SetAttribute("remove_clicks", remove)
 
     -- This snippet is executed from within the initialConfigFunction secure
@@ -118,7 +118,7 @@ function addon:Initialize()
 
         -- Remove any click and binding attributes that have already been set
         self:RunFor(button, self:GetAttribute("clickcast_onleave"))
-        self:RunFor(button, self:GetAttribute("remove_clicks")) 
+        self:RunFor(button, self:GetAttribute("remove_clicks"))
 
         button:SetAttribute("clickcast_onenter", nil)
         button:SetAttribute("clickcast_onleave", nil)
@@ -154,7 +154,7 @@ function addon:Initialize()
             self:RegisterFrame(k, v)
         end
     end})
- 
+
     -- Iterate over the frames that were set before we arrived
     if oldClickCastFrames then
         for frame, options in pairs(oldClickCastFrames) do
@@ -162,7 +162,7 @@ function addon:Initialize()
         end
     end
     self:EnableBlizzardFrames()
-    
+
     -- Register for combat events to ensure we can swap between the two states
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "EnteringCombat")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "LeavingCombat")
@@ -192,14 +192,7 @@ function addon:RegisterFrame(button)
 
     self.ccframes[button] = true
 
-    local name = button.GetName and button:GetName()
-    if not self.settings.blacklist[name] then
-        if self.settings.downclick then
-            button:RegisterForClicks("AnyDown")
-        else
-            button:RegisterForClicks("AnyUp")
-        end
-    end
+    self:UpdateRegisteredClicks(button)
 
     -- Wrap the OnEnter/OnLeave scripts in order to handle keybindings
     addon.header:WrapScript(button, "OnEnter", addon.header:GetAttribute("setup_onenter"))
@@ -223,7 +216,7 @@ function addon:UnregisterFrame(button)
         self:RunFor(button, self:GetAttribute("setup_onleave"))
         self:RunAttribute("remove_clicks")
     ]])
-    
+
     self.ccframes[button] = nil
 
     -- Unwrap the OnEnter/OnLeave scripts, if they were set
@@ -265,17 +258,17 @@ end
 
 function addon:OnProfileChanged(event, db, newProfile)
     self.bindings = db.profile.bindings
-    self:UpdateEverything() 
+    self:UpdateEverything()
 end
 
 local function ATTR(prefix, attr, suffix, value)
     local fmt = [[button:SetAttribute("%s%s%s%s%s", %q)]]
-    return fmt:format(prefix, #prefix > 0 and "-" or "", attr, tonumber(suffix) and "" or "-", suffix, value)  
+    return fmt:format(prefix, #prefix > 0 and "-" or "", attr, tonumber(suffix) and "" or "-", suffix, value)
 end
 
 local function REMATTR(prefix, attr, suffix, value)
     local fmt = [[button:SetAttribute("%s%s%s%s%s", nil)]]
-    return fmt:format(prefix, #prefix > 0 and "-" or "", attr, tonumber(suffix) and "" or "-", suffix)  
+    return fmt:format(prefix, #prefix > 0 and "-" or "", attr, tonumber(suffix) and "" or "-", suffix)
 end
 
 -- A sort function that determines in what order bindings should be applied.
@@ -329,10 +322,10 @@ function addon:GetClickAttributes(global)
         if self:ShouldSetBinding(entry, global) then
             local prefix, suffix = addon:GetBindingPrefixSuffix(entry, global)
 
-            -- Set up help/harm bindings. The button value will be either a number, 
+            -- Set up help/harm bindings. The button value will be either a number,
             -- in the case of mouse buttons, otherwise it will be a string of
             -- characters. Harmbuttons work alongside modifiers, so we need to include
-            -- then in the remapping. 
+            -- then in the remapping.
 
             if entry.sets.friend then
                 if global then
@@ -418,7 +411,7 @@ function addon:GetBindingAttributes(global)
     end
 
     for idx, entry in ipairs(self.bindings) do
-        if self:ShouldSetBinding(entry, global) and entry.key then 
+        if self:ShouldSetBinding(entry, global) and entry.key then
             local buttonNum = entry.key:match("BUTTON(%d+)$")
 
             -- A mouse button cannot be bound as an onenter/onleave binding over
@@ -428,7 +421,7 @@ function addon:GetBindingAttributes(global)
             -- you can use it in both situations.
 
             if buttonNum then
-                if global and entry.sets.hovercast or entry.sets.global then 
+                if global and entry.sets.hovercast or entry.sets.global then
                     -- Do NOT allow re-bindings of unmodified left/right-click
                     if entry.key ~= "BUTTON1" and entry.key ~= "BUTTON2" then
                         local prefix, suffix = addon:GetBindingPrefixSuffix(entry, global)
@@ -463,13 +456,13 @@ end
 --
 --     -- Any restricted sets that this click should be applied to
 --     sets = {"ooc", "harm", "help", "frames_blizzard"},
--- 
+--
 --     -- The type of the click-binding
 --     type = "spell",
 --     type = "macro",
 --     type = "target",
 --     type = "menu",
--- 
+--
 --     -- Any arguments for given click type
 --     spell = "Healing Touch",
 --     macrotext = "/run Nature's Swiftness\n/cast [target=mouseover] Healing Touch",
@@ -534,7 +527,7 @@ end
 function addon:ClearAttributes()
     self.header:Execute([[
         for button, enabled in pairs(ccframes) do
-            self:RunFor(button, self:GetAttribute("remove_clicks")) 
+            self:RunFor(button, self:GetAttribute("remove_clicks"))
         end
     ]])
 
@@ -566,10 +559,10 @@ function addon:UpdateAttributes()
 
     self.header:Execute([[
         for button, enabled in pairs(ccframes) do
-            self:RunFor(button, self:GetAttribute("setup_clicks")) 
+            self:RunFor(button, self:GetAttribute("setup_clicks"))
         end
     ]])
-    
+
     for button, enabled in pairs(self.ccframes) do
         -- Unwrap any existing enter/leave scripts
         addon.header:UnwrapScript(button, "OnEnter")
@@ -633,7 +626,7 @@ end
 
 function addon:UpdateRegisteredClicks()
     for button, enabled in pairs(self.ccframes) do
-        local name = button.GetName and button:GetName() 
+        local name = button.GetName and button:GetName()
         if not self.settings.blacklist[name] and enabled then
             if self.settings.downclick then
                 button:RegisterForClicks("AnyDown")
@@ -704,10 +697,44 @@ function addon:CheckPartyCombat(event, unit)
     end
 end
 
+-- This function returns whether or not a frame is blacklisted in the current
+-- users settings
+
+function addon:IsFrameBlacklisted(frame)
+    local name = frame
+    if type(frame) == "table" then
+        name = frame.GetName and frame:GetName()
+    end
+    return self.settings.blacklist[name]
+end
+
+function addon:UpdateRegisteredClicks(frame)
+    local direction = self.settings.downclick and "AnyDown" or "AnyUp"
+
+    -- Short version that only updates clicks for one frame
+    if frame and not self:IsFrameBlacklisted(frame) then
+        frame:RegisterForClicks(direction)
+        return
+    end
+
+    for frame in pairs(self.ccframes) do
+        if not self:IsFrameBlacklisted(frame) then
+            frame:RegisterForClicks(direction)
+        end
+    end
+
+    for frame in pairs(self.hccframes) do
+        if not self:IsFrameBlacklisted(frame) then
+            frame:RegisterForClicks(direction)
+        end
+    end
+end
+
 function addon:UpdateEverything()
     -- Update all running attributes and windows (block)
     addon:UpdateAttributes()
     addon:UpdateGlobalAttributes()
+    addon:UpdateRegisteredClicks()
     addon:UpdateOptionsPanel()
     CliqueConfig:UpdateList()
 end
