@@ -12,8 +12,8 @@
 local addonName, addon = ...
 local L = addon.L
 
--- Returns the prefix string for the current keyboard state. 
--- 
+-- Returns the prefix string for the current keyboard state.
+--
 -- Arguments:
 --   split - Whether or not to split the modifier keys into left and right components
 
@@ -31,7 +31,7 @@ function addon:GetPrefixString(split)
         lctrl, rctrl = false, false
         lalt, ralt = false, false
     end
-        
+
     local prefix = ""
     if shift then
         prefix = ((lshift and "LSHIFT-") or (rshift and "RSHIFT-") or "SHIFT-") .. prefix
@@ -140,7 +140,7 @@ end
 
 function addon:GetBindingKeyComboText(binding)
     if type(binding) == "table" and binding.key then
-        return strconcat(convert(strsplit("-", binding.key))) 
+        return strconcat(convert(strsplit("-", binding.key)))
     elseif type(binding) == "string" then
         return strconcat(convert(strsplit("-", binding)))
     else

@@ -724,9 +724,14 @@ function addon:UpdateRegisteredClicks(frame)
     end
 
     for frame in pairs(self.hccframes) do
-        if not self:IsFrameBlacklisted(frame) then
-            frame:RegisterForClicks(direction)
-        end
+       if not self:IsFrameBlacklisted(frame) then
+            if type(frame) == "string" then
+                frame = _G[frame]
+            end
+            if frame then
+                frame:RegisterForClicks(direction)
+            end
+         end
     end
 end
 
