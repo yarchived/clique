@@ -130,9 +130,19 @@ function addon:Initialize()
     -- 'export_unregister' attributes.
     self.header:SetScript("OnAttributeChanged", function(frame, name, value)
         if name == "export_register" and type(value) ~= nil then
-            self.hccframes[value] = true
+            -- Convert the userdata object to the global object so we have access
+            -- to all of the correct methods, such as 'RegisterForClicks''
+            local name = value.GetName and value:GetName()
+            if name then
+                local button = _G[name]
+                self.hccframes[name] = button
+                self:UpdateRegisteredClicks(button)
+            end
         elseif name == "export_unregister" and type(value) ~= nil then
-            self.hccframes[value] = nil
+            local name = value.GetName and value:GetName()
+            if name then
+                self.hccframes[name] = nil
+            end
         end
     end)
 
@@ -179,6 +189,7 @@ end
 -- These tables are a queue for frame registration/unregistration
 addon.regqueue = {}
 addon.unregqueue = {}
+addon.regclickqueue = {}
 
 -- These function may be called during combat. When that is the case, the
 -- request must be queued until combat ends, and then we can attempt to
@@ -624,19 +635,6 @@ function addon:UpdateCombatWatch()
     end
 end
 
-function addon:UpdateRegisteredClicks()
-    for button, enabled in pairs(self.ccframes) do
-        local name = button.GetName and button:GetName()
-        if not self.settings.blacklist[name] and enabled then
-            if self.settings.downclick then
-                button:RegisterForClicks("AnyDown")
-            else
-                button:RegisterForClicks("AnyUp")
-            end
-        end
-    end
-end
-
 function addon:UpdateBlacklist()
     local bits = {
         "blacklist = table.wipe(blacklist)",
@@ -662,13 +660,24 @@ function addon:LeavingCombat()
 
     -- Sanity check
     if not InCombatLockdown() then
+
+        -- Process any frames in the registration queue
         for idx, button in ipairs(self.regqueue) do
             self:RegisterFrame(button)
         end
+        if next(self.regqueue) then table.wipe(self.regqueue) end
 
-        if #self.regqueue > 0 then
-            self.regqueue = {}
+        -- Process any frames in the unregistration queue
+        for idx, button in ipairs(self.unregqueue) do
+            self:UnregisterFrame(button)
         end
+        if next(self.regqueue) then table.wipe(self.regqueue) end
+
+        -- Process any frames in the clickregister queue
+        for idx, button in ipairs(self.regclickqueue) do
+            self:UpdateRegisteredClicks(button)
+        end
+        if next(self.regclickqueue) then table.wipe(self.regclickqueue) end
     end
 
     self:UpdateAttributes()
@@ -708,30 +717,30 @@ function addon:IsFrameBlacklisted(frame)
     return self.settings.blacklist[name]
 end
 
-function addon:UpdateRegisteredClicks(frame)
-    local direction = self.settings.downclick and "AnyDown" or "AnyUp"
-
-    -- Short version that only updates clicks for one frame
-    if frame and not self:IsFrameBlacklisted(frame) then
-        frame:RegisterForClicks(direction)
+function addon:UpdateRegisteredClicks(button)
+    if InCombatLockdown() then
+        table.insert(self.regclickqueue, button)
         return
     end
 
-    for frame in pairs(self.ccframes) do
-        if not self:IsFrameBlacklisted(frame) then
-            frame:RegisterForClicks(direction)
+    local direction = self.settings.downclick and "AnyDown" or "AnyUp"
+
+    -- Short version that only updates clicks for one frame
+    if button and not self:IsFrameBlacklisted(button) then
+        button:RegisterForClicks(direction)
+        return
+    end
+
+    for button in pairs(self.ccframes) do
+        if not self:IsFrameBlacklisted(button) then
+            button:RegisterForClicks(direction)
         end
     end
 
-    for frame in pairs(self.hccframes) do
-       if not self:IsFrameBlacklisted(frame) then
-            if type(frame) == "string" then
-                frame = _G[frame]
-            end
-            if frame then
-                frame:RegisterForClicks(direction)
-            end
-         end
+    for name, button in pairs(self.hccframes) do
+       if not self:IsFrameBlacklisted(button) then
+           button:RegisterForClicks(direction)
+       end
     end
 end
 

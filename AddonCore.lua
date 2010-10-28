@@ -49,7 +49,7 @@ end
 -- Event registration and dispatch
 addon.eventFrame = CreateFrame("Frame", addonName .. "EventFrame", UIParent)
 local eventMap = {}
-    
+
 function addon:RegisterEvent(event, handler)
     assert(eventMap[event] == nil, "Attempt to re-register event: " .. tostring(event))
     eventMap[event] = handler and handler or event
@@ -79,7 +79,7 @@ addon:RegisterEvent("ADDON_LOADED", function(event, ...)
         if type(addon["Initialize"]) == "function" then
             addon["Initialize"](addon)
         end
-        
+
         -- If this addon was loaded-on-demand, trigger 'Enable' as well
         if IsLoggedIn() and type(addon["Enable"]) == "function" then
             addon["Enable"](addon)
