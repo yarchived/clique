@@ -102,16 +102,13 @@ function panel:CreateOptions()
             end
         end
 
-        for frame in pairs(addon.hccframes) do
-            local name = frame:GetName()
-            if name then
-                state[name] = true
-            end
+        for name, frame in pairs(addon.hccframes) do
+            state[name] = true
         end
 
         self:UpdateScrollFrame()
     end)
-    
+
     self.selectnone = CreateFrame("Button", "CliqueOptionsBlacklistSelectNone", self, "UIPanelButtonTemplate2")
     self.selectnone:SetText(L["Select None"])
     self.selectnone:SetPoint("BOTTOMLEFT", self.selectall, "BOTTOMRIGHT", 5, 0)
@@ -124,11 +121,8 @@ function panel:CreateOptions()
             end
         end
 
-        for frame in pairs(addon.hccframes) do
-            local name = frame:GetName()
-            if name then
-                state[name] = false
-            end
+        for name, frame in pairs(addon.hccframes) do
+            state[name] = false
         end
 
         self:UpdateScrollFrame()
@@ -144,13 +138,10 @@ function panel:UpdateScrollFrame()
         end
     end
 
-    for frame in pairs(addon.hccframes) do
-        local name = frame:GetName()
-        if name then
-            table.insert(sort, name)
-        end
+    for name, frame in pairs(addon.hccframes) do
+        table.insert(sort, name)
     end
-    
+
     table.sort(sort)
 
     local offset = FauxScrollFrame_GetOffset(self.scrollframe)
@@ -193,11 +184,8 @@ function panel.refresh()
         end
     end
 
-    for frame in pairs(addon.hccframes) do
-        local name = frame:GetName()
-        if name then
-            state[name] = false
-        end
+    for name, frame in pairs(addon.hccframes) do
+        state[name] = false
     end
 
     for frame, value in pairs(addon.settings.blacklist) do

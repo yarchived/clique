@@ -9,7 +9,7 @@
 -------------------------------------------------------------------------]]--
 
 local addonName, addon = ...
-local L = addon.L 
+local L = addon.L
 
 local panel = CreateFrame("Frame")
 panel.name = addonName
@@ -35,7 +35,7 @@ local function make_dropdown(name, parent)
     local frame = CreateFrame("Frame", name, parent, "UIDropDownMenuTemplate")
     frame:SetClampedToScreen(true)
     frame.type = "dropdown"
-    return frame 
+    return frame
 end
 
 local function make_label(name, parent, template)
@@ -52,7 +52,7 @@ function panel:CreateOptions()
 
     -- Create the general options panel here:
     local bits = {}
-   
+
     self.updown = make_checkbox("CliqueOptionsUpDownClick", self)
     self.updown.text:SetText(L["Trigger bindings on the 'down' portion of the click (experimental)"])
 
@@ -68,7 +68,7 @@ function panel:CreateOptions()
         else
             UIDropDownMenu_DisableDropDown(panel.prispec)
             UIDropDownMenu_DisableDropDown(panel.secspec)
-        end  
+        end
     end
     self.specswap:SetScript("PostClick", self.specswap.EnableDisable)
 
@@ -191,7 +191,7 @@ local function spec_initialize(dropdown, level)
 
     if not level or level == 1 then
         if not paged then
-            -- Display the profiles un-paged 
+            -- Display the profiles un-paged
             for idx, entry in ipairs(sort) do
                 local info = UIDropDownMenu_CreateInfo()
                 info.text = entry
@@ -204,7 +204,7 @@ local function spec_initialize(dropdown, level)
         else
             -- Page the results into sub-menus
             for idx = 1, #sort, 10 do
-                -- Make the submenus for each group 
+                -- Make the submenus for each group
                 local lastidx = (idx + 9 > #sort) and #sort or (idx + 9)
                 local info = UIDropDownMenu_CreateInfo()
                 local first = sort[idx]
@@ -242,7 +242,7 @@ local function mgmt_initialize(dropdown, level)
 
     if not level or level == 1 then
         if not paged then
-            -- Display the profiles un-paged 
+            -- Display the profiles un-paged
             for idx, entry in ipairs(sort) do
                 local info = UIDropDownMenu_CreateInfo()
                 info.text = entry
@@ -254,7 +254,7 @@ local function mgmt_initialize(dropdown, level)
         else
             -- Page the results into sub-menus
             for idx = 1, #sort, 10 do
-                -- Make the submenus for each group 
+                -- Make the submenus for each group
                 local lastidx = (idx + 9 > #sort) and #sort or (idx + 9)
                 local info = UIDropDownMenu_CreateInfo()
                 local first = sort[idx]
@@ -300,7 +300,7 @@ local function mgmt_initialize(dropdown, level)
             --info.disabled = addon.settings.specswap
             info.func = function(frame)
                 UIDropDownMenu_SetSelectedValue(dropdown, UIDROPDOWNMENU_MENU_VALUE)
-                UIDropDownMenu_SetText(dropdown, UIDROPDOWNMENU_MENU_VALUE) 
+                UIDropDownMenu_SetText(dropdown, UIDROPDOWNMENU_MENU_VALUE)
                 addon.db:SetProfile(UIDROPDOWNMENU_MENU_VALUE)
             end
             UIDropDownMenu_AddButton(info, level)
@@ -328,14 +328,14 @@ local function mgmt_initialize(dropdown, level)
         info.disabled = addon.settings.specswap
         info.func = function(frame)
             UIDropDownMenu_SetSelectedValue(dropdown, UIDROPDOWNMENU_MENU_VALUE)
-            UIDropDownMenu_SetText(dropdown, UIDROPDOWNMENU_MENU_VALUE) 
+            UIDropDownMenu_SetText(dropdown, UIDROPDOWNMENU_MENU_VALUE)
             addon.db:SetProfile(UIDROPDOWNMENU_MENU_VALUE)
         end
         UIDropDownMenu_AddButton(info, level)
 
         info = UIDropDownMenu_CreateInfo()
         info.text = L["Delete profile: %s"]:format(UIDROPDOWNMENU_MENU_VALUE)
-        info.disabled = UIDROPDOWNMENU_MENU_VALUE == currentProfile 
+        info.disabled = UIDROPDOWNMENU_MENU_VALUE == currentProfile
         info.value = sort[UIDROPDOWNMENU_MENU_VALUE]
         info.func = function(frame)
             local dialog = StaticPopupDialogs["CLIQUE_CONFIRM_PROFILE_DELETE"]
@@ -359,15 +359,15 @@ function panel.refresh()
     UIDropDownMenu_Initialize(panel.prispec, spec_initialize)
     UIDropDownMenu_SetSelectedValue(panel.prispec, settings.pri_profileKey or currentProfile)
     UIDropDownMenu_SetText(panel.prispec, settings.pri_profileKey or currentProfile)
-   
-    UIDropDownMenu_Initialize(panel.secspec, spec_initialize)    
+
+    UIDropDownMenu_Initialize(panel.secspec, spec_initialize)
     UIDropDownMenu_SetSelectedValue(panel.secspec, settings.sec_profileKey or currentProfile)
     UIDropDownMenu_SetText(panel.secspec, settings.sec_profileKey or currentProfile)
-    
+
     UIDropDownMenu_Initialize(panel.profiledd, mgmt_initialize)
     UIDropDownMenu_SetSelectedValue(panel.profiledd, currentProfile)
     UIDropDownMenu_SetText(panel.profiledd, L["Current: "] .. currentProfile)
-    
+
     panel.updown:SetChecked(settings.downclick)
     panel.fastooc:SetChecked(settings.fastooc)
     panel.specswap:SetChecked(settings.specswap)
@@ -400,3 +400,5 @@ function addon:UpdateOptionsPanel()
 end
 
 InterfaceOptions_AddCategory(panel)
+
+LibStub("tekKonfig-AboutPanel").new(addonName, addonName)
