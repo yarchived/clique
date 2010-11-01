@@ -51,7 +51,7 @@ function panel:CreateOptions()
     
     local bits = {}
     self.intro = make_label("Intro", "GameFontHighlightSmall")
-    self.intro:SetText(L["These options control whether or not Clique auotmatically registers certain Blizzard-created frames for binding. Changes made to these settings will not take effect until the user interface is reloaded."])
+    self.intro:SetText(L["These options control whether or not Clique automatically registers certain Blizzard-created frames for binding. Changes made to these settings will not take effect until the user interface is reloaded."])
     self.intro:SetPoint("RIGHT")
     self.intro:SetJustifyV("TOP")
     self.intro:SetHeight(40)
