@@ -105,7 +105,13 @@ addon.L = addon.L or setmetatable({}, {
 function addon:RegisterLocale(locale, tbl)
     if locale == "enUS" or locale == GetLocale() then
         for k,v in pairs(tbl) do
-            self.L[k] = v
+            if v == true then
+                self.L[k] = k
+            elseif type(v) == "string" then
+                self.L[k] = v
+            else
+                self.L[k] = k
+            end
         end
     end
 end
