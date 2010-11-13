@@ -14,7 +14,6 @@ local panel = CreateFrame("Frame")
 panel.name = "Frame Blacklist"
 panel.parent = addonName
 
-addon.optpanels = addon.optpanels or {}
 addon.optpanels["BLACKLIST"] = panel
 
 panel:SetScript("OnShow", function(self)
@@ -195,4 +194,4 @@ function panel.refresh()
     panel:UpdateScrollFrame()
 end
 
-InterfaceOptions_AddCategory(panel)
+InterfaceOptions_AddCategory(panel, addon.optpanels.ABOUT)

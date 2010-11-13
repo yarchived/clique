@@ -20,7 +20,6 @@ local panel = CreateFrame("Frame")
 panel.name = "Blizzard Frame Options"
 panel.parent = addonName
 
-addon.optpanels = addon.optpanels or {}
 addon.optpanels["BLIZZFRAMES"] = panel
 
 panel:SetScript("OnShow", function(self)
@@ -127,7 +126,7 @@ function panel.okay()
     opt.boss = not not panel.boss:GetChecked()
 end
 
-InterfaceOptions_AddCategory(panel)
+InterfaceOptions_AddCategory(panel, addon.optpanels.ABOUT)
 
 --[[---------------------------------------------------------------------------
 --  Blizzard Frame integration code 

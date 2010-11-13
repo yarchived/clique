@@ -12,10 +12,10 @@ local addonName, addon = ...
 local L = addon.L
 
 local panel = CreateFrame("Frame")
-panel.name = addonName
+panel.name = L["General Options"]
+panel.parent = addonName
 
-addon.optpanels = addon.optpanels or {}
-addon.optpanels["GENERAL"] = panel
+addon.optpanels.GENERAL = panel
 
 panel:SetScript("OnShow", function(self)
     if not panel.initialized then
@@ -399,6 +399,4 @@ function addon:UpdateOptionsPanel()
     end
 end
 
-InterfaceOptions_AddCategory(panel)
-
-LibStub("tekKonfig-AboutPanel").new(addonName, addonName)
+InterfaceOptions_AddCategory(panel, addon.optpanels.ABOUT)
