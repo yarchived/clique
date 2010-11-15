@@ -343,6 +343,10 @@ function addon:GetClickAttributes(global)
                     -- A modified binding that uses friend/enemy must have the unmodified
                     -- 'unit' attribute set, in order to do the friend/enemy lookup. Add
                     -- that here.
+                    --
+                    -- NOTE: This will not work with useOwnerUnit and usesuffix frames
+                    -- such as pet frames that use the owner's parent. This is a problem
+                    -- with the way the 'mouseover' unit resolves in these cases.
                     bits[#bits + 1] = ATTR(prefix, "unit", suffix, "mouseover")
                     rembits[#rembits + 1] = REMATTR(prefix, "unit", suffix)
                 end
@@ -355,6 +359,10 @@ function addon:GetClickAttributes(global)
                     -- A modified binding that uses friend/enemy must have the unmodified
                     -- 'unit' attribute set, in order to do the friend/enemy lookup. Add
                     -- that here.
+                    --
+                    -- NOTE: This will not work with useOwnerUnit and usesuffix frames
+                    -- such as pet frames that use the owner's parent. This is a problem
+                    -- with the way the 'mouseover' unit resolves in these cases.
                     bits[#bits + 1] = ATTR(prefix, "unit", suffix, "mouseover")
                     rembits[#rembits + 1] = REMATTR(prefix, "unit", suffix)
                 end
@@ -364,9 +372,10 @@ function addon:GetClickAttributes(global)
                 suffix = newbutton
             end
 
-            -- Give globutton the 'mouseover' unit as target when using the 'hovercast'
-            -- binding set, as opposed to the global set.
-            if entry.sets.hovercast then
+            -- When we're setting up the 'global' button, and the binding is in the
+            -- 'hovercast' binding set, we need to specify the unit on which to take
+            -- the action. In this case, that's just mouseover.
+            if global and entry.sets.hovercast then
                 bits[#bits + 1] = ATTR(prefix, "unit", suffix, "mouseover")
                 rembits[#rembits + 1] = REMATTR(prefix, "unit", suffix)
             end
