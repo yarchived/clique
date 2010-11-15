@@ -2,7 +2,7 @@ local addonName, addon = ...
 
 function addon:RunTest()
     function CliqueTest_Unit_OnShow(self)
-        local unit = self:GetAttribute("unit")
+        local unit = SecureButton_GetUnit(self)
         if not unit or not UnitExists(unit) then
             return
         end
@@ -37,12 +37,6 @@ function addon:RunTest()
 
     -- Set up the group header to display a solo/party/raid frame
     groupheader:SetAttribute("initialConfigFunction", [==[
-        self:SetAttribute("shift-type1", "spell")
-        self:SetAttribute("shift-spell1", "Regrowth")
-
-        self:SetAttribute("type-cliquebutton1", "spell")
-        self:SetAttribute("spell-cliquebutton1", "Lifebloom")
-
         -- Register this frame with the global click-cast header
         local header = self:GetParent():GetFrameRef("clickcast_header")
         header:SetAttribute("clickcast_button", self)
@@ -51,6 +45,42 @@ function addon:RunTest()
 
     groupheader:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     groupheader:Show()
+
+    -- Now create a pet frame, for testing useparent and other oddities
+
+       -- Create a fake "group header" to test things properly
+    local petheader = CreateFrame("Button", "MyGroupPetHeader", UIParent, "SecureGroupPetHeaderTemplate")
+    SecureHandler_OnLoad(petheader)
+
+    -- Ensure the group header has a reference to the click-cast header
+    petheader:SetFrameRef("clickcast_header", addon.header)
+
+    -- Set header attributes
+    petheader:SetAttribute("useOwnerUnit", true)
+    petheader:SetAttribute("showParty", true)
+    petheader:SetAttribute("showRaid", true)
+    petheader:SetAttribute("showPlayer", true)
+    petheader:SetAttribute("showSolo", true)
+    petheader:SetAttribute("maxColumns", 8)
+    petheader:SetAttribute("unitsPerColumn", 5)
+    petheader:SetAttribute("columnAnchorPoint", "TOP")
+    petheader:SetAttribute("point", "LEFT")
+    petheader:SetAttribute("template", "CliqueTest_UnitTemplate")
+    petheader:SetAttribute("templateType", "Button")
+    petheader:SetAttribute("xOffset", -1)
+    petheader:SetAttribute("yOffset", -1)
+
+    -- Set up the group header to display a solo/party/raid frame
+    petheader:SetAttribute("initialConfigFunction", [==[
+        self:SetAttribute("unitsuffix", "pet")
+        -- Register this frame with the global click-cast header
+        local header = self:GetParent():GetFrameRef("clickcast_header")
+        header:SetAttribute("clickcast_button", self)
+        header:RunAttribute("clickcast_register")
+    ]==])
+
+    petheader:SetPoint("LEFT", groupheader, "RIGHT", 0, 0)
+    petheader:Show() 
 end
 
 
