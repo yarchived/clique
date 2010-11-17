@@ -258,6 +258,11 @@ function addon:Enable_BlizzCompactParty()
         "CompactPartyFrameMember5Debuff1", 
         "CompactPartyFrameMember5Debuff2", 
         "CompactPartyFrameMember5Debuff3", 
+        "CompactPartyFramePet1",
+        "CompactPartyFramePet2",
+        "CompactPartyFramePet3",
+        "CompactPartyFramePet4",
+        "CompactPartyFramePet5",
     }
     for idx, frame in ipairs(frames) do
         enable(frame)
