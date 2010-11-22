@@ -306,39 +306,3 @@ function addon:GetBindingPrefixSuffix(binding, global)
 
     return prefix, suffix
 end
-
-
--- This function examines the current state of the game
-function addon:ShouldSetBinding(binding, global)
-    local apply = false
-
-    -- Check for global bindings first in isolation
-    if binding.sets.hovercast or binding.sets.global then
-        if global then
-            return true
-        end
-    elseif global then
-        return false
-    end
-
-    if binding.sets.enemy or binding.sets.friend then
-        apply = true
-    end
-
-    if binding.sets.ooc then
-        if UnitAffectingCombat("player") or addon.partyincombat then
-            apply = false
-        else
-            apply = true
-        end
-    end
-
-    if binding.sets.default then
-        apply = true
-    end
-
-    return apply
-end
-
-function addon:ShouldSetBindingOnFrame(binding, frame)
-end

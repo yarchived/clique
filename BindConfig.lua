@@ -284,9 +284,7 @@ function CliqueConfig:Button_OnClick(button)
             self.page2.binding.key = key
             self.page2.binding.macrotext = macrotext
             self.page2.binding = nil
-            if not InCombatLockdown() then
-                addon:UpdateEverything()
-            end
+            addon:FireMessage("BINDINGS_CHANGED")
         else
             local succ, err = addon:AddBinding{
                 key = key,
@@ -466,8 +464,7 @@ function CliqueConfig:AcceptSetBinding()
         dialog.binding = nil
         -- Do not forget to update the attributes as well
         self:UpdateList()
-        addon:UpdateAttributes()
-        addon:UpdateGlobalAttributes()
+        addon:FireMessage("BINDINGS_CHANGED")
     else
         local succ, err = addon:AddBinding{
             key = key,
@@ -503,8 +500,7 @@ local function toggleSet(binding, set, ...)
 
         UIDropDownMenu_Refresh(UIDROPDOWNMENU_OPEN_MENU, nil, UIDROPDOWNMENU_MENU_LEVEL) 
         CliqueConfig:UpdateList()
-        addon:UpdateAttributes()
-        addon:UpdateGlobalAttributes()
+        addon:FireMessage("BINDINGS_CHANGED")
     end
 end
 

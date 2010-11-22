@@ -50,7 +50,6 @@ end)
 local function makeprofile(bindings)
 
     addon:ClearAttributes()
-    addon:ClearGlobalAttributes()
 
     local tempName = "Temp" .. GetTime()
     local suiteName = addonName .. "TestSuite"
@@ -64,7 +63,7 @@ local function makeprofile(bindings)
         table.insert(addon.bindings, v)
     end
 
-    addon:UpdateEverything()
+    addon:FireMessage("BINDINGS_CHANGED")
 end
 
 local function makebind(key)

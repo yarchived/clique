@@ -170,9 +170,7 @@ function panel.okay()
         end
     end
 
-    addon:ClearAttributes()
-    addon:UpdateBlacklist()
-    addon:UpdateAttributes()
+    addon:FireMessage("BLACKLIST_CHANGED")
 end
 
 function panel.refresh()
