@@ -39,7 +39,9 @@ if EMERGENCY_DEBUG then
     setmetatable(addon, {
         __index = function(t, k)
             local value = rawget(private, k)
-            print(addonName, "INDEX", k, value)
+            if type(value) == "function" then
+                print("CALL", addonName .. "." .. tostring(k))
+            end
             return value
         end,
         __newindex = function(t, k, v)
