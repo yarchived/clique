@@ -97,7 +97,7 @@ function addon:UnregisterMessage(name)
 end
 
 function addon:FireMessage(name, ...)
-    assert(type(event) == "string", "Invalid argument to 'FireMessage'")
+    assert(type(name) == "string", "Invalid argument to 'FireMessage'")
     local handler = messageMap[name]
     local handler_t = type(handler)
     if handler_t == "function" then
