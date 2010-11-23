@@ -886,6 +886,22 @@ function addon:BLACKLIST_CHANGED()
         return
     end
 
+    -- Clear attributes on all frames
+    self:ClearAttributes()
+
+    -- Actually update the blacklist accordingly
+    local bits = {
+        "blacklist = table.wipe(blacklist)",
+    }
+
+    for frame, value in pairs(self.settings.blacklist) do
+        if not not value then
+            bits[#bits + 1] = string.format("blacklist[%q] = true", frame)
+        end
+    end
+
+    addon.header:Execute(table.concat(bits, ";\n"))
+
     -- Update the registered clicks, to catch any unblacklisted frames
     self:UpdateRegisteredClicks()
     -- Update the options panel
