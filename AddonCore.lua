@@ -52,6 +52,22 @@ if EMERGENCY_DEBUG then
 end
 
 --[[-------------------------------------------------------------------------
+--  Print/Printf support
+-------------------------------------------------------------------------]]--
+
+local printHeader = "|cFF33FF99%s|r: "
+
+function addon:Printf(msg, ...)
+    msg = printHeader .. msg
+    local success, txt = pcall(string.format, msg, addonName, ...)
+    if success then
+        print(txt)
+    else
+        error(string.gsub(txt, "'%?'", string.format("'%s'", "Printf")), 3)
+    end
+end
+
+--[[-------------------------------------------------------------------------
 --  Event registration and dispatch
 -------------------------------------------------------------------------]]--
 
