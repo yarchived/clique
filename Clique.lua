@@ -314,10 +314,17 @@ local function ApplicationOrder(a, b)
 end
 
 local function shouldApply(global, entry)
+    -- If this is the global button and this is a 'global' binding
     if global and (entry.sets.hovercast or entry.sets.global) then
         return true
-    elseif not global and (not entry.sets.hovercast and not entry.sets.global) then
-        return true
+    elseif not global then
+        -- Check to see if there's a non-global binding to be set
+        for k, v in pairs(entry.sets) do
+            if k ~= "global" and k ~= "hovercast" then
+                return true
+            end
+        end
+        return false
     end
 end
 
