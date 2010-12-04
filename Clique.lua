@@ -75,8 +75,7 @@ function addon:Initialize()
     -- the unit frame itself.
     self.header:SetAttribute("clickcast_onenter", [===[
         local header = self:GetParent():GetFrameRef("clickcast_header")
-        local inCombat = header:GetAttribute("inCombat")
-        header:RunFor(self, header:GetAttribute("setup_onenter"), inCombat)
+        header:RunFor(self, header:GetAttribute("setup_onenter"))
     ]===])
 
     -- This snippet is executed from the SecureHandlerEnterLeaveTemplate
@@ -84,8 +83,7 @@ function addon:Initialize()
     -- the unit frame itself.
     self.header:SetAttribute("clickcast_onleave", [===[
         local header = self:GetParent():GetFrameRef("clickcast_header")
-        local inCombat = header:GetAttribute("inCombat")
-        header:RunFor(self, header:GetAttribute("setup_onleave"), inCombat)
+        header:RunFor(self, header:GetAttribute("setup_onleave"))
     ]===])
 
     local setup, remove = self:GetClickAttributes()
@@ -105,7 +103,6 @@ function addon:Initialize()
         button:SetAttribute("clickcast_onleave", self:GetAttribute("clickcast_onleave"))
         ccframes[button] = true
 
-        local inCombat = self:GetAttribute("inCombat")
         self:RunFor(button, self:GetAttribute("setup_clicks"))
     ]===])
 
@@ -335,14 +332,15 @@ end
 -- also rather well commented.
 
 function addon:GetClickAttributes(global)
+    -- In these scripts, 'self' should always be the header
     local bits = {
-        "local inCombat = self:GetAttribute('inCombat')",
+        "local inCombat = control:GetAttribute('inCombat')",
         "local setupbutton = self:GetFrameRef('cliquesetup_button')",
         "local button = setupbutton or self",
     }
 
     local rembits = {
-        "local inCombat = self:GetAttribute('inCombat')",
+        "local inCombat = control:GetAttribute('inCombat')",
         "local setupbutton = self:GetFrameRef('cliquesetup_button')",
         "local button = setupbutton or self",
     }
