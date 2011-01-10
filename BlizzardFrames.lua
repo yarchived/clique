@@ -324,8 +324,8 @@ function addon:EnableBlizzardFrames()
         frame:RegisterEvent("ADDON_LOADED")
         frame:SetScript("OnEvent", function(frame, event, ...)
             if ... == "Blizzard_ArenaUI" then
-                self:UnregisterEvent("ADDON_LOADED")
-                self:SetScript("OnEvent", nil)
+                frame:UnregisterEvent("ADDON_LOADED")
+                frame:SetScript("OnEvent", nil)
                 self:Enable_BlizzArenaFrames()
             end
         end)
