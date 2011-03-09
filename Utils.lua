@@ -231,6 +231,8 @@ function addon:GetCapturedKey(key)
         key = "DASH"
     elseif key == "\\" then
         key = "BACKSLASH"
+    elseif key == "\"" then
+        key = "DOUBLEQUOTE"
     else
         local buttonNum = key:match("Button(%d+)")
         if buttonNum and tonumber(buttonNum) <= 31 then
@@ -274,6 +276,8 @@ function addon:ConvertSpecialKeys(binding)
         key = "-"
     elseif key == "BACKSLASH" then
         key = "\\"
+    elseif key == "DOUBLEQUOTE" then
+        key = "\""
     end
 
     return tostring(mods) .. tostring(key)
