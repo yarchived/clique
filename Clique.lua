@@ -53,8 +53,18 @@ function addon:Initialize()
     self.hccframes = {}
 
     -- Registration for group headers (in-combat safe)
-    self.header = CreateFrame("Frame", addonName .. "HeaderFrame", UIParent, "SecureHandlerBaseTemplate")
+    self.header = CreateFrame("Frame", addonName .. "HeaderFrame", UIParent, "SecureHandlerBaseTemplate,SecureHandlerAttributeTemplate")
     ClickCastHeader = addon.header
+
+    self.header:SetAttribute("_onattributechanged", [[
+        if name == "hasunit" then
+            if value == "false" and danglingButton then
+                self:RunFor(danglingButton, self:GetAttribute("setup_onleave"))
+                danglingButton = nil
+            end
+        end
+    ]])
+    RegisterAttributeDriver(self.header, "hasunit", "[@mouseover, exists] true; false")
 
     -- Create a secure action button that can be used for 'hovercast' and 'global'
     self.globutton = CreateFrame("Button", addonName .. "SABButton", UIParent, "SecureActionButtonTemplate, SecureHandlerBaseTemplate")
@@ -128,7 +138,7 @@ function addon:Initialize()
     -- We need to track frame registrations so we can display secure frames in
     -- the frame blacklist editor. This is done via the 'export_register' and
     -- 'export_unregister' attributes.
-    self.header:SetScript("OnAttributeChanged", function(frame, name, value)
+    self.header:HookScript("OnAttributeChanged", function(frame, name, value)
         if name == "export_register" and type(value) ~= nil then
             -- Convert the userdata object to the global object so we have access
             -- to all of the correct methods, such as 'RegisterForClicks''
