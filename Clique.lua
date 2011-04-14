@@ -105,6 +105,9 @@ function addon:Initialize()
     -- attribute, which can only be accomplished in a restricted environment.
     self.header:SetAttribute("clickcast_register", [===[
         local button = self:GetAttribute("clickcast_button")
+        if not button then
+            button = self:GetFrameRef("clickcast_button")
+        end
 
         -- Export this frame so we can display it in the insecure environment
         self:SetAttribute("export_register", button)
@@ -217,13 +220,19 @@ function addon:RegisterFrame(button)
         return
     end
 
-    self.ccframes[button] = true
-
-    self:UpdateRegisteredClicks(button)
-
     -- Wrap the OnEnter/OnLeave scripts in order to handle keybindings
     addon.header:WrapScript(button, "OnEnter", addon.header:GetAttribute("setup_onenter"))
     addon.header:WrapScript(button, "OnLeave", addon.header:GetAttribute("setup_onleave"))
+
+    self.header:SetFrameRef("clickcast_button", button)
+    self.header:Execute(self.header:GetAttribute("clickcast_register"), button)
+    do
+        return
+    end
+
+    self.ccframes[button] = true
+
+    self:UpdateRegisteredClicks(button)
 
     -- Set the attributes on the frame
     self.header:SetFrameRef("cliquesetup_button", button)
