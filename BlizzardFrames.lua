@@ -64,7 +64,7 @@ function panel:CreateOptions()
     self.arena = make_checkbox("ArenaEnemy", L["Arena enemy frames"])
     self.party = make_checkbox("Party", L["Party member frames"])
     self.compactraid = make_checkbox("CompactRaid", L["Compact raid frames"])
-    self.compactparty = make_checkbox("CompactParty", L["Compact party frames"])
+    --self.compactparty = make_checkbox("CompactParty", L["Compact party frames"])
     self.boss = make_checkbox("BossTarget", L["Boss target frames"])
 
     table.insert(bits, self.intro)
@@ -87,7 +87,7 @@ function panel:CreateOptions()
     table.insert(bits, self.arena)
     table.insert(bits, self.party)
     table.insert(bits, self.compactraid)
-    table.insert(bits, self.compactparty)
+    --table.insert(bits, self.compactparty)
     table.insert(bits, self.boss)
 
     bits[1]:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -15)
@@ -108,7 +108,7 @@ function panel.refresh()
     panel.arena:SetChecked(opt.arena)
     panel.party:SetChecked(opt.party)
     panel.compactraid:SetChecked(opt.compactraid)
-    panel.compactparty:SetChecked(opt.compactparty)
+    --panel.compactparty:SetChecked(opt.compactparty)
     panel.boss:SetChecked(opt.boss)
 end
 
@@ -122,7 +122,7 @@ function panel.okay()
     opt.arena = not not panel.arena:GetChecked()
     opt.party = not not panel.party:GetChecked()
     opt.compactraid = not not panel.compactraid:GetChecked()
-    opt.compactparty = not not panel.compactparty:GetChecked()
+    --opt.compactparty = not not panel.compactparty:GetChecked()
     opt.boss = not not panel.boss:GetChecked()
 end
 
@@ -136,7 +136,7 @@ local function enable(frame)
         local frameName = frame
         frame = _G[frameName]
         if not frame then
-            print("Error registering frame: " .. tostring(frameName))
+            print("Clique: error registering frame: " .. tostring(frameName))
         end
     end
 
@@ -220,79 +220,79 @@ function addon:Enable_BlizzPartyFrames()
     end
 end
 
-function addon:Enable_BlizzCompactParty()
-    if not addon.settings.blizzframes.compactparty then
-        return
-    end
-
-    local frames = {
-        --"CompactPartyFrameMemberSelf",
-        --"CompactPartyFrameMemberSelfBuff1",
-        --"CompactPartyFrameMemberSelfBuff2",
-        --"CompactPartyFrameMemberSelfBuff3",
-        --"CompactPartyFrameMemberSelfDebuff1",
-        --"CompactPartyFrameMemberSelfDebuff2",
-        --"CompactPartyFrameMemberSelfDebuff3",
-        "CompactPartyFrameMember1",
-        "CompactPartyFrameMember1Buff1",
-        "CompactPartyFrameMember1Buff2",
-        "CompactPartyFrameMember1Buff3",
-        "CompactPartyFrameMember1Debuff1",
-        "CompactPartyFrameMember1Debuff2",
-        "CompactPartyFrameMember1Debuff3",
-        "CompactPartyFrameMember1DispelDebuff1",
-        "CompactPartyFrameMember1DispelDebuff2",
-        "CompactPartyFrameMember1DispelDebuff2",
-        "CompactPartyFrameMember2",
-        "CompactPartyFrameMember2Buff1",
-        "CompactPartyFrameMember2Buff2",
-        "CompactPartyFrameMember2Buff3",
-        "CompactPartyFrameMember2Debuff1",
-        "CompactPartyFrameMember2Debuff2",
-        "CompactPartyFrameMember2Debuff3",
-        "CompactPartyFrameMember2DispelDebuff1",
-        "CompactPartyFrameMember2DispelDebuff2",
-        "CompactPartyFrameMember2DispelDebuff2",
-        "CompactPartyFrameMember3",
-        "CompactPartyFrameMember3Buff1",
-        "CompactPartyFrameMember3Buff2",
-        "CompactPartyFrameMember3Buff3",
-        "CompactPartyFrameMember3Debuff1",
-        "CompactPartyFrameMember3Debuff2",
-        "CompactPartyFrameMember3Debuff3",
-        "CompactPartyFrameMember3DispelDebuff1",
-        "CompactPartyFrameMember3DispelDebuff2",
-        "CompactPartyFrameMember3DispelDebuff2",
-        "CompactPartyFrameMember4",
-        "CompactPartyFrameMember4Buff1",
-        "CompactPartyFrameMember4Buff2",
-        "CompactPartyFrameMember4Buff3",
-        "CompactPartyFrameMember4Debuff1",
-        "CompactPartyFrameMember4Debuff2",
-        "CompactPartyFrameMember4Debuff3",
-        "CompactPartyFrameMember4DispelDebuff1",
-        "CompactPartyFrameMember4DispelDebuff2",
-        "CompactPartyFrameMember4DispelDebuff2",
-        "CompactPartyFrameMember5",
-        "CompactPartyFrameMember5Buff1",
-        "CompactPartyFrameMember5Buff2",
-        "CompactPartyFrameMember5Buff3",
-        "CompactPartyFrameMember5Debuff1",
-        "CompactPartyFrameMember5Debuff2",
-        "CompactPartyFrameMember5Debuff3",
-        "CompactPartyFrameMember5DispelDebuff1",
-        "CompactPartyFrameMember5DispelDebuff2",
-        "CompactPartyFrameMember5DispelDebuff2",
-        "CompactPartyFramePet1",
-        "CompactPartyFramePet2",
-        "CompactPartyFramePet3",
-        "CompactPartyFramePet4",
-        "CompactPartyFramePet5",
-    }
-    for idx, frame in ipairs(frames) do
-        enable(frame)
-    end
-end
+-- function addon:Enable_BlizzCompactParty()
+--     if not addon.settings.blizzframes.compactparty then
+--         return
+--     end
+--
+--     local frames = {
+--         --"CompactPartyFrameMemberSelf",
+--         --"CompactPartyFrameMemberSelfBuff1",
+--         --"CompactPartyFrameMemberSelfBuff2",
+--         --"CompactPartyFrameMemberSelfBuff3",
+--         --"CompactPartyFrameMemberSelfDebuff1",
+--         --"CompactPartyFrameMemberSelfDebuff2",
+--         --"CompactPartyFrameMemberSelfDebuff3",
+--         "CompactPartyFrameMember1",
+--         "CompactPartyFrameMember1Buff1",
+--         "CompactPartyFrameMember1Buff2",
+--         "CompactPartyFrameMember1Buff3",
+--         "CompactPartyFrameMember1Debuff1",
+--         "CompactPartyFrameMember1Debuff2",
+--         "CompactPartyFrameMember1Debuff3",
+--         "CompactPartyFrameMember1DispelDebuff1",
+--         "CompactPartyFrameMember1DispelDebuff2",
+--         "CompactPartyFrameMember1DispelDebuff2",
+--         "CompactPartyFrameMember2",
+--         "CompactPartyFrameMember2Buff1",
+--         "CompactPartyFrameMember2Buff2",
+--         "CompactPartyFrameMember2Buff3",
+--         "CompactPartyFrameMember2Debuff1",
+--         "CompactPartyFrameMember2Debuff2",
+--         "CompactPartyFrameMember2Debuff3",
+--         "CompactPartyFrameMember2DispelDebuff1",
+--         "CompactPartyFrameMember2DispelDebuff2",
+--         "CompactPartyFrameMember2DispelDebuff2",
+--         "CompactPartyFrameMember3",
+--         "CompactPartyFrameMember3Buff1",
+--         "CompactPartyFrameMember3Buff2",
+--         "CompactPartyFrameMember3Buff3",
+--         "CompactPartyFrameMember3Debuff1",
+--         "CompactPartyFrameMember3Debuff2",
+--         "CompactPartyFrameMember3Debuff3",
+--         "CompactPartyFrameMember3DispelDebuff1",
+--         "CompactPartyFrameMember3DispelDebuff2",
+--         "CompactPartyFrameMember3DispelDebuff2",
+--         "CompactPartyFrameMember4",
+--         "CompactPartyFrameMember4Buff1",
+--         "CompactPartyFrameMember4Buff2",
+--         "CompactPartyFrameMember4Buff3",
+--         "CompactPartyFrameMember4Debuff1",
+--         "CompactPartyFrameMember4Debuff2",
+--         "CompactPartyFrameMember4Debuff3",
+--         "CompactPartyFrameMember4DispelDebuff1",
+--         "CompactPartyFrameMember4DispelDebuff2",
+--         "CompactPartyFrameMember4DispelDebuff2",
+--         "CompactPartyFrameMember5",
+--         "CompactPartyFrameMember5Buff1",
+--         "CompactPartyFrameMember5Buff2",
+--         "CompactPartyFrameMember5Buff3",
+--         "CompactPartyFrameMember5Debuff1",
+--         "CompactPartyFrameMember5Debuff2",
+--         "CompactPartyFrameMember5Debuff3",
+--         "CompactPartyFrameMember5DispelDebuff1",
+--         "CompactPartyFrameMember5DispelDebuff2",
+--         "CompactPartyFrameMember5DispelDebuff2",
+--         "CompactPartyFramePet1",
+--         "CompactPartyFramePet2",
+--         "CompactPartyFramePet3",
+--         "CompactPartyFramePet4",
+--         "CompactPartyFramePet5",
+--     }
+--     for idx, frame in ipairs(frames) do
+--         enable(frame)
+--     end
+-- end
 
 function addon:Enable_BlizzBossFrames()
     if not addon.settings.blizzframes.boss then
@@ -315,20 +315,28 @@ function addon:EnableBlizzardFrames()
     self:Enable_BlizzCompactUnitFrames()
     self:Enable_BlizzSelfFrames()
     self:Enable_BlizzPartyFrames()
-    self:Enable_BlizzCompactParty()
     self:Enable_BlizzBossFrames()
+
+    local waitForAddon = {}
+
     if IsAddOnLoaded("Blizzard_ArenaUI") then
         self:Enable_BlizzArenaFrames()
     else
+        waitForAddon["Blizzard_ArenaUI"] = "Enable_BlizzArenaFrames"
+    end
+
+    if next(waitForAddon) then
         local frame = CreateFrame("Frame")
         frame:RegisterEvent("ADDON_LOADED")
         frame:SetScript("OnEvent", function(frame, event, ...)
-            if ... == "Blizzard_ArenaUI" then
-                frame:UnregisterEvent("ADDON_LOADED")
-                frame:SetScript("OnEvent", nil)
-                self:Enable_BlizzArenaFrames()
+            if waitForAddon[...] then
+                self[waitForAddon[...]](self)
             end
         end)
-    end
- end
 
+        if not next(waitForAddon) then
+            frame:UnregisterEvent("ADDON_LOADED")
+            frame:SetScript("OnEvent", nil)
+        end
+    end
+end
