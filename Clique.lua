@@ -309,9 +309,11 @@ local function ApplicationOrder(a, b)
 
     -- Force out-of-combat clicks to take the HIGHEST priority
     if a.sets.ooc and not b.sets.ooc then
-        return false
+        return true
+	elseif b.sets.ooc and not a.sets.ooc then
+		return false
     elseif a.sets.ooc and b.sets.ooc then
-        return bcnt < acnt
+        return acnt < bcnt
     end
 
     -- Try to give any 'default' clicks LOWEST priority
@@ -346,13 +348,13 @@ end
 function addon:GetClickAttributes(global)
     -- In these scripts, 'self' should always be the header
     local bits = {
-        "local inCombat = control:GetAttribute('inCombat')",
+		"local inCombat = control:GetAttribute('inCombat')",
         "local setupbutton = self:GetFrameRef('cliquesetup_button')",
         "local button = setupbutton or self",
     }
 
     local rembits = {
-        "local inCombat = control:GetAttribute('inCombat')",
+		"local inCombat = control:GetAttribute('inCombat')",
         "local setupbutton = self:GetFrameRef('cliquesetup_button')",
         "local button = setupbutton or self",
     }
@@ -367,10 +369,11 @@ function addon:GetClickAttributes(global)
         rembits[#rembits + 1] = "if blacklist[name] then return end"
     end
 
-    -- Sort the bindings so they are applied in order
+    -- Sort the bindings so they are applied in order. This sort ensures that
+	-- any 'ooc' bindings are applied first.
     table.sort(self.bindings, ApplicationOrder)
 
-    -- Build a small table of ooc keys that are 'taken' sowe can check for
+    -- Build a small table of ooc keys that are 'taken' so we can check for
     -- masking conflicts with the friend/enemy sets.
     local oocKeys = {}
     for idx, entry in ipairs(self.bindings) do
@@ -395,12 +398,24 @@ function addon:GetClickAttributes(global)
             local indent = ""
             local oocmask = oocKeys[entry.key]
 
+			-- This code needs to set/clear a binding depending on combat
+			-- state. We do both in this function to ensure that we don't have
+			-- to run remove_clicks every single time the combat status
+			-- changes.
+
+			local startbits
             if oocmask and not entry.sets.ooc then
-                bits[#bits + 1] = "if inCombat then"
+				-- This means that the binding will mask the 'ooc' binding
+				-- with the same key, so we must ensure this is only set when
+				-- we are in combat.
+                bits[#bits + 1] = "if inCombat then      -- non-ooc that is masking"
                 indent = indent .. "  "
-            elseif entry.sets.ooc then
-                bits[#bits + 1] = "if not inCombat then"
-                indent = indent .. "  "
+			elseif entry.sets.ooc then
+				-- This is a standard 'ooc' binding, so we want to ensure its
+				-- only applied when out of combat, and cleared otherwise.
+				bits[#bits + 1] = "if not inCombat then  -- ooc binding"
+				indent = indent .. "  "
+				startbits = #rembits + 1
             end
 
             local prefix, suffix = addon:GetBindingPrefixSuffix(entry, global)
@@ -471,11 +486,21 @@ function addon:GetClickAttributes(global)
 
             -- Finish the conditional statements started above
             if oocmask and not entry.sets.ooc then
-                bits[#bits + 1] = "end"
+				-- This means that the binding will mask the 'ooc' binding
+				-- with the same key, so we must ensure this is only set when
+				-- we are in combat.
+				bits[#bits + 1] = "end"
                 indent = indent:sub(1, -3)
-            elseif entry.sets.ooc then
-                bits[#bits + 1] = "end"
-                indent = indent:sub(1, -3)
+			elseif entry.sets.ooc then
+				-- This is a standard 'ooc' binding, so we want to ensure its
+				-- only applied when out of combat, and cleared otherwise.
+				local endbits = #rembits
+				bits[#bits + 1] = "else                  -- clear ooc binding"
+				for i = startbits, endbits, 1 do
+					bits[#bits + 1] = indent .. rembits[i]
+				end
+				bits[#bits + 1] = "end"
+				indent = indent:sub(1, -3)
             end
         end
     end
