@@ -331,7 +331,11 @@ compareFunctions = {
     end,
     binding = function(a, b)
         local mem = memoizeBindings
-        return mem[a] < mem[b]
+		if mem[a] == mem[b] then
+			return compareFunctions.name(a, b)
+		else
+			return mem[a] < mem[b]
+		end
     end,
 }
 
