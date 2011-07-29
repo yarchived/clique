@@ -591,11 +591,29 @@ function CliqueConfig:Row_OnClick(frame, button)
     })
 
     table.insert(submenu.menuList, {
-        text = L["Out-of-combat only"],
+        text = L["Out-of-combat (ONLY)"],
         checked = function() return binding.sets["ooc"] end,
         func = toggleSet(binding, "ooc"),
         tooltipTitle = L["Clique: 'ooc' binding-set"],
-        tooltipText = L["A binding that belongs to the 'ooc' binding-set will only be active when the player is out-of-combat. As soon as the player enters combat, these bindings will no longer be active, so be careful when choosing this binding-set for any spells you use frequently."],
+        tooltipText = L["A binding that belongs to the 'ooc' binding-set will only be active when the player is out-of-combat, regardless of the other binding-sets this binding belongs to. As soon as the player enters combat, these bindings will no longer be active, so be careful when choosing this binding-set for any spells you use frequently."],
+        keepShownOnClick = true,
+    })
+
+	table.insert(submenu.menuList, {
+        text = L["Primary talent spec (ONLY)"],
+        checked = function() return binding.sets["pritalent"] end,
+        func = toggleSet(binding, "pritalent"),
+        tooltipTitle = L["Clique: 'pritalent' binding-set"],
+        tooltipText = L["A binding that belongs to the 'pritalent' binding-set is only active when the player is currently using their primary talent spec, regardless of the other binding-sets that this binding belongs to."],
+        keepShownOnClick = true,
+    })
+
+	table.insert(submenu.menuList, {
+        text = L["Secondary talent spec (ONLY)"],
+        checked = function() return binding.sets["sectalent"] end,
+        func = toggleSet(binding, "sectalent"),
+        tooltipTitle = L["Clique: 'sectalent' binding-set"],
+        tooltipText = L["A binding that belongs to the 'sectalent' binding-set is only active when the player is currently using their secondary talent spec, regardless of the other binding-sets that this binding belongs to."],
         keepShownOnClick = true,
     })
 

@@ -339,6 +339,15 @@ local function shouldApply(global, entry)
     end
 end
 
+local function correctSpec(entry, currentSpec)
+	if entry.sets.pritalent and currentSpec ~= 1 then
+		return false
+	elseif entry.sets.sectalent and currentSpec ~= 2 then
+		return false
+	end
+	return true
+end
+
 -- This function takes a single argument indicating if the attributes being
 -- computed are for the special 'global' button used by Clique.  It then
 -- computes the set of attributes necessary for the player's bindings to be
@@ -388,7 +397,7 @@ function addon:GetClickAttributes(global)
         -- non-global bindings are only applied on non-global frames. handle
         -- this logic here.
 
-        if shouldApply(global, entry) then
+        if shouldApply(global, entry) and correctSpec(entry, GetActiveTalentGroup()) then
             -- Check to see if this is a 'friend' or an 'enemy' binding, and
             -- check if it would mask an 'ooc' binding with the same key. If
             -- so, we need to add code that prevents this from happening, by
@@ -728,9 +737,9 @@ function addon:TalentGroupChanged()
     local currentProfile = self.db:GetCurrentProfile()
     local newProfile
 
-    if self.settings.specswap then
+	if self.settings.specswap then
+		self.talentGroup = GetActiveTalentGroup()
         -- Determine which profile to set, based on talent group
-        self.talentGroup = GetActiveTalentGroup()
         if self.talentGroup == 1 and self.settings.pri_profileKey then
             newProfile = self.settings.pri_profileKey
         elseif self.talentGroup == 2 and self.settings.sec_profileKey then
