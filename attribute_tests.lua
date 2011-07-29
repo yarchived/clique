@@ -308,8 +308,172 @@ self:ClearBinding("CTRL-SHIFT-F");
 self:ClearBinding("SHIFT-F");]],
 }
 
+-- Test ooc bindings
+addtest{
+	name = "OOC bindings",
+	bindings = {
+		-- A masked binding
+		{ key = "BUTTON2", type = "menu", sets = { ooc = true } },
+		{ key = "BUTTON2", type = "spell", spell = "Wild Growth", sets = { default = true } },
+		-- An unmasked keybinding
+		{ key = "F", type = "spell", spell = "Swiftmend", sets = { ooc = true } },
+	},
+	cset = [[
+if not inCombat then  -- ooc binding
+  button:SetAttribute("type2", "menu")
+else                  -- clear ooc binding
+  button:SetAttribute("type2", nil)
+end
+if not inCombat then  -- ooc binding
+  button:SetAttribute("type-cliquebuttonF", "spell")
+  button:SetAttribute("spell-cliquebuttonF", "Swiftmend")
+else                  -- clear ooc binding
+  button:SetAttribute("type-cliquebuttonF", nil)
+  button:SetAttribute("spell-cliquebuttonF", nil)
+end
+if inCombat then      -- non-ooc that is masking
+  button:SetAttribute("type2", "spell")
+  button:SetAttribute("spell2", "Wild Growth")
+end]],
+	crem = [[
+button:SetAttribute("type2", nil)
+button:SetAttribute("type-cliquebuttonF", nil)
+button:SetAttribute("spell-cliquebuttonF", nil)
+button:SetAttribute("type2", nil)
+button:SetAttribute("spell2", nil)]],
+	bset = [[
+self:SetBindingClick(true, "F", self, "cliquebuttonF");]],
+	brem = [[
+self:ClearBinding("F");]],
+}
+
+-- Test ooc bindings being masked by friend bindings
+addtest{
+	name = "OOC/friend mask",
+	bindings = {
+		-- A masked binding
+		{ key = "BUTTON2", type = "menu", sets = { ooc = true } },
+		{ key = "BUTTON2", type = "spell", spell = "Wild Growth", sets = { friend = true } },
+	},
+	cset = [[
+if not inCombat then  -- ooc binding
+  button:SetAttribute("type2", "menu")
+else                  -- clear ooc binding
+  button:SetAttribute("type2", nil)
+end
+if inCombat then      -- non-ooc that is masking
+  button:SetAttribute("helpbutton2", "friend2")
+  button:SetAttribute("type-friend2", "spell")
+  button:SetAttribute("spell-friend2", "Wild Growth")
+end]],
+	crem = [[
+button:SetAttribute("type2", nil)
+button:SetAttribute("helpbutton2", nil)
+button:SetAttribute("type-friend2", nil)
+button:SetAttribute("spell-friend2", nil)]],
+}
+
+-- Test friend/enemy bindings
+addtest{
+	name = "Friend/enemy",
+	bindings = {
+		-- A masked binding
+		{ key = "BUTTON2", type = "spell", spell = "Healing Touch", sets = { friend = true } },
+		{ key = "BUTTON2", type = "spell", spell = "Cyclone", sets = { enemy = true } },
+	},
+	cset = [[
+button:SetAttribute("helpbutton2", "friend2")
+button:SetAttribute("type-friend2", "spell")
+button:SetAttribute("spell-friend2", "Healing Touch")
+button:SetAttribute("harmbutton2", "enemy2")
+button:SetAttribute("type-enemy2", "spell")
+button:SetAttribute("spell-enemy2", "Cyclone")]],
+	crem = [[
+button:SetAttribute("helpbutton2", nil)
+button:SetAttribute("type-friend2", nil)
+button:SetAttribute("spell-friend2", nil)
+button:SetAttribute("harmbutton2", nil)
+button:SetAttribute("type-enemy2", nil)
+button:SetAttribute("spell-enemy2", nil)]],
+}
+
+-- Test friend/ooc/default ooc
+addtest{
+	name = "Friend/default ooc",
+	bindings = {
+		-- A masked binding
+		{ key = "BUTTON2", type = "spell", spell = "Healing Touch", sets = { ooc = true, default = true } },
+		{ key = "BUTTON2", type = "spell", spell = "Cyclone", sets = { ooc = true, enemy  = true } },
+	},
+	cset = [[
+if not inCombat then  -- ooc binding
+  button:SetAttribute("type2", "spell")
+  button:SetAttribute("spell2", "Healing Touch")
+else                  -- clear ooc binding
+  button:SetAttribute("type2", nil)
+  button:SetAttribute("spell2", nil)
+end
+if not inCombat then  -- ooc binding
+  button:SetAttribute("harmbutton2", "enemy2")
+  button:SetAttribute("type-enemy2", "spell")
+  button:SetAttribute("spell-enemy2", "Cyclone")
+else                  -- clear ooc binding
+  button:SetAttribute("harmbutton2", nil)
+  button:SetAttribute("type-enemy2", nil)
+  button:SetAttribute("spell-enemy2", nil)
+end]],
+	crem = [[
+button:SetAttribute("type2", nil)
+button:SetAttribute("spell2", nil)
+button:SetAttribute("harmbutton2", nil)
+button:SetAttribute("type-enemy2", nil)
+button:SetAttribute("spell-enemy2", nil)]],
+}
+
+-- pritalant
+addtest{
+	name = "Primary talents",
+	talentGroup = 1,
+	bindings = {
+		-- A masked binding
+		{ key = "BUTTON2", type = "spell", spell = "Healing Touch", sets = { pritalent = true } },
+		{ key = "BUTTON2", type = "spell", spell = "Cyclone", sets = { sectalent = true } },
+	},
+	cset = [[
+button:SetAttribute("type2", "spell")
+button:SetAttribute("spell2", "Healing Touch")]],
+	crem = [[
+button:SetAttribute("type2", nil)
+button:SetAttribute("spell2", nil)]],
+}
+
+-- pritalant
+addtest{
+	name = "Secondary talents",
+	talentGroup = 2,
+	bindings = {
+		-- A masked binding
+		{ key = "BUTTON2", type = "spell", spell = "Healing Touch", sets = { pritalent = true } },
+		{ key = "BUTTON2", type = "spell", spell = "Cyclone", sets = { sectalent = true } },
+	},
+	cset = [[
+button:SetAttribute("type2", "spell")
+button:SetAttribute("spell2", "Cyclone")]],
+	crem = [[
+button:SetAttribute("type2", nil)
+button:SetAttribute("spell2", nil)]],
+}
+
+
 for idx, test in ipairs(tests) do
+	io.stdout:write("[" .. test.name .. "]")
 	addon.bindings = test.bindings
+	function GetActiveTalentGroup()
+		return test.talentGroup and test.talentGroup or 1
+	end
+
+	addon.talentGroup = test.talentGroup
+
 	local cset, crem = addon:GetClickAttributes()
 	local bset, brem = addon:GetBindingAttributes()
 	local gcset, gcrem = addon:GetClickAttributes(true)
@@ -323,6 +487,8 @@ for idx, test in ipairs(tests) do
 	check(gcrem, test, "gcrem")
 	check(gbset, test, "gbset")
 	check(gbrem, test, "gbrem")
+
+	print("\t - PASS")
 end
 
 print("Passed " .. #tests .. " tests")
