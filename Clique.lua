@@ -831,6 +831,8 @@ function addon:IsFrameBlacklisted(frame)
     return self.settings.blacklist[name]
 end
 
+-- Update both registered clicks, and ensure that mousewheel events are enabled
+-- on the frame.
 function addon:UpdateRegisteredClicks(button)
     if InCombatLockdown() then
         table.insert(self.regclickqueue, button)
@@ -842,18 +844,21 @@ function addon:UpdateRegisteredClicks(button)
     -- Short version that only updates clicks for one frame
     if button and not self:IsFrameBlacklisted(button) then
         button:RegisterForClicks(direction)
+        button:EnableMouseWheel(true)
         return
     end
 
     for button in pairs(self.ccframes) do
         if not self:IsFrameBlacklisted(button) then
             button:RegisterForClicks(direction)
+            button:EnableMouseWheel(true)
         end
     end
 
     for name, button in pairs(self.hccframes) do
        if not self:IsFrameBlacklisted(button) then
            button:RegisterForClicks(direction)
+           button:EnableMouseWheel(true)
        end
     end
 end
