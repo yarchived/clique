@@ -56,6 +56,8 @@ function addon:Initialize()
     self.header = CreateFrame("Frame", addonName .. "HeaderFrame", UIParent, "SecureHandlerBaseTemplate,SecureHandlerAttributeTemplate")
     ClickCastHeader = addon.header
 
+	-- This snippet will clear any dangling bindings that might have occurred
+	-- as a result of frames being shown/hidden.
     self.header:SetAttribute("_onattributechanged", [[
         if name == "hasunit" then
             if value == "false" and danglingButton then
@@ -357,7 +359,7 @@ function addon:GetClickAttributes(global)
 
     -- Check to see if the frame being setup is blacklisted. Do not perform
     -- this check on the global frame.
-    if not global then 
+    if not global then
         bits[#bits + 1] = "local name = button:GetName()"
         bits[#bits + 1] = "if blacklist[name] then return end"
 
@@ -393,14 +395,14 @@ function addon:GetClickAttributes(global)
             local indent = ""
             local oocmask = oocKeys[entry.key]
 
-            if oocmask and not entry.sets.ooc then 
+            if oocmask and not entry.sets.ooc then
                 bits[#bits + 1] = "if inCombat then"
                 indent = indent .. "  "
             elseif entry.sets.ooc then
                 bits[#bits + 1] = "if not inCombat then"
                 indent = indent .. "  "
             end
- 
+
             local prefix, suffix = addon:GetBindingPrefixSuffix(entry, global)
 
             -- Set up help/harm bindings. The button value will be either a number,
@@ -468,7 +470,7 @@ function addon:GetClickAttributes(global)
             end
 
             -- Finish the conditional statements started above
-            if oocmask and not entry.sets.ooc then 
+            if oocmask and not entry.sets.ooc then
                 bits[#bits + 1] = "end"
                 indent = indent:sub(1, -3)
             elseif entry.sets.ooc then
@@ -484,7 +486,7 @@ end
 local B_SET = [[self:SetBindingClick(true, %q, self, %q);]]
 local B_CLR = [[self:ClearBinding(%q);]]
 
--- This function takes a single argument, indicating whether the attributes 
+-- This function takes a single argument, indicating whether the attributes
 -- should be built for the special global button or not, and returns an
 -- attribute that can set the appropriate attributes, and one that can clear
 function addon:GetBindingAttributes(global)
@@ -533,7 +535,7 @@ function addon:GetBindingAttributes(global)
 
                     local attr = B_SET:format(key, suffix)
                     if not unique[attr] then
-                        set[#set + 1] = attr 
+                        set[#set + 1] = attr
                         clr[#clr + 1] = B_CLR:format(key)
                         unique[attr] = true
                     end
@@ -548,7 +550,7 @@ function addon:GetBindingAttributes(global)
 
                     local attr = B_SET:format(key, suffix)
                     if not unique[attr] then
-                        set[#set + 1] = attr 
+                        set[#set + 1] = attr
                         clr[#clr + 1] = B_CLR:format(key)
                         unique[attr] = true
                     end
@@ -795,7 +797,7 @@ function addon:CheckPartyCombat(event, unit)
     if InCombatLockdown() or not unit then return end
     if not self.has_ooc then
         -- No change required if no ooc bindings
-        return 
+        return
     end
 
     if self.settings.fastooc then
