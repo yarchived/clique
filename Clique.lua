@@ -386,7 +386,7 @@ function addon:GetClickAttributes(global)
     -- masking conflicts with the friend/enemy sets.
     local oocKeys = {}
     for idx, entry in ipairs(self.bindings) do
-        if shouldApply(global, entry) and entry.sets.ooc then
+        if shouldApply(global, entry) and entry.sets.ooc and entry.key then
             oocKeys[entry.key] = true
         end
     end
@@ -397,7 +397,7 @@ function addon:GetClickAttributes(global)
         -- non-global bindings are only applied on non-global frames. handle
         -- this logic here.
 
-        if shouldApply(global, entry) and correctSpec(entry, GetActiveTalentGroup()) then
+        if shouldApply(global, entry) and correctSpec(entry, GetActiveTalentGroup()) and entry.key then
             -- Check to see if this is a 'friend' or an 'enemy' binding, and
             -- check if it would mask an 'ooc' binding with the same key. If
             -- so, we need to add code that prevents this from happening, by
@@ -559,38 +559,40 @@ function addon:GetBindingAttributes(global)
     local unique = {}
 
     for idx, entry in ipairs(self.bindings) do
-        if shouldApply(global, entry) then
-            if global then
-                -- Allow for the re-binding of clicks and keys, except for
-                -- unmodified left/right-click
-                if entry.key ~= "BUTTON1" and entry.key ~= "BUTTON2" then
-                    local prefix, suffix = addon:GetBindingPrefixSuffix(entry, global)
-                    local key = self:ConvertSpecialKeys(entry)
+		if entry.key then
+			if shouldApply(global, entry) then
+				if global then
+					-- Allow for the re-binding of clicks and keys, except for
+					-- unmodified left/right-click
+					if entry.key ~= "BUTTON1" and entry.key ~= "BUTTON2" then
+						local prefix, suffix = addon:GetBindingPrefixSuffix(entry, global)
+						local key = self:ConvertSpecialKeys(entry)
 
-                    local attr = B_SET:format(key, suffix)
-                    if not unique[attr] then
-                        set[#set + 1] = attr
-                        clr[#clr + 1] = B_CLR:format(key)
-                        unique[attr] = true
-                    end
-                end
-            else
-                local buttonNum = entry.key:match("BUTTON(%d+)$")
-                if not buttonNum then
-                    -- Only apply key-based binding clicks, let the raw
-                    -- attributes handle the others
-                    local prefix, suffix = addon:GetBindingPrefixSuffix(entry, global)
-                    local key = self:ConvertSpecialKeys(entry)
+						local attr = B_SET:format(key, suffix)
+						if not unique[attr] then
+							set[#set + 1] = attr
+							clr[#clr + 1] = B_CLR:format(key)
+							unique[attr] = true
+						end
+					end
+				else
+					local buttonNum = entry.key:match("BUTTON(%d+)$")
+					if not buttonNum then
+						-- Only apply key-based binding clicks, let the raw
+						-- attributes handle the others
+						local prefix, suffix = addon:GetBindingPrefixSuffix(entry, global)
+						local key = self:ConvertSpecialKeys(entry)
 
-                    local attr = B_SET:format(key, suffix)
-                    if not unique[attr] then
-                        set[#set + 1] = attr
-                        clr[#clr + 1] = B_CLR:format(key)
-                        unique[attr] = true
-                    end
-                end
-            end
-        end
+						local attr = B_SET:format(key, suffix)
+						if not unique[attr] then
+							set[#set + 1] = attr
+							clr[#clr + 1] = B_CLR:format(key)
+							unique[attr] = true
+						end
+					end
+				end
+			end
+		end
     end
 
     return table.concat(set, "\n"), table.concat(clr, "\n")
