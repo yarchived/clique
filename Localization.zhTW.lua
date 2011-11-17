@@ -1,12 +1,13 @@
--- by yaroot (yaroot#gmail.com)
+-- by yaroot#gmail.com
 
-if(GetLocale() ~= 'zhTW') then return end
+if(GetLocale() ~= 'zhCN') then return end
 
 local _, addon = ...
 local baseLocale = {
     ["A binding that belongs to the 'default' binding-set will always be active on your unit frames, unless you override it with another binding."] = "默認組別, 設置將對所有框體有效, 除非有其他組別的相同的按鍵設置",
     ["A binding that belongs to the 'enemy' binding-set will always be active when clicking on unit frames that display enemy units, ie those you can attack. If you click on a unit that you cannot attack, nothing will happen." ] = "敵對組別, 設置只對敵對的框體有效, 當你對敵對的框體點擊施法時, 這個設置將被觸發.",
     ["A binding that belongs to the 'frield' binding-set will only be active when clicking on unit frames that display friendly units, ie those you can heal and assist. If you click on a unit that you cannot heal or assist, nothing will happen."] = "友善組別, 該組別設置只對友善的框體有效, 當你對友善的框體點擊施法時, 該設置將被觸發.",
+["A binding that belongs to the 'global' binding-set is always active. If the spell requires a target, you will be given the 'casting hand', otherwise the spell will be cast. If the spell is an AOE spell, then you will be given the ground targeting circle."] = "全局組, 該組設置全局有效. 如果法術需要一個目標, 鼠標會變成選取目標狀態, 如果不需要, 法術將會直接被施放. 如果是AOE法術, 你將需要選取一片區域.",
     ["A binding that belongs to the 'hovercast' binding-set is active whenever the mouse is over a unit frame, or a character in the 3D world. This allows you to use 'hovercasting', where you hover over a unit in the world and press a key to cast a spell on them. THese bindings are also active over unit frames."] = "全局組別, 該組別按鍵設置為懸浮式施法, 將鼠標移動到其他玩家/怪物或者頭像框體上將可以直接對其施法.",
     ["A binding that belongs to the 'ooc' binding-set will only be active when the player is out-of-combat. As soon as the player enters combat, these bindings will no longer be active, so be careful when choosing this binding-set for any spells you use frequently."] = "非戰鬥組別, 這個組別的設置只在不戰鬥時有效.",
     ["Accept"] = "接受",
@@ -17,20 +18,21 @@ local baseLocale = {
     ["Bind other"] = "綁定其他",
     ["Bind spell"] = "綁定技能",
     ["Binding"] = "綁定",
-    ["Boss target frames"] = "首領目標框體",
+["Blizzard frame integration options"] = "暴雪界面集成選項",
+    ["Boss target frames"] = "首領框體",
     ["Cancel"] = "取消",
     ["Cast %s"] = "施放 %s",
     ["Change binding"] = "修改綁定",
     ["Change binding: %s"] = "修改綁定: %s",
     ["Clique Binding Configuration"] = "Clique 設置",
     ["Clique binding configuration"] = "Clique 設置",
+["Clique general options"] = "Clique 綜合設置",
     ["Clique: 'default' binding-set"] = "組別: 默認",
     ["Clique: 'enemy' binding-set"] = "組別: 敵對",
     ["Clique: 'friend' binding-set"] = "組別: 友善",
     ["Clique: 'global' binding-set"] = "組別: 全局",
 ["Clique: 'hovercast' binding-set"] = "組別: 懸浮施法",
     ["Clique: 'ooc' binding-set"] = "組別: 非戰鬥",
-
     ["Compact party frames"] = "小隊框體",
     ["Compact raid frames"] = "團隊框體",
     ["Configure binding: '%s'"] = "設置綁定: '%s'",
@@ -39,11 +41,12 @@ local baseLocale = {
     ["Default"] = "默認",
     ["Delete binding"] = "刪除綁定",
     ["Delete profile '%s'"] = "刪除配置: '%s'",
-["Delete profile: %s"] = "Delete profile: %s",
+["Delete profile: %s"] = "刪除配置: %s",
     ["Disable out of combat clicks when party members enter combat"] = "當隊友進入戰鬥時禁用'非戰鬥' 組別的快捷鍵",
 ["Edit macro"] = "編輯宏",
     ["Enable/Disable click-sets"] = "設置組別...",
     ["Enemy"] = "敵對",
+["Frame blacklist"] = "框體黑名單",
     ["Frame name"] = "框體名",
     ["Friend"] = "友善",
 ["Global bindings (no target)"] = "全局按鍵(無目標)",
@@ -79,10 +82,11 @@ local baseLocale = {
     ["Select All"] = "選擇所有",
     ["Select None"] = "清除所有選擇",
     ["Select a binding type"] = "選擇綁定類型",
+["Select an options category"] = "請選擇選項組別",
     ["Select profile: %s"] = "選擇配置: %s",
     ["Set binding"] = "設置綁定",
     ["Set binding: %s"] = "設置綁定: %s",
-    ["Shift"] = true,
+["Shift"] = "Shift",
     ["Show unit menu"] = "打開右鍵菜單",
     ["Swap profiles based on talent spec"] = "隨天賦切換配置",
     ["Target clicked unit"] = "選中點擊單位",
@@ -97,7 +101,8 @@ local baseLocale = {
     ["Unknown binding type '%s'"] = "未知綁定類型'%s'",
     ["When both the Clique binding configuration window and the spellbook are open, you can set new bindings simply by performing them on the spell icon in your spellbook. Simply move your mouse over a spell and then click or press a key on your keyboard along with any combination of the alt, control, and shift keys. The new binding will be added to your binding configuration."] = "當Clique 設置界面和法術書同時打開時, 你只要用需要設置的快捷鍵點擊法術就可以將其添加到Clique 設置中. 將鼠標移動到法術圖標上, 同時可以按下ctrl, alt 和shift 中的一個或多個, 然後點擊鼠標的某一個按鍵, 這項設置就會被添加." ,
 ["You are in Clique binding mode"] = "你現在處於Clique 設置模式中",
-    ["You can use this page to create a custom macro to be run when activating a binding on a unit. When creating this macro you should keep in mind that you will need to specify the target of any actions in the macro by using the ' mouseover' unit, which is the unit you are clicking on. For example, you can do any of the following:\n\n/cast [target=mouseover] Regrowth\n/cast [@mouseover] Regrowth\n/cast [ @mouseovertarget] Taunt\n\nHover over the 'Set binding' button below and either click or press a key with any modifiers you would like included. Then edit the box below to contain the macro you would like to have run when this binding is activated."] = "你可以在這頁創建一個用於點擊施放的自定義宏. 撰寫宏時需要注意, 你必須將施法動作的目標指定為'mouseover'. 例如, 你可以使用以下內容:\ n\n/cast [target=mouseover] 癒合\n/cast [@mouseovertarget] 嘲諷\n\n將鼠標移動到設置綁定按鈕上然後按下鼠標和ctrl/alt/shift鍵來創建綁定. 然後撰寫你需要運行的宏",
+    ["You can use this page to create a custom macro to be run when activati​​ng a binding on a unit. When creating this macro you should keep in mind that you will need to specify the target of any actions in the macro by using the ' mouseover' unit, which is the unit you are clicking on. For example, you can do any of the following:\n\n/cast [target=mouseover] Regrowth\n/cast [@mouseover] Regrowth\n/cast [ @mouseovertarget] Taunt\n\nHover over the 'Set binding' button below and either click or press a key with any modifiers you would like included. Then edit the box below to contain the macro you would like to have run when this binding is activated."] = "你可以在這頁創建一個用於點擊施放的自定義宏. 撰寫宏時需要注意, 你必須將施法動作的目標指定為'mouseover'. 例如, 你可以使用以下內容:\ n\n/cast [target=mouseover] 癒合\n/cast [@mouseovertarget] 嘲諷\n\n將鼠標移動到設置綁定按鈕上然後按下鼠標和ctrl/alt/shift鍵來創建綁定. 然後撰寫你需要運行的宏",
 }
 
 addon:RegisterLocale('zhTW', baseLocale)
+
