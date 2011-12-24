@@ -68,6 +68,12 @@ function addon:Initialize()
     ]])
     RegisterAttributeDriver(self.header, "hasunit", "[@mouseover, exists] true; false")
 
+	-- Create a secure action button that's sole purpose is to cancel a
+	-- pending spellcast (the targeting hand)
+	self.stopbutton = CreateFrame("Button", addonName .. "StopButton", nil, "SecureActionButtonTemplate")
+	self.stopbutton.name = self.stopbutton:GetName()
+	self.stopbutton:SetAttribute("type", "stop")
+
     -- Create a secure action button that can be used for 'hovercast' and 'global'
     self.globutton = CreateFrame("Button", addonName .. "SABButton", UIParent, "SecureActionButtonTemplate, SecureHandlerBaseTemplate")
 
@@ -479,7 +485,14 @@ function addon:GetClickAttributes(global)
             if entry.type == "target" or entry.type == "menu" then
                 bits[#bits + 1] = ATTR(indent, prefix, "type", suffix, entry.type)
                 rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
-            elseif entry.type == "spell" then
+			elseif entry.type == "spell" and self.settings.stopcastingfix then
+				-- Implementation of the 'stop casting' fix
+				local macrotext = string.format("/click %s\n/cast %s", self.stopbutton.name, entry.spell)
+                bits[#bits + 1] = ATTR(indent, prefix, "type", suffix, "macro")
+                bits[#bits + 1] = ATTR(indent, prefix, "macrotext", suffix, macrotext)
+                rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
+                rembits[#rembits + 1] = REMATTR(prefix, "macrotext", suffix)
+           elseif entry.type == "spell" then
                 bits[#bits + 1] = ATTR(indent, prefix, "type", suffix, entry.type)
                 bits[#bits + 1] = ATTR(indent, prefix, "spell", suffix, entry.spell)
                 rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
