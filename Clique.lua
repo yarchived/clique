@@ -487,7 +487,7 @@ function addon:GetClickAttributes(global)
                 rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
 			elseif entry.type == "spell" and self.settings.stopcastingfix then
 				-- Implementation of the 'stop casting' fix
-				local macrotext = string.format("/click %s\n/cast %s", self.stopbutton.name, entry.spell)
+				local macrotext = string.format("/click %s\n/cast [@mouseover] %s", self.stopbutton.name, entry.spell)
                 bits[#bits + 1] = ATTR(indent, prefix, "type", suffix, "macro")
                 bits[#bits + 1] = ATTR(indent, prefix, "macrotext", suffix, macrotext)
                 rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
@@ -497,6 +497,12 @@ function addon:GetClickAttributes(global)
                 bits[#bits + 1] = ATTR(indent, prefix, "spell", suffix, entry.spell)
                 rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
                 rembits[#rembits + 1] = REMATTR(prefix, "spell", suffix)
+			elseif entry.type == "macro" and self.settings.stopcastingfix then
+				local macrotext = string.format("/click %s\n%s", self.stopbutton.name, entry.macrotext)
+                bits[#bits + 1] = ATTR(indent, prefix, "type", suffix, entry.type)
+                bits[#bits + 1] = ATTR(indent, prefix, "macrotext", suffix, macrotext)
+                rembits[#rembits + 1] = REMATTR(prefix, "type", suffix)
+                rembits[#rembits + 1] = REMATTR(prefix, "macrotext", suffix)
             elseif entry.type == "macro" then
                 bits[#bits + 1] = ATTR(indent, prefix, "type", suffix, entry.type)
                 bits[#bits + 1] = ATTR(indent, prefix, "macrotext", suffix, entry.macrotext)
