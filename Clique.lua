@@ -403,7 +403,7 @@ function addon:GetClickAttributes(global)
         -- non-global bindings are only applied on non-global frames. handle
         -- this logic here.
 
-        if shouldApply(global, entry) and correctSpec(entry, GetActiveTalentGroup()) and entry.key then
+        if shouldApply(global, entry) and correctSpec(entry, GetActiveSpecGroup()) and entry.key then
             -- Check to see if this is a 'friend' or an 'enemy' binding, and
             -- check if it would mask an 'ooc' binding with the same key. If
             -- so, we need to add code that prevents this from happening, by
@@ -759,7 +759,7 @@ function addon:TalentGroupChanged()
     local newProfile
 
 	if self.settings.specswap then
-		self.talentGroup = GetActiveTalentGroup()
+		self.talentGroup = GetActiveSpecGroup()
         -- Determine which profile to set, based on talent group
         if self.talentGroup == 1 and self.settings.pri_profileKey then
             newProfile = self.settings.pri_profileKey
